@@ -32,7 +32,7 @@ export function Footer() {
           </Grid>
         </Grid>
         <Typography variant="body2" sx={{ marginTop: "2rem", textAlign: "center" }}>
-          © 2026 Võ Mạnh Xe Nâng. All rights reserved.
+          © 2026 Võ Mâm Xe Nâng. All rights reserved.
         </Typography>
       </Container>
     </Box>

@@ -23,7 +23,7 @@ export function Header() {
             href="/"
             sx={{ color: "white", textDecoration: "none", fontSize: "1.5rem", fontWeight: "bold" }}
           >
-            Võ Mạnh Xe Nâng
+            Võ Mâm Xe Nâng
           </MuiLink>
         </Box>
 

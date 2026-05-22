@@ -19,6 +19,41 @@ enum OrderStatus {
   FAILED
 }
 
+enum TireType {
+  SOLID
+  PNEUMATIC
+  NON_MARKING
+}
+
+enum RimType {
+  STANDARD
+  LIP_CLICK
+}
+
+enum TireCondition {
+  NEW
+  USED
+}
+
+enum ReceiptStatus {
+  DRAFT
+  CONFIRMED
+  COMPLETED
+}
+
+enum IssueStatus {
+  DRAFT
+  CONFIRMED
+  COMPLETED
+}
+
+enum InventoryLogType {
+  RECEIPT
+  ISSUE
+  ADJUSTMENT
+  TRANSFER
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -36,8 +71,21 @@ model Client {
   company   String?
   notes     String?
   orders    Order[]
+  issues    Issue[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Supplier {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String?
+  address   String?
+  notes     String?
+  receipts  Receipt[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
@@ -51,6 +99,190 @@ model Product {
   description     String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+}
+
+// ========== TIRE CATALOG MODELS ==========
+model Category {
+  id                String    @id @default(cuid())
+  name              String    @unique
+  tireSize          String    // e.g., "6.00-9", "7.00-12", "21x8-9"
+  brand             String    // e.g., "Bridgestone", "Michelin", "Dunlop"
+  tireType          TireType
+  rimType           RimType
+  origin            String    // Xuất xứ
+  condition         TireCondition
+  specifications    String? // Chi tiết kỹ thuật thêm
+  stocks            Stock[]
+  receiptItems      ReceiptItem[]
+  issueItems        IssueItem[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([name, tireSize, brand, tireType, rimType, condition])
+}
+
+// ========== WAREHOUSE LOCATION MODELS ==========
+model Warehouse {
+  id    String @id @default(cuid())
+  code  String @unique // e.g., "K1"
+  name  String
+  zones Zone[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Zone {
+  id          String @id @default(cuid())
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  code        String // e.g., "A2"
+  name        String
+  racks       Rack[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([warehouseId, code])
+}
+
+model Rack {
+  id     String @id @default(cuid())
+  zoneId String
+  zone   Zone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  code   String // e.g., "R3"
+  name   String
+  slots  Slot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([zoneId, code])
+}
+
+model Slot {
+  id        String     @id @default(cuid())
+  rackId    String
+  rack      Rack       @relation(fields: [rackId], references: [id], onDelete: Cascade)
+  code      String     // e.g., "L1" for Level 1
+  name      String
+  stocks    Stock[]
+  barcode   String?    @unique
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([rackId, code])
+  @@index([barcode])
+}
+
+// ========== STOCK MODELS ==========
+model Stock {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  slotId     String
+  slot       Slot     @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  quantity   Int      @default(0)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([categoryId, slotId])
+  @@index([categoryId])
+  @@index([slotId])
+}
+
+// ========== GOODS RECEIPT MODELS (Phiếu Nhập) ==========
+model Receipt {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  supplierId  String
+  supplier    Supplier      @relation(fields: [supplierId], references: [id])
+  status      ReceiptStatus @default(DRAFT)
+  notes       String?
+  items       ReceiptItem[]
+  logs        InventoryLog[]
+  createdAt   DateTime      @default(now())
+  confirmedAt DateTime?
+  updatedAt   DateTime      @updatedAt
+
+  @@index([supplierId])
+}
+
+model ReceiptItem {
+  id        String   @id @default(cuid())
+  receiptId String
+  receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  categoryId String
+  category  Category @relation(fields: [categoryId], references: [id])
+  quantity  Int
+  unitPrice Decimal
+  slotId    String?  // Designated storage location
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([receiptId])
+  @@index([categoryId])
+}
+
+// ========== GOODS ISSUE MODELS (Phiếu Xuất) ==========
+model Issue {
+  id       String      @id @default(cuid())
+  code     String      @unique
+  clientId String?
+  client   Client?     @relation(fields: [clientId], references: [id])
+  status   IssueStatus @default(DRAFT)
+  reason   String?     // Lý do xuất
+  notes    String?
+  items    IssueItem[]
+  logs     InventoryLog[]
+
+  createdAt   DateTime @default(now())
+  confirmedAt DateTime?
+  updatedAt   DateTime @updatedAt
+
+  @@index([clientId])
+}
+
+model IssueItem {
+  id        String   @id @default(cuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  categoryId String
+  category  Category @relation(fields: [categoryId], references: [id])
+  quantity  Int
+  slotId    String?  // Storage location for issue
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([issueId])
+  @@index([categoryId])
+}
+
+// ========== INVENTORY LOG MODELS (Lịch sử nhập xuất) ==========
+model InventoryLog {
+  id         String            @id @default(cuid())
+  logType    InventoryLogType
+  categoryId String
+  slotId     String
+  quantity   Int
+  notes      String?
+  receiptId  String?
+  receipt    Receipt?          @relation(fields: [receiptId], references: [id])
+  issueId    String?
+  issue      Issue?            @relation(fields: [issueId], references: [id])
+
+  createdAt  DateTime          @default(now())
+
+  @@index([categoryId])
+  @@index([slotId])
+  @@index([receiptId])
+  @@index([issueId])
 }
 
 model Order {

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProductType, OrderStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -19,7 +19,7 @@ async function main() {
   const clients = [
     {
       id: 'client-1',
-      name: 'Võ Mạnh Xe Nâng',
+      name: 'Võ Mâm Xe Nâng',
       email: 'info@vomamxenang.local',
       phone: '0905123456',
       company: 'Võ Mạnh Logistics',
@@ -48,7 +48,7 @@ async function main() {
   const products = [
     {
       id: 'product-1',
-      type: 'TIRE',
+      type: ProductType.TIRE,
       name: 'Lốp xe nâng 7.00-12',
       importPrice: '420000',
       sellingPrice: '520000',
@@ -58,7 +58,7 @@ async function main() {
     },
     {
       id: 'product-2',
-      type: 'RIM',
+      type: ProductType.RIM,
       name: 'Vành xe nâng 6.50-10',
       importPrice: '850000',
       sellingPrice: '980000',
@@ -68,7 +68,7 @@ async function main() {
     },
     {
       id: 'product-3',
-      type: 'SERVICE',
+      type: ProductType.SERVICE,
       name: 'Bảo dưỡng xe nâng',
       importPrice: '200000',
       sellingPrice: '350000',
@@ -93,14 +93,14 @@ async function main() {
       id: 'order-1',
       clientEmail: 'info@vomamxenang.local',
       totalAmount: '1560000',
-      status: 'PAID',
+      status: OrderStatus.PAID,
       stripeSessionId: 'sess_1234567890',
     },
     {
       id: 'order-2',
       clientEmail: 'contact@thanhdat.com',
       totalAmount: '1330000',
-      status: 'PENDING',
+      status: OrderStatus.PENDING,
       stripeSessionId: 'sess_0987654321',
     },
   ];

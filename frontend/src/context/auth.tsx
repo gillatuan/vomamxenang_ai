@@ -41,8 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user");
   };
 
-  if (!isHydrated) return children;
-
   return (
     <AuthContext.Provider
       value={{

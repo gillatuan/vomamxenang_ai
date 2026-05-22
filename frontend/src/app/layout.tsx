@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClientWrapper } from "@/app/client-wrapper";
 
 export const metadata: Metadata = {
-  title: "Võ Mạnh Xe Nâng",
+  title: "Võ Mâm Xe Nâng",
   description: "Chuyên cung cấp lốp và phụ tùng xe nâng chất lượng cao",
 };
 

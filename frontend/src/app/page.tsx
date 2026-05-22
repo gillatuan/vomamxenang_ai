@@ -19,7 +19,7 @@ export default function HomePage() {
       >
         <Container>
           <Typography variant="h3" sx={{ marginBottom: "1rem", fontWeight: "bold" }}>
-            Võ Mạnh Xe Nâng
+            Võ Mâm Xe Nâng
           </Typography>
           <Typography variant="h6" sx={{ marginBottom: "2rem" }}>
             Chuyên cung cấp lốp, vành, dịch vụ bảo dưỡng xe nâng chất lượng cao

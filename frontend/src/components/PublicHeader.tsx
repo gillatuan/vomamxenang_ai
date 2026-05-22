@@ -37,7 +37,7 @@ export function PublicHeader() {
                 fontWeight: "bold",
               }}
             >
-              Võ Mạnh Xe Nâng
+              Võ Mâm Xe Nâng
             </MuiLink>
           </Box>
 
