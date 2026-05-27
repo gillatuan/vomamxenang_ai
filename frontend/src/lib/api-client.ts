@@ -45,9 +45,9 @@ export interface Client {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  company?: string;
-  notes?: string;
+  phone: string;
+  company: string;
+  notes: string;
 }
 
 export const clientsAPI = {
