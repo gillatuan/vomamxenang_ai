@@ -1,10 +1,15 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+enum Role {
+  ADMIN_MANAGER
+  STOREKEEPER
 }
 
 enum ProductType {
@@ -19,289 +24,173 @@ enum OrderStatus {
   FAILED
 }
 
-enum TireType {
-  SOLID
-  PNEUMATIC
-  NON_MARKING
-}
-
-enum RimType {
-  STANDARD
-  LIP_CLICK
-}
-
-enum TireCondition {
-  NEW
-  USED
-}
-
-enum ReceiptStatus {
-  DRAFT
-  CONFIRMED
-  COMPLETED
-}
-
-enum IssueStatus {
-  DRAFT
-  CONFIRMED
-  COMPLETED
-}
-
-enum InventoryLogType {
-  RECEIPT
-  ISSUE
-  ADJUSTMENT
-  TRANSFER
+enum TransactionType {
+  IMPORT        // Nhập kho thông thường
+  EXPORT        // Xuất kho bán hàng
+  ASSEMBLY_OUT  // Xuất vỏ/mâm để mang đi ép thành bộ
+  ASSEMBLY_IN   // Nhập bộ vỏ mâm hoàn chỉnh sau khi ép (hoặc rã bánh)
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   email     String   @unique
   password  String
-  role      String   @default("ADMIN")
+  role      Role     @default(STOREKEEPER)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Client {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   name      String
   email     String   @unique
-  phone     String?
+  phone     String
   company   String?
+  type      String   @default("RETAIL") // RETAIL (Khách lẻ), B2B_TIER1, B2B_TIER2
   notes     String?
-  orders    Order[]
-  issues    Issue[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Supplier {
-  id        String    @id @default(cuid())
-  name      String
-  email     String    @unique
-  phone     String?
-  address   String?
-  notes     String?
-  receipts  Receipt[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  orders    Order[]
 }
 
 model Product {
-  id              String      @id @default(cuid())
-  type            ProductType
-  name            String
-  importPrice     Decimal
-  sellingPrice    Decimal?
-  quantityInStock Int
+  id              String        @id @default(uuid())
+  sku             String        @unique // Mã QR tổng sản phẩm
+  type            ProductType   @default(TIRE)
+  name            String        // Tên mô tả (Ví dụ: Vỏ đặc Casumina 6.00-9)
+  
+  // Thuộc tính đặc thù lốp xe nâng
+  size            String?       // Thông số kích thước: 6.00-9, 7.00-12
+  brand           String?       // Bridgestone, Casumina, Michelin...
+  tireType        String?       // Solid (Đặc), Pneumatic (Hơi), NonMarking (Đặc trắng)
+  rimType         String?       // Lip/Click (Mâm gài), Standard (Mâm thường)
+  condition       String?       // NEW_100 (Mới), USED (Lướt)
+  
+  importPrice     Float
+  sellingPrice    Float?        // Giá bán lẻ mặc định
+  minStock        Int           @default(5)  // Định mức tồn tối thiểu để cảnh báo
+  maxStock        Int           @default(100) // Định mức tồn tối đa
   imageUrl        String?
   description     String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  
+  // Quan hệ
+  stocks          StockLocation[]
+  priceMatrix     PriceMatrix[]
+  txDetails       TransactionDetail[]
+  assemblyLogs    AssemblyLog[]
 }
 
-// ========== TIRE CATALOG MODELS ==========
-model Category {
-  id                String    @id @default(cuid())
-  name              String    @unique
-  tireSize          String    // e.g., "6.00-9", "7.00-12", "21x8-9"
-  brand             String    // e.g., "Bridgestone", "Michelin", "Dunlop"
-  tireType          TireType
-  rimType           RimType
-  origin            String    // Xuất xứ
-  condition         TireCondition
-  specifications    String? // Chi tiết kỹ thuật thêm
-  stocks            Stock[]
-  receiptItems      ReceiptItem[]
-  issueItems        IssueItem[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  @@unique([name, tireSize, brand, tireType, rimType, condition])
+model WheelRim {
+  id               String        @id @default(uuid())
+  sku              String        @unique // Mã QR mâm
+  size             String        // Kích thước mâm tương ứng lốp
+  boltHoles        Int           // Số lỗ bu-lông: 4, 5, 6, 8 lỗ
+  compatibleModels String?       // Tương thích dòng xe nâng (Toyota, Komatsu...)
+  brand            String?
+  importPrice      Float
+  sellingPrice     Float?
+  
+  stocks           StockLocation[]
+  txDetails        TransactionDetail[]
+  assemblyLogs     AssemblyLog[]
 }
 
-// ========== WAREHOUSE LOCATION MODELS ==========
 model Warehouse {
-  id    String @id @default(cuid())
-  code  String @unique // e.g., "K1"
-  name  String
-  zones Zone[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Zone {
-  id          String @id @default(cuid())
-  warehouseId String
-  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
-  code        String // e.g., "A2"
-  name        String
-  racks       Rack[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([warehouseId, code])
-}
-
-model Rack {
-  id     String @id @default(cuid())
-  zoneId String
-  zone   Zone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-  code   String // e.g., "R3"
-  name   String
-  slots  Slot[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([zoneId, code])
-}
-
-model Slot {
-  id        String     @id @default(cuid())
-  rackId    String
-  rack      Rack       @relation(fields: [rackId], references: [id], onDelete: Cascade)
-  code      String     // e.g., "L1" for Level 1
+  id        String     @id @default(uuid())
   name      String
-  stocks    Stock[]
-  barcode   String?    @unique
-
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  @@unique([rackId, code])
-  @@index([barcode])
+  address   String?
+  locations Location[]
 }
 
-// ========== STOCK MODELS ==========
-model Stock {
-  id         String   @id @default(cuid())
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  slotId     String
-  slot       Slot     @relation(fields: [slotId], references: [id], onDelete: Restrict)
-  quantity   Int      @default(0)
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([categoryId, slotId])
-  @@index([categoryId])
-  @@index([slotId])
+model Location {
+  id           String          @id @default(uuid())
+  warehouseId  String
+  warehouse    Warehouse       @relation(fields: [warehouseId], references: [id])
+  zone         String          // Dãy/Khu vực: A, B, C
+  rack         String          // Kệ/Hàng: 01, 02
+  slot         String          // Cột/Ô trống: 01, 02
+  locationCode String          @unique // Mã QR vị trí: K1-ZA-R01-S02
+  capacity     Int             @default(50) // Sức chứa tối đa (chiều cao lốp)
+  
+  stocks       StockLocation[]
+  txDetails    TransactionDetail[]
 }
 
-// ========== GOODS RECEIPT MODELS (Phiếu Nhập) ==========
-model Receipt {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  supplierId  String
-  supplier    Supplier      @relation(fields: [supplierId], references: [id])
-  status      ReceiptStatus @default(DRAFT)
-  notes       String?
-  items       ReceiptItem[]
-  logs        InventoryLog[]
-  createdAt   DateTime      @default(now())
-  confirmedAt DateTime?
-  updatedAt   DateTime      @updatedAt
+// Bảng trung gian quản lý tồn kho thực tế tại từng vị trí cột/kệ cụ thể
+model StockLocation {
+  id         String    @id @default(uuid())
+  locationId String
+  location   Location  @relation(fields: [locationId], references: [id])
+  productId  String?
+  product    Product?  @relation(fields: [productId], references: [id])
+  wheelRimId String?
+  wheelRim   WheelRim? @relation(fields: [wheelRimId], references: [id])
+  quantity   Int       @default(0) // Số lượng thực tế tại vị trí này
 
-  @@index([supplierId])
+  @@unique([locationId, productId, wheelRimId])
 }
 
-model ReceiptItem {
-  id        String   @id @default(cuid())
-  receiptId String
-  receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  categoryId String
-  category  Category @relation(fields: [categoryId], references: [id])
-  quantity  Int
-  unitPrice Decimal
-  slotId    String?  // Designated storage location
-  notes     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([receiptId])
-  @@index([categoryId])
-}
-
-// ========== GOODS ISSUE MODELS (Phiếu Xuất) ==========
-model Issue {
-  id       String      @id @default(cuid())
-  code     String      @unique
-  clientId String?
-  client   Client?     @relation(fields: [clientId], references: [id])
-  status   IssueStatus @default(DRAFT)
-  reason   String?     // Lý do xuất
-  notes    String?
-  items    IssueItem[]
-  logs     InventoryLog[]
-
-  createdAt   DateTime @default(now())
-  confirmedAt DateTime?
-  updatedAt   DateTime @updatedAt
-
-  @@index([clientId])
-}
-
-model IssueItem {
-  id        String   @id @default(cuid())
-  issueId   String
-  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  categoryId String
-  category  Category @relation(fields: [categoryId], references: [id])
-  quantity  Int
-  slotId    String?  // Storage location for issue
-  notes     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([issueId])
-  @@index([categoryId])
-}
-
-// ========== INVENTORY LOG MODELS (Lịch sử nhập xuất) ==========
-model InventoryLog {
-  id         String            @id @default(cuid())
-  logType    InventoryLogType
-  categoryId String
-  slotId     String
-  quantity   Int
-  notes      String?
-  receiptId  String?
-  receipt    Receipt?          @relation(fields: [receiptId], references: [id])
-  issueId    String?
-  issue      Issue?            @relation(fields: [issueId], references: [id])
-
-  createdAt  DateTime          @default(now())
-
-  @@index([categoryId])
-  @@index([slotId])
-  @@index([receiptId])
-  @@index([issueId])
+// Ma trận giá linh hoạt dành cho các tầng đại lý B2B
+model PriceMatrix {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  customerType String   // RETAIL, B2B_TIER1, B2B_TIER2
+  price        Float
+  
+  @@unique([productId, customerType])
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  client          Client      @relation(fields: [clientId], references: [id])
-  clientId        String
-  totalAmount     Decimal
-  status          OrderStatus @default(PENDING)
-  stripeSessionId String?     @unique
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  clientId       String
+  client         Client      @relation(fields: [clientId], references: [id])
+  totalAmount    Float
+  status         OrderStatus @default(PENDING)
+  stripeSessionId String?
+  createdAt      DateTime    @default(now())
+}
+
+// Nhật ký chi tiết phiếu nhập/xuất kho gắn liền với vị trí
+model InventoryTransaction {
+  id           String              @id @default(uuid())
+  code         String              @unique // Số phiếu nhập/xuất tự sinh
+  type         TransactionType
+  partnerName  String?             // Tên nhà cung cấp hoặc khách mua lẻ
+  userId       String              // Người thực hiện giao dịch (Storekeeper/Admin)
+  createdAt    DateTime            @default(now())
+  details      TransactionDetail[]
+}
+
+model TransactionDetail {
+  id            String               @id @default(uuid())
+  txId          String
+  transaction   InventoryTransaction @relation(fields: [txId], references: [id])
+  productId     String?
+  product       Product?             @relation(fields: [productId], references: [id])
+  wheelRimId    String?
+  wheelRim      WheelRim?            @relation(fields: [wheelRimId], references: [id])
+  locationId    String
+  location      Location             @relation(fields: [locationId], references: [id])
+  quantity      Int
+  price         Float                // Giá thực tế tại thời điểm nhập/xuất
+}
+
+// Nhật ký quy trình Ép Mâm (Gộp lốp và mâm thành một combo hoàn chỉnh)
+model AssemblyLog {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  wheelRimId  String
+  wheelRim    WheelRim  @relation(fields: [wheelRimId], references: [id])
+  quantity    Int       // Số lượng bộ lốp đã ép thành công
+  pressingFee Float     @default(0) // Chi phí công ép mâm
+  userId      String    // Storekeeper thực hiện ép
+  createdAt   DateTime  @default(now())
 }
 
 model Post {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   title     String
   content   String
   videoUrl  String?
-  published Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
