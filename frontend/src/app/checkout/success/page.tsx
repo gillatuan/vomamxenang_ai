@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Container, Typography, Button, Card, CardContent, Grid } from "@mui/material";
+import { Container, Typography, Button, Card, CardContent } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import NextLink from "next/link";
 

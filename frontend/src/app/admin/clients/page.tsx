@@ -44,7 +44,7 @@ export default function ClientsPage() {
         setClients(res.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Failed to load clients");
         setLoading(false);
       });

@@ -20,7 +20,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useCartStore } from "@/store/cart";
 import { ordersAPI } from "@/lib/api-client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   open: boolean;
@@ -31,7 +30,6 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, total, clear } = useCartStore();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleCheckout = async () => {
     if (items.length === 0) {

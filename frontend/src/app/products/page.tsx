@@ -38,7 +38,7 @@ export default function ProductsPage() {
         setProducts(res.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Failed to load products");
         setLoading(false);
       });

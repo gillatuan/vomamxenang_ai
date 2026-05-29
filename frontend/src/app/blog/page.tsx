@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, CircularProgress } from "@mui/material";
+import { Box, Container, Typography, Grid, Card, CardContent, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -18,7 +18,7 @@ export default function BlogPage() {
         setPosts(res.data.filter((p) => p.published));
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Failed to load posts");
         setLoading(false);
       });

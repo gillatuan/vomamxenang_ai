@@ -23,7 +23,7 @@ async function bootstrap() {
 
   app.use(express.json({
     verify: (req: any, res, buf) => {
-      if (req.originalUrl?.includes('/api/v/1/orders/webhook')) {
+      if (req.originalUrl?.includes('/api/v1/orders/webhook')) {
         req.rawBody = buf;
       }
     },
