@@ -1,431 +1,283 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateReceiptDto, CreateReceiptItemDto } from './dto/create-receipt.dto';
-import { CreateIssueDto, CreateIssueItemDto } from './dto/create-issue.dto';
-import { ConfirmReceiptDto } from './dto/confirm-receipt.dto';
-import { ConfirmIssueDto } from './dto/confirm-issue.dto';
+import { CreateReceiptDto } from './dto/create-receipt.dto';
+import { CreateIssueDto } from './dto/create-issue.dto';
 
 @Injectable()
 export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
-  // ========== RECEIPT (PHIẾU NHẬP) ==========
-
   async createReceipt(createReceiptDto: CreateReceiptDto) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { id: createReceiptDto.supplierId },
     });
-
     if (!supplier) {
       throw new NotFoundException('Supplier not found');
     }
 
-    // Generate receipt code
-    const receiptCode = `RCPT-${Date.now()}`;
-
-    const receipt = await this.prisma.receipt.create({
+    const transactionCode = `IMPORT-${Date.now()}`;
+    return this.prisma.inventoryTransaction.create({
       data: {
-        code: receiptCode,
-        supplierId: createReceiptDto.supplierId,
-        notes: createReceiptDto.notes,
-        items: {
+        code: transactionCode,
+        type: 'IMPORT',
+        partnerName: supplier.name ?? supplier.company ?? supplier.email,
+        userId: createReceiptDto.supplierId,
+        details: {
           create: createReceiptDto.items.map((item) => ({
-            categoryId: item.categoryId,
+            productId: item.productId,
+            wheelRimId: item.wheelRimId,
+            locationId: item.locationId ?? '',
             quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            slotId: item.slotId,
-            notes: item.notes,
+            price: item.unitPrice,
           })),
         },
       },
-      include: {
-        supplier: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
+      include: { details: true },
     });
-
-    return receipt;
   }
 
   async findAllReceipts() {
-    return this.prisma.receipt.findMany({
-      include: {
-        supplier: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+    return this.prisma.inventoryTransaction.findMany({
+      where: { type: 'IMPORT' },
+      include: { details: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async findReceiptById(id: string) {
-    return this.prisma.receipt.findUnique({
+    return this.prisma.inventoryTransaction.findUnique({
       where: { id },
-      include: {
-        supplier: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
+      include: { details: true },
     });
   }
 
-  async confirmReceipt(id: string, confirmReceiptDto: ConfirmReceiptDto) {
-    const receipt = await this.prisma.receipt.findUnique({
+  async confirmReceipt(id: string) {
+    const transaction = await this.prisma.inventoryTransaction.findUnique({
       where: { id },
-      include: {
-        items: true,
-      },
+      include: { details: true },
     });
-
-    if (!receipt) {
-      throw new NotFoundException('Receipt not found');
+    if (!transaction || transaction.type !== 'IMPORT') {
+      throw new NotFoundException('Receipt transaction not found');
     }
 
-    if (receipt.status !== 'DRAFT') {
-      throw new BadRequestException('Receipt is not in DRAFT status');
-    }
-
-    // Update receipt status and process items
-    const updatedReceipt = await this.prisma.receipt.update({
-      where: { id },
-      data: {
-        status: 'CONFIRMED',
-        confirmedAt: new Date(),
-      },
-    });
-
-    // Add inventory logs and update stocks
-    for (const item of receipt.items) {
-      // Find or create slot if not specified
-      let slotId = item.slotId;
-      
-      if (!slotId) {
-        // Find first available slot (implementation may vary)
-        const firstSlot = await this.prisma.slot.findFirst();
-        if (!firstSlot) {
-          throw new BadRequestException('No slot available in warehouse');
+    await Promise.all(
+      transaction.details.map(async (detail) => {
+        if (!detail.locationId) {
+          throw new BadRequestException('Receipt detail requires locationId');
         }
-        slotId = firstSlot.id;
-      }
 
-      // Update or create stock
-      const existingStock = await this.prisma.stock.findUnique({
-        where: {
-          categoryId_slotId: {
-            categoryId: item.categoryId,
-            slotId,
-          },
-        },
-      });
-
-      if (existingStock) {
-        await this.prisma.stock.update({
+        const existingStock = await this.prisma.stockLocation.findFirst({
           where: {
-            categoryId_slotId: {
-              categoryId: item.categoryId,
-              slotId,
-            },
-          },
-          data: {
-            quantity: existingStock.quantity + item.quantity,
+            locationId: detail.locationId,
+            productId: detail.productId ?? undefined,
+            wheelRimId: detail.wheelRimId ?? undefined,
           },
         });
-      } else {
-        await this.prisma.stock.create({
-          data: {
-            categoryId: item.categoryId,
-            slotId,
-            quantity: item.quantity,
-          },
-        });
-      }
 
-      // Log inventory transaction
-      await this.prisma.inventoryLog.create({
-        data: {
-          logType: 'RECEIPT',
-          categoryId: item.categoryId,
-          slotId,
-          quantity: item.quantity,
-          receiptId: id,
-          notes: item.notes,
-        },
-      });
-    }
+        if (existingStock) {
+          await this.prisma.stockLocation.update({
+            where: { id: existingStock.id },
+            data: { quantity: { increment: detail.quantity } },
+          });
+        } else {
+          await this.prisma.stockLocation.create({
+            data: {
+              locationId: detail.locationId,
+              productId: detail.productId,
+              wheelRimId: detail.wheelRimId,
+              quantity: detail.quantity,
+            },
+          });
+        }
+      }),
+    );
 
     return this.findReceiptById(id);
   }
 
-  // ========== ISSUE (PHIẾU XUẤT) ==========
-
   async createIssue(createIssueDto: CreateIssueDto) {
-    // Generate issue code
-    const issueCode = `ISS-${Date.now()}`;
-
-    const issue = await this.prisma.issue.create({
+    const transactionCode = `EXPORT-${Date.now()}`;
+    return this.prisma.inventoryTransaction.create({
       data: {
-        code: issueCode,
-        clientId: createIssueDto.clientId,
-        reason: createIssueDto.reason,
-        notes: createIssueDto.notes,
-        items: {
+        code: transactionCode,
+        type: 'EXPORT',
+        partnerName: createIssueDto.clientId ?? 'Internal',
+        userId: createIssueDto.clientId ?? 'system',
+        details: {
           create: createIssueDto.items.map((item) => ({
-            categoryId: item.categoryId,
+            productId: item.productId,
+            wheelRimId: item.wheelRimId,
+            locationId: item.locationId ?? '',
             quantity: item.quantity,
-            slotId: item.slotId,
-            notes: item.notes,
+            price: 0,
           })),
         },
       },
-      include: {
-        client: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
+      include: { details: true },
     });
-
-    return issue;
   }
 
   async findAllIssues() {
-    return this.prisma.issue.findMany({
-      include: {
-        client: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+    return this.prisma.inventoryTransaction.findMany({
+      where: { type: 'EXPORT' },
+      include: { details: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async findIssueById(id: string) {
-    return this.prisma.issue.findUnique({
+    return this.prisma.inventoryTransaction.findUnique({
       where: { id },
-      include: {
-        client: true,
-        items: {
-          include: {
-            category: true,
-          },
-        },
-      },
+      include: { details: true },
     });
   }
 
-  async confirmIssue(id: string, confirmIssueDto: ConfirmIssueDto) {
-    const issue = await this.prisma.issue.findUnique({
+  async confirmIssue(id: string) {
+    const transaction = await this.prisma.inventoryTransaction.findUnique({
       where: { id },
-      include: {
-        items: true,
-      },
+      include: { details: true },
     });
-
-    if (!issue) {
-      throw new NotFoundException('Issue not found');
+    if (!transaction || transaction.type !== 'EXPORT') {
+      throw new NotFoundException('Issue transaction not found');
     }
 
-    if (issue.status !== 'DRAFT') {
-      throw new BadRequestException('Issue is not in DRAFT status');
-    }
-
-    // Update issue status and process items
-    const updatedIssue = await this.prisma.issue.update({
-      where: { id },
-      data: {
-        status: 'CONFIRMED',
-        confirmedAt: new Date(),
-      },
-    });
-
-    // Reduce inventory and create logs
-    for (const item of issue.items) {
-      // Find stock by category and slot
-      let slotId = item.slotId;
-
-      if (!slotId) {
-        // Find slot with available stock
-        const stockWithSlot = await this.prisma.stock.findFirst({
-          where: { categoryId: item.categoryId, quantity: { gt: 0 } },
-        });
-        if (!stockWithSlot) {
-          throw new BadRequestException(
-            `Insufficient stock for category ${item.categoryId}`,
-          );
+    await Promise.all(
+      transaction.details.map(async (detail) => {
+        if (!detail.locationId) {
+          throw new BadRequestException('Issue detail requires locationId');
         }
-        slotId = stockWithSlot.slotId;
-      }
 
-      // Check stock availability
-      const stock = await this.prisma.stock.findUnique({
-        where: {
-          categoryId_slotId: {
-            categoryId: item.categoryId,
-            slotId,
+        const stock = await this.prisma.stockLocation.findFirst({
+          where: {
+            locationId: detail.locationId,
+            productId: detail.productId ?? undefined,
+            wheelRimId: detail.wheelRimId ?? undefined,
           },
-        },
-      });
+        });
 
-      if (!stock || stock.quantity < item.quantity) {
-        throw new BadRequestException(
-          `Insufficient stock for category ${item.categoryId} at slot ${slotId}`,
-        );
-      }
+        if (!stock || stock.quantity < detail.quantity) {
+          throw new BadRequestException('Insufficient stock for the chosen location');
+        }
 
-      // Update stock (reduce quantity)
-      await this.prisma.stock.update({
-        where: {
-          categoryId_slotId: {
-            categoryId: item.categoryId,
-            slotId,
-          },
-        },
-        data: {
-          quantity: stock.quantity - item.quantity,
-        },
-      });
-
-      // Log inventory transaction
-      await this.prisma.inventoryLog.create({
-        data: {
-          logType: 'ISSUE',
-          categoryId: item.categoryId,
-          slotId,
-          quantity: -item.quantity,
-          issueId: id,
-          notes: item.notes,
-        },
-      });
-    }
+        await this.prisma.stockLocation.update({
+          where: { id: stock.id },
+          data: { quantity: { decrement: detail.quantity } },
+        });
+      }),
+    );
 
     return this.findIssueById(id);
   }
 
-  // ========== INVENTORY LOG ==========
-
   async findAllInventoryLogs() {
-    return this.prisma.inventoryLog.findMany({
+    return this.prisma.transactionDetail.findMany({
       include: {
-        receipt: true,
-        issue: true,
+        transaction: true,
+        product: true,
+        wheelRim: true,
+        location: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { id: 'desc' },
     });
   }
 
-  async getInventoryLogByCategory(categoryId: string) {
-    return this.prisma.inventoryLog.findMany({
-      where: { categoryId },
+  async getInventoryLogByProduct(productId: string) {
+    return this.prisma.transactionDetail.findMany({
+      where: { productId },
       include: {
-        receipt: true,
-        issue: true,
+        transaction: true,
+        location: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { id: 'desc' },
     });
   }
 
-  async getInventoryLogBySlot(slotId: string) {
-    return this.prisma.inventoryLog.findMany({
-      where: { slotId },
+  async getInventoryLogByLocation(locationId: string) {
+    return this.prisma.transactionDetail.findMany({
+      where: { locationId },
       include: {
-        receipt: true,
-        issue: true,
+        transaction: true,
+        product: true,
+        wheelRim: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { id: 'desc' },
     });
   }
-
-  // ========== STOCK SUMMARY ==========
 
   async getStockSummary() {
-    const stocks = await this.prisma.stock.findMany({
+    return this.prisma.stockLocation.findMany({
       include: {
-        category: true,
-        slot: {
-          include: {
-            rack: {
-              include: {
-                zone: {
-                  include: {
-                    warehouse: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return stocks;
-  }
-
-  async getStockByCategory(categoryId: string) {
-    return this.prisma.stock.findMany({
-      where: { categoryId },
-      include: {
-        category: true,
-        slot: {
-          include: {
-            rack: {
-              include: {
-                zone: {
-                  include: {
-                    warehouse: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+        location: true,
+        product: true,
+        wheelRim: true,
       },
     });
   }
 
-  async getStockBySlot(slotId: string) {
-    return this.prisma.stock.findMany({
-      where: { slotId },
+  async getStockByProduct(productId: string) {
+    return this.prisma.stockLocation.findMany({
+      where: { productId },
       include: {
-        category: true,
-        slot: {
-          include: {
-            rack: {
-              include: {
-                zone: {
-                  include: {
-                    warehouse: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+        location: true,
       },
     });
+  }
+
+  async getStockByLocation(locationId: string) {
+    return this.prisma.stockLocation.findMany({
+      where: { locationId },
+      include: {
+        product: true,
+        wheelRim: true,
+      },
+    });
+  }
+
+  async assembleInventory(productId: string, wheelRimId: string, quantity: number, pressingFee: number, locationId: string, userId: string) {
+    if (quantity <= 0) {
+      throw new BadRequestException('Quantity must be greater than zero');
+    }
+
+    const productStock = await this.prisma.stockLocation.findFirst({
+      where: {
+        locationId,
+        productId,
+      },
+    });
+    const wheelRimStock = await this.prisma.stockLocation.findFirst({
+      where: {
+        locationId,
+        wheelRimId,
+      },
+    });
+
+    if (!productStock || productStock.quantity < quantity) {
+      throw new BadRequestException('Insufficient tire stock for assembly');
+    }
+    if (!wheelRimStock || wheelRimStock.quantity < quantity) {
+      throw new BadRequestException('Insufficient wheel rim stock for assembly');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.stockLocation.update({
+        where: { id: productStock.id },
+        data: { quantity: { decrement: quantity } },
+      }),
+      this.prisma.stockLocation.update({
+        where: { id: wheelRimStock.id },
+        data: { quantity: { decrement: quantity } },
+      }),
+      this.prisma.assemblyLog.create({
+        data: {
+          productId,
+          wheelRimId,
+          quantity,
+          pressingFee,
+          userId,
+        },
+      }),
+    ]);
+
+    return { message: 'Assembly completed', productId, wheelRimId, quantity };
   }
 }

@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class OrdersController {
   constructor(private service: OrdersService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.service.findAll();

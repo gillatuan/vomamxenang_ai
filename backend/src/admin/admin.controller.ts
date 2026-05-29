@@ -1,12 +1,15 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
   constructor(private prisma: PrismaService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN_MANAGER')
   @Get('dashboard-stats')
   async stats() {
     const totalClients = await this.prisma.client.count();
@@ -30,5 +33,31 @@ export class AdminController {
     }, months);
 
     return { totalClients, totalRevenue: Number(revenueResult._sum.totalAmount?.toString() ?? '0'), revenueByMonth };
+  }
+
+  @Roles('ADMIN_MANAGER')
+  @Get('inventory-alerts')
+  async inventoryAlerts() {
+    const products = await this.prisma.product.findMany({
+      include: {
+        stocks: true,
+      },
+    });
+
+    const alerts = products
+      .map((product) => {
+        const quantity = product.stocks.reduce((sum, stock) => sum + stock.quantity, 0);
+        return {
+          productId: product.id,
+          sku: product.sku,
+          name: product.name,
+          minStock: product.minStock,
+          currentQuantity: quantity,
+          thresholdExceeded: quantity < product.minStock,
+        };
+      })
+      .filter((item) => item.thresholdExceeded);
+
+    return alerts;
   }
 }

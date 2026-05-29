@@ -2,22 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class PostsService {
+export class WheelRimsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.post.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.wheelRim.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
   async create(data: any) {
-    return this.prisma.post.create({ data });
+    return this.prisma.wheelRim.create({ data });
   }
 
   async update(id: string, data: any) {
-    return this.prisma.post.update({ where: { id }, data });
+    return this.prisma.wheelRim.update({ where: { id }, data });
   }
 
   async remove(id: string) {
-    return this.prisma.post.delete({ where: { id } });
+    return this.prisma.wheelRim.delete({ where: { id } });
   }
 }

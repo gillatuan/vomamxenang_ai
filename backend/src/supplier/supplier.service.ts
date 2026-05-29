@@ -14,31 +14,12 @@ export class SupplierService {
   }
 
   async findAll() {
-    return this.prisma.supplier.findMany({
-      include: {
-        receipts: {
-          include: {
-            items: true,
-          },
-        },
-      },
-    });
+    return this.prisma.supplier.findMany();
   }
 
   async findOne(id: string) {
     return this.prisma.supplier.findUnique({
       where: { id },
-      include: {
-        receipts: {
-          include: {
-            items: {
-              include: {
-                category: true,
-              },
-            },
-          },
-        },
-      },
     });
   }
 

@@ -1,6 +1,7 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
@@ -12,21 +13,24 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  // include PermissionGuard
-  // app.useGlobalGuards(new PermissionGuard(app.get(Reflector)));
-
-  // 🔑 Enable CORS with credentials support for HttpOnly cookies
   const frontendUrl = configService.get('FRONTEND_URL') || 'http://localhost:3000';
   app.enableCors({
     origin: frontendUrl,
-    credentials: true,  // 🔑 Allow credentials (HttpOnly cookies)
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  app.use(express.json({
+    verify: (req: any, res, buf) => {
+      if (req.originalUrl?.includes('/api/v/1/orders/webhook')) {
+        req.rawBody = buf;
+      }
+    },
+  }));
+
   app.use(cookieParser());
 
-  // set prefix
   app.enableVersioning({
     type: VersioningType.URI,
     prefix: 'api/v',

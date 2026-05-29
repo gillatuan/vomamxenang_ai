@@ -5,94 +5,105 @@ import {
   Body,
   Param,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { CreateIssueDto } from './dto/create-issue.dto';
-import { ConfirmReceiptDto } from './dto/confirm-receipt.dto';
-import { ConfirmIssueDto } from './dto/confirm-issue.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
-  // ========== RECEIPT ENDPOINTS ==========
+  @UseGuards(JwtAuthGuard)
   @Post('receipts')
   createReceipt(@Body() createReceiptDto: CreateReceiptDto) {
     return this.inventoryService.createReceipt(createReceiptDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('receipts')
   findAllReceipts() {
     return this.inventoryService.findAllReceipts();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('receipts/:id')
   findReceiptById(@Param('id') id: string) {
     return this.inventoryService.findReceiptById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('receipts/:id/confirm')
-  confirmReceipt(
-    @Param('id') id: string,
-    @Body() confirmReceiptDto: ConfirmReceiptDto,
-  ) {
-    return this.inventoryService.confirmReceipt(id, confirmReceiptDto);
+  confirmReceipt(@Param('id') id: string) {
+    return this.inventoryService.confirmReceipt(id);
   }
 
-  // ========== ISSUE ENDPOINTS ==========
+  @UseGuards(JwtAuthGuard)
   @Post('issues')
   createIssue(@Body() createIssueDto: CreateIssueDto) {
     return this.inventoryService.createIssue(createIssueDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('issues')
   findAllIssues() {
     return this.inventoryService.findAllIssues();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('issues/:id')
   findIssueById(@Param('id') id: string) {
     return this.inventoryService.findIssueById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('issues/:id/confirm')
-  confirmIssue(
-    @Param('id') id: string,
-    @Body() confirmIssueDto: ConfirmIssueDto,
-  ) {
-    return this.inventoryService.confirmIssue(id, confirmIssueDto);
+  confirmIssue(@Param('id') id: string) {
+    return this.inventoryService.confirmIssue(id);
   }
 
-  // ========== INVENTORY LOG ENDPOINTS ==========
+  @UseGuards(JwtAuthGuard)
+  @Post('assembly')
+  assembleInventory(@Body() body: any) {
+    const { productId, wheelRimId, quantity, pressingFee, locationId, userId } = body;
+    return this.inventoryService.assembleInventory(productId, wheelRimId, quantity, pressingFee, locationId, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('logs')
   findAllInventoryLogs() {
     return this.inventoryService.findAllInventoryLogs();
   }
 
-  @Get('logs/category/:categoryId')
-  getInventoryLogByCategory(@Param('categoryId') categoryId: string) {
-    return this.inventoryService.getInventoryLogByCategory(categoryId);
+  @UseGuards(JwtAuthGuard)
+  @Get('logs/product/:productId')
+  getInventoryLogByProduct(@Param('productId') productId: string) {
+    return this.inventoryService.getInventoryLogByProduct(productId);
   }
 
-  @Get('logs/slot/:slotId')
-  getInventoryLogBySlot(@Param('slotId') slotId: string) {
-    return this.inventoryService.getInventoryLogBySlot(slotId);
+  @UseGuards(JwtAuthGuard)
+  @Get('logs/location/:locationId')
+  getInventoryLogByLocation(@Param('locationId') locationId: string) {
+    return this.inventoryService.getInventoryLogByLocation(locationId);
   }
 
-  // ========== STOCK SUMMARY ENDPOINTS ==========
+  @UseGuards(JwtAuthGuard)
   @Get('stocks/summary')
   getStockSummary() {
     return this.inventoryService.getStockSummary();
   }
 
-  @Get('stocks/category/:categoryId')
-  getStockByCategory(@Param('categoryId') categoryId: string) {
-    return this.inventoryService.getStockByCategory(categoryId);
+  @UseGuards(JwtAuthGuard)
+  @Get('stocks/product/:productId')
+  getStockByProduct(@Param('productId') productId: string) {
+    return this.inventoryService.getStockByProduct(productId);
   }
 
-  @Get('stocks/slot/:slotId')
-  getStockBySlot(@Param('slotId') slotId: string) {
-    return this.inventoryService.getStockBySlot(slotId);
+  @UseGuards(JwtAuthGuard)
+  @Get('stocks/location/:locationId')
+  getStockByLocation(@Param('locationId') locationId: string) {
+    return this.inventoryService.getStockByLocation(locationId);
   }
 }

@@ -12,6 +12,7 @@ import { CategoryModule } from "./category/category.module"
 import { WarehouseModule } from "./warehouse/warehouse.module"
 import { InventoryModule } from "./inventory/inventory.module"
 import { SupplierModule } from "./supplier/supplier.module"
+import { WheelRimsModule } from "./wheel-rims/wheel-rims.module"
 import { APP_FILTER } from "@nestjs/core"
 
 @Module({
@@ -49,6 +50,7 @@ import { APP_FILTER } from "@nestjs/core"
     WarehouseModule,
     InventoryModule,
     SupplierModule,
+    WheelRimsModule,
   ]
 })
 export class AppModule {}

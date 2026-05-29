@@ -1,8 +1,9 @@
 export class CreateReceiptItemDto {
-  categoryId!: string;
+  productId?: string;
+  wheelRimId?: string;
   quantity!: number;
   unitPrice!: number;
-  slotId?: string;
+  locationId?: string;
   notes?: string;
 }
 

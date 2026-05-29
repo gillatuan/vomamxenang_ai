@@ -1,8 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto } from './dto/register.dto';
+
+const ALLOWED_ROLES: Role[] = ['ADMIN_MANAGER', 'STOREKEEPER'];
+const isAllowedRole = (value: string | undefined): value is Role => !!value && ALLOWED_ROLES.includes(value as Role);
 
 @Injectable()
 export class AuthService {
@@ -11,15 +15,16 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) {
-      throw new UnauthorizedException('Email is already registered');
+      throw new BadRequestException('Email is already registered');
     }
 
+    const role = isAllowedRole(dto.role) ? dto.role : 'STOREKEEPER';
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         password: hashedPassword,
-        role: dto.role ?? 'ADMIN',
+        role,
       },
     });
 

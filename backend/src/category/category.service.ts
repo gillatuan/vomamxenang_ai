@@ -18,17 +18,9 @@ export class CategoryService {
       include: {
         stocks: {
           include: {
-            slot: {
+            location: {
               include: {
-                rack: {
-                  include: {
-                    zone: {
-                      include: {
-                        warehouse: true,
-                      },
-                    },
-                  },
-                },
+                warehouse: true,
               },
             },
           },
@@ -43,17 +35,9 @@ export class CategoryService {
       include: {
         stocks: {
           include: {
-            slot: {
+            location: {
               include: {
-                rack: {
-                  include: {
-                    zone: {
-                      include: {
-                        warehouse: true,
-                      },
-                    },
-                  },
-                },
+                warehouse: true,
               },
             },
           },
@@ -84,7 +68,7 @@ export class CategoryService {
       where: { categoryId },
     });
 
-    const total = stocks.reduce((sum, stock) => sum + stock.quantity, 0);
+    const total = stocks.reduce<number>((sum, stock) => sum + stock.quantity, 0);
     return {
       categoryId,
       total,

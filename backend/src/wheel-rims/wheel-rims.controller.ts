@@ -1,12 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { WheelRimsService } from './wheel-rims.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
-@Controller('products')
-export class ProductsController {
-  constructor(private service: ProductsService) {}
+@Controller('wheel-rims')
+export class WheelRimsController {
+  constructor(private service: WheelRimsService) {}
 
   @Get()
   findAll() {

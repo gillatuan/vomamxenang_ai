@@ -1,7 +1,8 @@
 export class CreateIssueItemDto {
-  categoryId!: string;
+  productId?: string;
+  wheelRimId?: string;
   quantity!: number;
-  slotId?: string;
+  locationId?: string;
   notes?: string;
 }
 

@@ -1,97 +1,34 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
-import { CreateZoneDto } from './dto/create-zone.dto';
-import { CreateRackDto } from './dto/create-rack.dto';
-import { CreateSlotDto } from './dto/create-slot.dto';
+import { CreateLocationDto } from './dto/create-location.dto';
 
 @Controller('warehouse')
 export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
-  // ========== WAREHOUSE ENDPOINTS ==========
   @Post()
   createWarehouse(@Body() createWarehouseDto: CreateWarehouseDto) {
     return this.warehouseService.createWarehouse(createWarehouseDto);
   }
 
-  @Get()
-  findAllWarehouses() {
-    return this.warehouseService.findAllWarehouses();
+  @Get('map')
+  getWarehouseMap() {
+    return this.warehouseService.getWarehouseMap();
   }
 
-  @Get(':id')
-  findWarehouseById(@Param('id') id: string) {
-    return this.warehouseService.findWarehouseById(id);
+  @Post('scan')
+  scanWarehouse(@Body('query') query: string) {
+    return this.warehouseService.scanWarehouse(query);
   }
 
-  @Get(':id/structure')
-  getWarehouseStructure(@Param('id') id: string) {
-    return this.warehouseService.getWarehouseStructure(id);
+  @Post('locations')
+  createLocation(@Body() createLocationDto: CreateLocationDto) {
+    return this.warehouseService.createLocation(createLocationDto);
   }
 
-  // ========== ZONE ENDPOINTS ==========
-  @Post('zones')
-  createZone(@Body() createZoneDto: CreateZoneDto) {
-    return this.warehouseService.createZone(createZoneDto);
-  }
-
-  @Get('zones/list')
-  findAllZones(@Query('warehouseId') warehouseId?: string) {
-    return this.warehouseService.findAllZones(warehouseId);
-  }
-
-  @Get('zones/:id')
-  findZoneById(@Param('id') id: string) {
-    return this.warehouseService.findZoneById(id);
-  }
-
-  // ========== RACK ENDPOINTS ==========
-  @Post('racks')
-  createRack(@Body() createRackDto: CreateRackDto) {
-    return this.warehouseService.createRack(createRackDto);
-  }
-
-  @Get('racks/list')
-  findAllRacks(@Query('zoneId') zoneId?: string) {
-    return this.warehouseService.findAllRacks(zoneId);
-  }
-
-  @Get('racks/:id')
-  findRackById(@Param('id') id: string) {
-    return this.warehouseService.findRackById(id);
-  }
-
-  // ========== SLOT ENDPOINTS ==========
-  @Post('slots')
-  createSlot(@Body() createSlotDto: CreateSlotDto) {
-    return this.warehouseService.createSlot(createSlotDto);
-  }
-
-  @Get('slots/list')
-  findAllSlots(@Query('rackId') rackId?: string) {
-    return this.warehouseService.findAllSlots(rackId);
-  }
-
-  @Get('slots/:id')
-  findSlotById(@Param('id') id: string) {
-    return this.warehouseService.findSlotById(id);
-  }
-
-  @Get('slots/barcode/:barcode')
-  findSlotByBarcode(@Param('barcode') barcode: string) {
-    return this.warehouseService.findSlotByBarcode(barcode);
-  }
-
-  @Get('slots/:id/location-code')
-  getLocationCode(@Param('id') id: string) {
-    return this.warehouseService.getLocationCode(id);
+  @Get('locations')
+  findAllLocations() {
+    return this.warehouseService.findAllLocations();
   }
 }

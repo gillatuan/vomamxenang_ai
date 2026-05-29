@@ -205,6 +205,123 @@ Audit trail for all inventory movements:
 
 ---
 
+## ✅ Recent Implementation Updates
+This section documents the actual backend changes that were made so you can verify them step by step.
+
+### 1. Prisma schema and generated client
+- `backend/prisma/schema.prisma` was kept aligned with current models for:
+  - `User`, `Client`, `Supplier`, `Category`, `Product`, `WheelRim`, `Warehouse`, `Location`, `StockLocation`, `Order`, `OrderItem`, `InventoryTransaction`, `Stock`, `TransactionDetail`, `AssemblyLog`, `Post`
+- Prisma client was regenerated successfully with:
+  - `npm run prisma:generate`
+- Build verification was done with:
+  - `npm run build`
+
+### 2. Fixed auth role typing
+- File: `src/auth/auth.service.ts`
+- Change: added a `Role` type guard so `role` is validated as `Role` before passing to Prisma.
+- Verify: register endpoint now accepts only `ADMIN_MANAGER` or `STOREKEEPER` and compiles cleanly.
+
+### 3. Fixed category stock relation includes
+- File: `src/category/category.service.ts`
+- Change: corrected the Prisma `include` chain to use `stocks -> location -> warehouse` instead of invalid `slot` nesting.
+- Verify: category list/detail queries now return location + warehouse data for each stock record.
+
+### 4. Fixed order client null handling
+- File: `src/orders/orders.service.ts`
+- Change: added a `client` existence check after `findUnique()` / `upsert()`.
+- Verify: checkout session creation fails with a clear `BadRequestException` if client creation/query fails.
+
+### 5. Fixed unsupported Post fields
+- File: `src/posts/posts.service.ts`
+- Change: removed the non-existent `published` filter from `prisma.post.findMany()`.
+- Verify: blog/post listing compiles and returns all posts ordered by `createdAt`.
+
+### 6. Fixed supplier relation includes
+- File: `src/supplier/supplier.service.ts`
+- Change: removed unsupported `receipts` / `items` include paths that did not exist in the current Prisma schema.
+- Verify: supplier list/detail queries compile and return supplier records correctly.
+
+### 7. Build result
+- Final verification step: `npm run build` completed successfully with zero TypeScript errors.
+
+---
+
+## 🧪 Verification Examples
+Use the following examples to confirm the backend behavior step by step.
+
+### Example A: Regenerate Prisma client and build
+```bash
+cd backend
+npm run prisma:generate
+npm run build
+```
+Expected result: `Prisma Client` generated successfully and `tsc` completes with no errors.
+
+### Example B: Create a new warehouse
+```bash
+POST /warehouse
+Content-Type: application/json
+
+{
+  "code": "K1",
+  "name": "Main Warehouse",
+  "address": "123 Industrial Road"
+}
+```
+Expected result: warehouse created with `id`, `code`, `name`, and optional `address`.
+
+### Example C: Create a location using warehouse code generation
+```bash
+POST /warehouse/locations
+Content-Type: application/json
+
+{
+  "warehouseId": "<warehouseId>",
+  "zone": "A",
+  "rack": "01",
+  "slot": "02",
+  "capacity": 50
+}
+```
+Expected result: `locationCode` is auto-generated as `K1-A-01-02` when `locationCode` is not provided.
+
+### Example D: Create a category and verify stock include
+```bash
+POST /categories
+Content-Type: application/json
+
+{
+  "name": "Nexen 6.00-9 Solid",
+  "tireSize": "6.00-9",
+  "brand": "Nexen",
+  "tireType": "SOLID",
+  "rimType": "STANDARD",
+  "origin": "Vietnam",
+  "condition": "NEW",
+  "specifications": "Heavy-duty forklift tire"
+}
+```
+Expected result: category created successfully, and GET `/categories/:id` returns related `stocks` with `location` and `warehouse`.
+
+### Example E: Create a checkout session and ensure client exists
+```bash
+POST /orders/checkout
+Content-Type: application/json
+
+{
+  "items": [
+    { "productId": "<productId>", "locationId": "<locationId>", "quantity": 2 }
+  ]
+}
+```
+Expected result: if client creation/query succeeds, checkout session is created; if not, the request returns a validation error.
+
+---
+
+## Notes
+- Nếu bạn muốn kiểm tra từng endpoint, hãy chạy lại `npm run build` trước để đảm bảo mã nguồn đã đồng bộ.
+- Các điểm chỉnh sửa chính tương ứng với những file backend đã cập nhật và các lỗi biên dịch đã được sửa.
+
 ## 📝 Usage Examples
 
 ### Example 1: Create a Tire Category

@@ -1,265 +1,89 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWarehouseDto } from './dto/create-warehouse.dto';
-import { CreateZoneDto } from './dto/create-zone.dto';
-import { CreateRackDto } from './dto/create-rack.dto';
-import { CreateSlotDto } from './dto/create-slot.dto';
+import { CreateLocationDto } from './dto/create-location.dto';
 
 @Injectable()
 export class WarehouseService {
   constructor(private prisma: PrismaService) {}
 
-  // ========== WAREHOUSE ==========
   async createWarehouse(createWarehouseDto: CreateWarehouseDto) {
     return this.prisma.warehouse.create({
       data: createWarehouseDto,
     });
   }
 
-  async findAllWarehouses() {
+  async createLocation(createLocationDto: CreateLocationDto) {
+    const warehouse = await this.prisma.warehouse.findUnique({ where: { id: createLocationDto.warehouseId } });
+    if (!warehouse) {
+      throw new BadRequestException('Warehouse not found');
+    }
+
+    const locationCode = createLocationDto.locationCode || `${warehouse.code}-${createLocationDto.zone}-${createLocationDto.rack}-${createLocationDto.slot}`;
+
+    return this.prisma.location.create({
+      data: {
+        warehouseId: createLocationDto.warehouseId,
+        zone: createLocationDto.zone,
+        rack: createLocationDto.rack,
+        slot: createLocationDto.slot,
+        locationCode,
+        capacity: createLocationDto.capacity ?? 50,
+      },
+    });
+  }
+
+  async findAllLocations() {
+    return this.prisma.location.findMany({
+      include: {
+        warehouse: true,
+        stocks: {
+          include: {
+            product: true,
+            wheelRim: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getWarehouseMap() {
     return this.prisma.warehouse.findMany({
       include: {
-        zones: {
-          include: {
-            racks: {
-              include: {
-                slots: {
-                  include: {
-                    stocks: {
-                      include: {
-                        category: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async findWarehouseById(id: string) {
-    return this.prisma.warehouse.findUnique({
-      where: { id },
-      include: {
-        zones: {
-          include: {
-            racks: {
-              include: {
-                slots: {
-                  include: {
-                    stocks: {
-                      include: {
-                        category: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async getWarehouseStructure(warehouseId: string) {
-    return this.prisma.warehouse.findUnique({
-      where: { id: warehouseId },
-      include: {
-        zones: {
-          include: {
-            racks: {
-              include: {
-                slots: {
-                  include: {
-                    stocks: {
-                      include: {
-                        category: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  // ========== ZONE ==========
-  async createZone(createZoneDto: CreateZoneDto) {
-    return this.prisma.zone.create({
-      data: createZoneDto,
-      include: {
-        warehouse: true
-      },
-    });
-  }
-
-  async findAllZones(warehouseId?: string) {
-    return this.prisma.zone.findMany({
-      where: warehouseId ? { warehouseId } : undefined,
-      include: {
-        warehouse: true,
-        racks: {
-          include: {
-            slots: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findZoneById(id: string) {
-    return this.prisma.zone.findUnique({
-      where: { id },
-      include: {
-        warehouse: true,
-        racks: {
-          include: {
-            slots: {
-              include: {
-                stocks: {
-                  include: {
-                    category: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  // ========== RACK ==========
-  async createRack(createRackDto: CreateRackDto) {
-    return this.prisma.rack.create({
-      data: createRackDto,
-      include: {
-        zone: true,
-      },
-    });
-  }
-
-  async findAllRacks(zoneId?: string) {
-    return this.prisma.rack.findMany({
-      where: zoneId ? { zoneId } : undefined,
-      include: {
-        zone: true,
-        slots: true,
-      },
-    });
-  }
-
-  async findRackById(id: string) {
-    return this.prisma.rack.findUnique({
-      where: { id },
-      include: {
-        zone: true,
-        slots: {
+        locations: {
           include: {
             stocks: {
               include: {
-                category: true,
+                product: true,
+                wheelRim: true,
               },
             },
           },
         },
       },
+      orderBy: { name: 'asc' },
     });
   }
 
-  // ========== SLOT ==========
-  async createSlot(createSlotDto: CreateSlotDto) {
-    return this.prisma.slot.create({
-      data: createSlotDto,
+  async scanWarehouse(query: string) {
+    const normalized = query?.replace(/^SKU:/i, '').trim();
+    if (!normalized) {
+      throw new BadRequestException('Invalid scan query');
+    }
+
+    return this.prisma.stockLocation.findMany({
+      where: {
+        OR: [
+          { product: { sku: normalized } },
+          { wheelRim: { sku: normalized } },
+          { location: { locationCode: normalized } },
+        ],
+      },
       include: {
-        rack: true,
+        location: true,
+        product: true,
+        wheelRim: true,
       },
     });
-  }
-
-  async findAllSlots(rackId?: string) {
-    return this.prisma.slot.findMany({
-      where: rackId ? { rackId } : undefined,
-      include: {
-        rack: true,
-        stocks: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findSlotById(id: string) {
-    return this.prisma.slot.findUnique({
-      where: { id },
-      include: {
-        rack: {
-          include: {
-            zone: {
-              include: {
-                warehouse: true,
-              },
-            },
-          },
-        },
-        stocks: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findSlotByBarcode(barcode: string) {
-    return this.prisma.slot.findUnique({
-      where: { barcode },
-      include: {
-        rack: {
-          include: {
-            zone: {
-              include: {
-                warehouse: true,
-              },
-            },
-          },
-        },
-        stocks: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    });
-  }
-
-  async getLocationCode(slotId: string): Promise<string | null> {
-    const slot = await this.prisma.slot.findUnique({
-      where: { id: slotId },
-      include: {
-        rack: {
-          include: {
-            zone: {
-              include: {
-                warehouse: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!slot) return null;
-
-    return `${slot.rack.zone.warehouse.code}-${slot.rack.zone.code}-${slot.rack.code}-${slot.code}`;
   }
 }
