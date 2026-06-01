@@ -14,6 +14,7 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import Link from "next/link";
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -24,7 +25,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import theme from '@/theme';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, logout, isAdminManager } = useAuth();
+  const { isAuthenticated, isInitialized, logout, isAdminManager } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -32,13 +33,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginRoute = pathname === "/admin/login";
 
   useEffect(() => {
+    if (!isInitialized) {
+      return;
+    }
+
     if (!isAuthenticated && !isLoginRoute) {
       router.push("/admin/login");
+      return;
     }
+
     if (isAuthenticated && isLoginRoute) {
       router.push("/admin");
     }
-  }, [isAuthenticated, isLoginRoute, router]);
+  }, [isAuthenticated, isInitialized, isLoginRoute, router]);
+
+  if (!isInitialized) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (!isAuthenticated && isLoginRoute) {
     return <>{children}</>;

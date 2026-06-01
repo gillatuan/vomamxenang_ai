@@ -15,7 +15,7 @@ export const authAPI = {
   login: (email: string, password: string) =>
     apiClient.post<AuthResponse>("/auth/login", { email, password }),
 
-  register: (email: string, password: string, role: string = "ADMIN") =>
+  register: (email: string, password: string, role: string = "STOREKEEPER") =>
     apiClient.post<User>("/auth/register", { email, password, role }),
 };
 

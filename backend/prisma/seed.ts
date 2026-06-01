@@ -137,6 +137,19 @@ async function main() {
       id: 'warehouse-1',
       name: 'Kho Trung Tâm',
       address: '123 Đường Thành Công',
+      code: 'WH-001',
+      locations: {
+        create: [
+          {
+            id: 'location-1',
+            zone: 'A',
+            rack: '01',
+            slot: '01',
+            locationCode: 'K1-A-01-01',
+            capacity: 100,
+          },
+        ],
+      },
     },
   });
 
