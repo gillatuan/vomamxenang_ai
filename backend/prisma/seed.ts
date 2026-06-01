@@ -239,7 +239,7 @@ async function main() {
       totalAmount: 520000,
       status: OrderStatus.PAID,
       stripeSessionId: 'sess_1234567890',
-      details: {
+      items: {
         create: [
           {
             productId: 'product-1',
