@@ -9,6 +9,10 @@ export class ClientsService {
     return this.prisma.client.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
+  async findOne(id: string) {
+    return this.prisma.client.findUnique({ where: { id } });
+  }
+
   async create(data: any) {
     return this.prisma.client.create({ data });
   }

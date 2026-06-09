@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -9,8 +9,13 @@ export class ProductsController {
   constructor(private service: ProductsService) {}
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('condition') condition?: string) {
+    return this.service.findAll(condition);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

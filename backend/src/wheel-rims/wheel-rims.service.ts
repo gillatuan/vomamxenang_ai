@@ -6,7 +6,13 @@ export class WheelRimsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.wheelRim.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.wheelRim.findMany({ 
+      orderBy: { createdAt: 'desc' } 
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prisma.wheelRim.findUnique({ where: { id } });
   }
 
   async create(data: any) {

@@ -5,8 +5,16 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
-    return this.prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+  async findAll(condition?: string) {
+    const where = condition ? { condition } : undefined;
+    return this.prisma.product.findMany({ 
+      where,
+      orderBy: { createdAt: 'desc' } 
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prisma.product.findUnique({ where: { id } });
   }
 
   async create(data: any) {

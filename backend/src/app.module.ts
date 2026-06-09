@@ -13,7 +13,8 @@ import { WarehouseModule } from "./warehouse/warehouse.module"
 import { InventoryModule } from "./inventory/inventory.module"
 import { SupplierModule } from "./supplier/supplier.module"
 import { WheelRimsModule } from "./wheel-rims/wheel-rims.module"
-import { APP_FILTER } from "@nestjs/core"
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core"
+import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
 
 @Module({
   imports: [
@@ -51,6 +52,12 @@ import { APP_FILTER } from "@nestjs/core"
     InventoryModule,
     SupplierModule,
     WheelRimsModule,
-  ]
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: FinancialDataInterceptor,
+    },
+  ],
 })
 export class AppModule {}
