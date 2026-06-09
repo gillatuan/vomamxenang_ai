@@ -33,24 +33,41 @@ export class OrdersService {
     const products = await this.prisma.product.findMany({ where: { id: { in: productIds } }, include: { priceMatrix: true } });
     const wheelRims = await this.prisma.wheelRim.findMany({ where: { id: { in: wheelRimIds } } });
 
-    const client = body.clientId
-      ? await this.prisma.client.findUnique({ where: { id: body.clientId } })
-      : await this.prisma.client.upsert({
-          where: { email: 'guest@vomamxenang.local' },
-          update: { name: 'Guest' },
-          create: { name: 'Guest', email: 'guest@vomamxenang.local', phone: '', company: 'Guest', type: 'RETAIL' },
-        });
+    // Support two checkout assumptions:
+    // - Logged-in user: attempt to resolve a Client by authenticated user's email (req.user.email)
+    // - Guest (anonymous): use provided clientId or create/lookup a guest client record
+    const authUser = req?.user as { sub?: string; email?: string } | undefined;
+
+    let client = null as any;
+    if (authUser?.email) {
+      client = await this.prisma.client.findUnique({ where: { email: authUser.email } });
+    }
+
+    if (!client && body.clientId) {
+      client = await this.prisma.client.findUnique({ where: { id: body.clientId } });
+    }
+
+    if (!client) {
+      client = await this.prisma.client.upsert({
+        where: { email: 'guest@vomamxenang.local' },
+        update: { name: 'Guest' },
+        create: { name: 'Guest', email: 'guest@vomamxenang.local', phone: '', company: 'Guest', type: 'RETAIL' },
+      });
+    }
 
     if (!client) {
       throw new BadRequestException('Client not found');
     }
+
+    // If customerType wasn't explicitly provided, derive from resolved client (guest or real client)
+    const effectiveCustomerType = body.customerType ?? client.type ?? 'RETAIL';
 
     const checkoutItems = items.map((item) => {
       const product = item.productId ? products.find((p) => p.id === item.productId) : undefined;
       const wheelRim = item.wheelRimId ? wheelRims.find((w) => w.id === item.wheelRimId) : undefined;
       const price = product
         ? Number(
-            product.priceMatrix.find((matrix) => matrix.customerType === customerType)?.price ?? product.sellingPrice ?? product.importPrice,
+            product.priceMatrix.find((matrix) => matrix.customerType === effectiveCustomerType)?.price ?? product.sellingPrice ?? product.importPrice,
           )
         : wheelRim
         ? Number(wheelRim.sellingPrice ?? wheelRim.importPrice)

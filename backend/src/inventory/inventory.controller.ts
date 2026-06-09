@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
@@ -66,8 +67,9 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('assembly')
-  assembleInventory(@Body() body: any) {
-    const { productId, wheelRimId, quantity, pressingFee, locationId, userId } = body;
+  assembleInventory(@Req() req: any, @Body() body: any) {
+    const { productId, wheelRimId, quantity, pressingFee, locationId } = body;
+    const userId = body.userId || req.user?.sub;
     return this.inventoryService.assembleInventory(productId, wheelRimId, quantity, pressingFee, locationId, userId);
   }
 

@@ -16,7 +16,8 @@ export const authAPI = {
     apiClient.post<AuthResponse>("/auth/login", { email, password }),
 
   register: (email: string, password: string, role: string = "STOREKEEPER") =>
-    apiClient.post<User>("/auth/register", { email, password, role }),
+    apiClient.post<AuthResponse>("/auth/register", { email, password, role }),
+  forgotPassword: (email: string) => apiClient.post(`/auth/forgot-password`, { email }),
 };
 
 export interface Product {

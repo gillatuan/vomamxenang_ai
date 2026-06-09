@@ -1,22 +1,19 @@
-Nhiệm vụ: Thiết kế trọn vẹn Luồng Giao diện Duyệt danh mục phân tầng theo yêu cầu kinh doanh: Tầng 1 (Phân loại Mới/Cũ) -> Tầng 2 (Danh sách hàng hóa) -> Tầng 3 (Trang chi tiết - Detail) bằng MaterialUI.
+Nhiệm vụ: Thiết kế trọn vẹn Luồng Giao diện Duyệt danh mục phân tầng: Tầng 1 (Lọc Vỏ Mới, Vỏ Cũ, Mâm Mới, Mâm Cũ) -> Tầng 2 (Danh sách hàng hóa kèm nhãn Condition công khai) -> Tầng 3 (Trang chi tiết tích hợp Comment, Favourite, Tồn kho thực tế) bằng MaterialUI.
 
 Yêu cầu giao diện & Luồng trải nghiệm (UX):
 
-1. TẦNG 1: TRANG LỰA CHỌN TRẠNG THÁI (Condition Selection Page):
-   - Thiết kế giao diện gồm 2 Tab lớn hoặc 2 Grid Card khổng lồ trực quan: "HÀNG MỚI 100%" (Sử dụng biểu tượng Huy hiệu/Mới) và "HÀNG ĐÃ QUA SỬ DỤNG / LƯỚT" (Sử dụng biểu tượng Hoàn trả/Tái chế).
-   - Người dùng bấm vào một trong hai lựa chọn sẽ chuyển hướng hoặc lọc dữ liệu theo trạng thái đó.
+1. TẦNG 1: TRANG LỰA CHỌN TRẠNG THÁI VÀ CHỦ CHỦ (Condition Gateway):
+   - Giao diện trang chủ cửa hàng chia làm 4 Grid Card lớn rất trực quan đại diện cho 4 nhóm kinh doanh: "VỎ XE NÂNG MỚI 100%", "VỎ XE NÂNG ĐÃ QUA SỬ DỤNG (CŨ/LƯỚT)", "MÂM XE NÂNG MỚI", "MÂM XE NÂNG CŨ". 
+   - Mỗi Card có hình ảnh minh họa tương ứng, khi click vào sẽ chuyển hướng sang Tầng 2 và tự động truyền Query Parameter tương ứng (Ví dụ: `?type=TIRE&condition=NEW`).
 
 2. TẦNG 2: DANH SÁCH SẢN PHẨM PHÂN LOẠI (Catalog View):
-   - Sử dụng component `Tabs` của MUI để chia nhanh: "Vỏ Xe Nâng" và "Mâm Xe Nâng".
-   - Hiển thị danh sách dạng Bảng (`Table`) hoặc dạng Lưới các thẻ (`Grid Card`) tùy thuộc vào loại thiết bị (PC hiển thị Table, Mobile hiển thị Card).
-   - Mỗi sản phẩm hiển thị: Hình ảnh, Tên/Thông số kích thước (Size), Thương hiệu, Tình trạng (Mới/Lướt), Tồn kho thực tế. Có nút hiển thị "In mã QR" kích hoạt `Dialog` in ấn tem nhiệt 50x30mm.
-   - Cho phép lọc nâng cao (`TextField`, `Select` của MUI) theo thương hiệu và kích thước.
+   - Hiển thị danh sách sản phẩm. Trên mỗi Product Card hoặc hàng trong Table, **bắt buộc phải hiển thị một nhãn (Chip của MUI) thể hiện rõ "Condition"**: Màu xanh lá (`success`) cho hàng "MỚI 100%" và màu xám/cam (`warning`) cho hàng "CŨ/LƯỚT".
+   - Mỗi sản phẩm có hình ảnh, thông số size, thương hiệu và tồn kho. Khi click vào Card sẽ điều hướng thẳng đến trang Chi tiết (`/catalog/:id`).
 
-3. TẦNG 3: TRANG CHI TIẾT SẢN PHẨM (Product Detail Page):
-   - Khi người dùng click vào một dòng sản phẩm hoặc một Card ở Tầng 2, hệ thống điều hướng sang trang Chi tiết (`/catalog/:id`).
-   - Thiết kế trang chi tiết sử dụng `Grid` chia làm 2 bên (hoặc 1 cột đứng trên Mobile):
-     + Bên trái: Component `Paper` chứa hình ảnh sản phẩm phóng to rõ nét.
-     + Bên phải: Các khối `Typography` chữ lớn thể hiện Thông số kỹ thuật chi tiết, Thương hiệu, Loại vỏ, Loại mâm tương thích, Định mức tồn kho (Min/Max).
-     + Một bảng nhỏ sử dụng `Table` liệt kê chi tiết: Sản phẩm này hiện đang nằm ở những vị trí ô kệ nào trong kho và số lượng ở từng ô là bao nhiêu (Ví dụ: Ô K1-ZA-R02 có 5 cái, Ô K1-ZB-R01 có 2 cái).
+3. TẦNG 3: TRANG CHI TIẾT SẢN PHẨM & TƯƠNG TÁC NGƯỜI DÙNG (Product Detail & Interactions):
+   - **Thông tin chi tiết:** Hiển thị hình ảnh lớn, thông số kỹ thuật, nhãn trạng thái cũ/mới, và một bảng `Table` nhỏ liệt kê lốp/mâm này hiện đang nằm ở chính xác những vị trí ô kệ nào trong kho (Vận hành nội bộ).
+   - **Tương tác End-User (Comment & Favourite):**
+     + Cạnh nút "Thêm vào giỏ hàng" phải có một nút hình Trái tim (`IconButton` icon `FavoriteBorder` hoặc `Favorite` màu đỏ nếu đã thích) để người dùng lưu vào danh sách yêu thích.
+     + Phía dưới trang là Khu vực Bình luận (`Box` chứa bình luận). Sử dụng `Rating` component của MUI để đánh giá số sao (1-5 sao), một `TextField` nhập nội dung và nút "Gửi bình luận". Hiển thị danh sách các bình luận cũ kèm avatar người dùng trực quan.
 
-Yêu cầu đầu ra: Viết mã nguồn hoàn chỉnh bằng TypeScript cho cấu trúc luồng duyệt sản phẩm 3 tầng này, đảm bảo liên kết Router (Next.js Link hoặc React Router) mượt mà và đồng bộ màu sắc Theme vàng/đen.
+Yêu cầu đầu ra: Viết mã nguồn hoàn chỉnh bằng TypeScript cho cấu trúc luồng duyệt sản phẩm 3 tầng này kèm tính năng Comment, Favourite bằng MaterialUI.

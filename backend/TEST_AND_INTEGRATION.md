@@ -476,6 +476,31 @@ npx prisma db seed
 | POST | `/warehouse/scan` | Yes | - | Quét mã QR |
 | POST | `/inventory/assembly` | Yes | - | Ép mâm xe |
 
+### 4.12 Stripe Checkout - Examples (Guest vs Logged-in)
+
+Guest checkout (no auth):
+```bash
+curl -X POST http://localhost:3001/orders/checkout-session \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      { "productId": "{product-id}", "locationId": "{location-id}", "quantity": 2 }
+    ]
+  }'
+```
+
+Logged-in checkout (use JWT token `$TOKEN` obtained from /auth/login):
+```bash
+curl -X POST http://localhost:3001/orders/checkout-session \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "items": [
+      { "productId": "{product-id}", "locationId": "{location-id}", "quantity": 1 }
+    ]
+  }'
+```
+
 ---
 
 ## Ghi Chú Quan trọng

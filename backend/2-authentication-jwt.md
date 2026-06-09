@@ -1,11 +1,11 @@
-Nhiệm vụ: Triển khai AuthModule trong NestJS tích hợp phân quyền chặt chẽ cho 2 nhóm đối tượng (Admin Manager & Nhân viên kho), hỗ trợ tối ưu giao diện quét mã trên thiết bị di động.
+Nhiệm vụ: Triển khai AuthModule trong NestJS tích hợp phân quyền chặt chẽ cho Admin Manager & Nhân viên kho, hỗ trợ đầy đủ các cổng xác thực (Đăng ký, Đăng nhập, Quên mật khẩu).
 
 YÊU CẦU THỰC HIỆN:
 1. Cung cấp các lệnh cài đặt thư viện cần thiết: `@nestjs/jwt`, `bcrypt`.
-2. Tạo `AuthModule` có endpoint `POST /auth/register` và `POST /auth/login` bên trong `AuthController`.
-3. Mật khẩu phải được băm bằng `bcrypt` trước khi lưu. Endpoint login trả về một chuỗi JWT access token chứa thông tin `id`, `email`, và `role`.
-4. Tạo `JwtAuthGuard` để bảo vệ các API endpoint nội bộ.
-5. Tạo `RolesGuard` để phân quyền:
-   - "ADMIN_MANAGER": Toàn quyền hệ thống, xem giá tiền, chỉnh sửa bảng giá tài chính.
-   - "STOREKEEPER": Chỉ thao tác trên sơ đồ kho, nhập/xuất kho vật lý, và quét QR. Ẩn hoàn toàn dữ liệu tiền tệ.
-6. Cung cấp một đoạn mã seed dữ liệu mẫu (`prisma/seed.ts`) để tự động tạo một tài khoản Admin mặc định (`admin@vomamxenang.local` / `admin123`).
+2. Tạo `AuthModule` có các endpoint sau trong `AuthController`:
+   - `POST /auth/register`: Đăng ký tài khoản mới cho end-user.
+   - `POST /auth/login`: Đăng nhập hệ thống, băm mật khẩu qua bcrypt, trả về JWT token (chứa id, email, role).
+   - `POST /auth/forgot-password`: Nhận email và xử lý logic gửi mã/link reset mật khẩu (giả lập hoặc gửi qua console).
+3. Tạo `JwtAuthGuard` để bảo vệ các API endpoint nội bộ.
+4. Tạo `RolesGuard` để bảo vệ tài nguyên: ADMIN_MANAGER được xem báo cáo doanh thu và sửa bảng giá tài chính; STOREKEEPER chỉ quản lý sơ đồ kho, bốc dỡ hàng vật lý và ẩn hoàn toàn dữ liệu giá tiền.
+5. Cung cấp đoạn mã seed dữ liệu mẫu (`prisma/seed.ts`) tạo tài khoản Admin mặc định (`admin@vomamxenang.local` / `admin123`).

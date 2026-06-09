@@ -21,4 +21,9 @@ export class AuthController {
   async test() {
     return { message: 'Test successful' };
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
 }

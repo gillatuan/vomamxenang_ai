@@ -1,7 +1,18 @@
-Nhiệm vụ: Thiết kế giao diện Form Nhập/Xuất hàng động, tích hợp module dịch vụ "Ép mâm xe nâng" đặc thù và tự động áp giá B2B theo nhóm Khách hàng bằng MaterialUI.
+Nhiệm vụ: Thiết kế giao diện Giỏ hàng có link xem lại sản phẩm, luồng Thanh toán từng bước (Next Step Verified), Form Nhập/Xuất động, Nghiệp vụ Ép mâm và danh sách Blog hiển thị bài viết chi tiết.
 
 Yêu cầu giao diện & Chức năng:
-1. FORM XUẤT HÀNG ĐỘNG (Dynamic Invoice Form): Sử dụng `Autocomplete` của MUI để chọn Khách hàng. Hệ thống tự khóa giá theo nhóm sỉ từ backend gửi về. Thiết kế bảng thêm dòng sản phẩm động (Nút thêm dòng, nút xóa dòng bằng `IconButton`).
-2. GỢI Ý VỊ TRÍ LẤY HÀNG: Cột "Vị trí lấy hàng" sử dụng `Select` của MUI. Khi chọn một mã lốp, dropdown tự động hiển thị danh sách các ô kệ đang còn hàng kèm số lượng thực tế để nhân viên tích chọn đúng vị trí bốc lốp.
-3. MODULE NGHIỆP VỤ ĐẶC THÙ "ÉP MÂM XE NÂNG": Bố trí một thanh gạt `FormControlLabel` kết hợp với `Switch` của MUI mang tên "Bật chế độ Ép mâm sẵn". Khi bật, giao diện mở rộng bắt buộc nhân viên chọn thêm: 1 Mã Vỏ xe + 1 Mã Mâm xe tương thích + Ô nhập `TextField` "Chi phí công ép mâm".
-4. BÁO CÁO BIẾN ĐỘNG KHO (Inventory Log): Sử dụng `Table` và component `Chip` của MUI để gắn tag màu sắc phân loại dòng chảy hàng hóa (Ví dụ: Loại ÉP MÂM hiển thị Chip màu Vàng, loại XUẤT HÀNG hiển thị Chip màu Đỏ).
+
+1. GIỎ HÀNG NÂNG CAO (Cart Component) & LUỒNG THANH TOÁN (Next Step Validation):
+   - **Link xem lại sản phẩm:** Trong bảng danh sách giỏ hàng, tên của mỗi sản phẩm phải được bọc trong component `Link` của MUI/Next.js trỏ thẳng về trang chi tiết sản phẩm (`/catalog/:id`) để người dùng click xem lại thông số bất cứ lúc nào.
+   - **Luồng Thanh toán (MUI Stepper):** Khi bấm "Thanh toán", hệ thống chuyển sang trang Checkout sử dụng component `Stepper` và `Step`, `StepLabel` của MUI để thể hiện rõ 3 bước: Bước 1: Xem lại giỏ hàng -> Bước 2: Nhập thông tin giao hàng & Áp giá khách hàng (B2B PriceMatrix) -> Bước 3: Thanh toán qua cổng Stripe. Phải viết đủ layout cho cả 3 bước này để user xác thực và chuyển tiếp qua lại (Next/Back) mượt mà.
+
+2. TRANG BLOG & TRANG CHI TIẾT BÀI VIẾT (Blog Layout & Detail Page):
+   - **Hiển thị danh sách Post:** Tạo giao diện `/blog` sử dụng `Grid` hiển thị các bài viết dạng Card. Mỗi Card có `CardMedia` (Hình ảnh bài viết), `CardContent` (Tiêu đề, tóm tắt nội dung), và nút "Đọc thêm" dẫn vào trang chi tiết.
+   - **Trang chi tiết bài viết (`/blog/:id`):** Hiển thị tiêu đề lớn, ngày đăng, video nhúng từ YouTube (nếu có bằng thẻ iframe/CardMedia), và toàn bộ nội dung bài viết. Phía dưới cùng hiển thị khu vực bình luận bài viết (`PostComment`) có sẵn các comment mặc định chân thực để tăng tương tác.
+
+3. FORM KHO CHUYÊN DỤNG (Nhập/Xuất kho & Ép mâm Combo - Vận hành nội bộ):
+   - Form Nhập/Xuất có tính năng thêm dòng động. Cột "Vị trí lấy hàng" hiển thị dropdown các ô kệ đang còn hàng.
+   - Tích hợp công tắc gạt `Switch` "Combo Ép mâm sẵn". Khi bật, mở rộng form bắt chọn: 1 Vỏ + 1 Mâm tương thích + Ô nhập `TextField` phí công ép mâm để tự động trừ kho đồng thời cả vỏ và mâm khi hoàn tất.
+   - Nhật ký dòng chảy kho (`Inventory Log`) sử dụng component `Chip` phân màu để đánh dấu giao dịch: Màu vàng cho ÉP MÂM, màu đỏ cho XUẤT HÀNG.
+
+Yêu cầu đầu ra: Cung cấp mã nguồn Frontend hoàn chỉnh cho Giỏ hàng Stepper, Module Blog (Danh sách + Chi tiết + Comment mặc định) và Form Nhập/Xuất/Ép mâm nâng cao bằng MaterialUI.

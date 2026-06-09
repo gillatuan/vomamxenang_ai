@@ -48,4 +48,14 @@ export class AuthService {
       user: { id: user.id, email: user.email, role: user.role },
     };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return { ok: true }; // don't reveal
+
+    const token = Math.random().toString(36).slice(2, 8).toUpperCase();
+    // In a real app: save token with expiry and send email. Here we console log for testing.
+    console.log(`Reset token for ${email}: ${token}`);
+    return { ok: true };
+  }
 }

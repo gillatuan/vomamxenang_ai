@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,6 +16,20 @@ export class ProductsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/comment')
+  async addComment(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    const userId = req.user?.sub || body.userId;
+    return this.service.addComment(id, userId, body.content, body.rating);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/favourite')
+  async toggleFavourite(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    const userId = req.user?.sub || body.userId;
+    return this.service.toggleFavourite(id, userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
