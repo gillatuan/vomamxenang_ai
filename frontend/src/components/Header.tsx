@@ -46,7 +46,7 @@ export function Header() {
             </Button>
           </>
         ) : (
-          <Button color="inherit" component={NextLink} href="/admin/login">
+          <Button color="inherit" component={NextLink} href="/auth/login">
             Đăng nhập
           </Button>
         )}

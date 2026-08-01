@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Container, TextField, Button, Typography, Alert, CircularProgress } from "@mui/material";
+import { Box, Container, TextField, Button, Typography, Alert, CircularProgress, Link as MuiLink } from "@mui/material";
+import NextLink from "next/link";
 import { useState } from "react";
 import { authAPI } from "@/lib/api-client";
 
@@ -27,10 +28,11 @@ export default function ForgotPage() {
     <Container maxWidth="xs" sx={{ pt: 8 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 3, bgcolor: "background.paper", borderRadius: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Quên mật khẩu</Typography>
+        <MuiLink component={NextLink} href="/auth/login">← Quay lại Đăng nhập</MuiLink>
         {message && <Alert severity="info">{message}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
           <TextField label="Email" type="email" fullWidth required value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mt: 2 }} />
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>{loading ? <CircularProgress size={20} /> : "Gửi hướng dẫn"}</Button>
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>{loading ? <CircularProgress size={20} /> : "Gửi mã khôi phục"}</Button>
         </Box>
       </Box>
     </Container>

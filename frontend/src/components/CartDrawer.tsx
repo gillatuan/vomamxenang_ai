@@ -13,13 +13,12 @@ import {
   TableRow,
   IconButton,
   Paper,
-  Alert,
-  CircularProgress,
+  Link as MuiLink,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import NextLink from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart";
-import { ordersAPI } from "@/lib/api-client";
-import { useState } from "react";
 
 interface CartDrawerProps {
   open: boolean;
@@ -28,34 +27,15 @@ interface CartDrawerProps {
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, total, clear } = useCartStore();
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleCheckout = async () => {
+  const router = useRouter();
+  const handleCheckout = () => {
     if (items.length === 0) {
       alert("Giỏ hàng trống");
       return;
     }
 
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const checkoutData = items.map((item) => ({
-        productId: item.id,
-        quantity: item.quantity,
-        price: item.sellingPrice || 0,
-      }));
-
-      const res = await ordersAPI.createCheckoutSession(checkoutData);
-      if (res.data.url) {
-        window.location.href = res.data.url;
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Checkout failed");
-    } finally {
-      setSubmitting(false);
-    }
+    onClose();
+    router.push("/checkout");
   };
 
   return (
@@ -64,8 +44,6 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
         <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
           Giỏ hàng ({items.length})
         </Typography>
-
-        {error && <Alert severity="error" sx={{ marginBottom: "1rem" }}>{error}</Alert>}
 
         {items.length === 0 ? (
           <Typography color="textSecondary">Giỏ hàng trống</Typography>
@@ -84,7 +62,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
+                      <TableCell><MuiLink component={NextLink} href={`/products/${item.id}`} onClick={onClose}>{item.name}</MuiLink></TableCell>
                       <TableCell align="right">
                         <input
                           type="number"
@@ -127,9 +105,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                 variant="contained"
                 fullWidth
                 onClick={handleCheckout}
-                disabled={submitting}
               >
-                {submitting ? <CircularProgress size={24} /> : "Thanh toán"}
+                Thanh toán
               </Button>
             </Box>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Container, Typography, Grid, Card, CardContent, CircularProgress } from "@mui/material";
+import { Box, Button, Card, CardContent, CircularProgress, Container, Grid, Typography } from "@mui/material";
+import NextLink from "next/link";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -69,6 +70,7 @@ export default function BlogPage() {
                   <Typography variant="body2" color="textSecondary">
                     {post.content.substring(0, 100)}...
                   </Typography>
+                  <Button component={NextLink} href={`/blog/${post.id}`} sx={{ mt: 2 }}>Đọc thêm</Button>
                 </CardContent>
               </Card>
             </Grid>

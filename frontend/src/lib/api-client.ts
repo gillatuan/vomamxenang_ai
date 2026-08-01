@@ -29,10 +29,14 @@ export interface Product {
   quantityInStock: number;
   imageUrl?: string;
   description?: string;
+  condition?: "NEW" | "NEW_100" | "USED";
+  brand?: string;
+  size?: string;
 }
 
 export const productsAPI = {
-  getAll: () => apiClient.get<Product[]>("/products"),
+  getAll: (condition?: string) => apiClient.get<Product[]>("/products", { params: condition ? { condition } : undefined }),
+  getOne: (id: string) => apiClient.get<Product>(`/products/${id}`),
 
   create: (data: Partial<Product>) => apiClient.post<Product>("/products", data),
 
@@ -72,6 +76,7 @@ export interface Post {
 
 export const postsAPI = {
   getAll: () => apiClient.get<Post[]>("/posts"),
+  getOne: (id: string) => apiClient.get<Post>(`/posts/${id}`),
 
   create: (data: Partial<Post>) => apiClient.post<Post>("/posts", data),
 

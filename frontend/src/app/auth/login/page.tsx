@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Container, TextField, Button, Typography, Alert, CircularProgress, Avatar } from "@mui/material";
+import { Box, Container, TextField, Button, Typography, Alert, CircularProgress, Avatar, Link as MuiLink, Stack } from "@mui/material";
+import NextLink from "next/link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -37,11 +38,16 @@ export default function LoginPage() {
           <LockOutlinedIcon />
         </Avatar>
         <Typography variant="h6" sx={{ mb: 2 }}>Đăng nhập</Typography>
+        <MuiLink component={NextLink} href="/" sx={{ alignSelf: "flex-start" }}>← Quay lại Trang Chủ</MuiLink>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
           <TextField label="Email" type="email" fullWidth required value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mt: 2 }} />
           <TextField label="Mật khẩu" type="password" fullWidth required value={password} onChange={(e) => setPassword(e.target.value)} sx={{ mt: 2 }} />
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>{loading ? <CircularProgress size={20} /> : "Đăng nhập"}</Button>
+          <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+            <MuiLink component={NextLink} href="/auth/register">Đăng ký tài khoản mới</MuiLink>
+            <MuiLink component={NextLink} href="/auth/forgot">Quên mật khẩu?</MuiLink>
+          </Stack>
         </Box>
       </Box>
     </Container>

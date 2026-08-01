@@ -13,15 +13,18 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  Chip,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import NextLink from "next/link";
+import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { productsAPI, clientsAPI, Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
 
-export default function ProductsPage() {
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,10 +33,12 @@ export default function ProductsPage() {
   const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
   const [submitting, setSubmitting] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const searchParams = useSearchParams();
+  const condition = searchParams.get("condition") || undefined;
 
   useEffect(() => {
     productsAPI
-      .getAll()
+      .getAll(condition)
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -42,7 +47,7 @@ export default function ProductsPage() {
         setError("Failed to load products");
         setLoading(false);
       });
-  }, []);
+  }, [condition]);
 
   const handleQuoteClick = (product: Product) => {
     setSelectedProduct(product);
@@ -95,6 +100,12 @@ export default function ProductsPage() {
                 )}
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h6">{product.name}</Typography>
+                  <Chip
+                    size="small"
+                    sx={{ mt: 1 }}
+                    color={product.condition === "USED" ? "warning" : "success"}
+                    label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"}
+                  />
                   <Typography variant="body2" color="textSecondary">
                     {product.description}
                   </Typography>
@@ -103,6 +114,9 @@ export default function ProductsPage() {
                   </Typography>
                 </CardContent>
                 <CardActions>
+                  <Button component={NextLink} href={`/products/${product.id}`} size="small">
+                    Xem chi tiết
+                  </Button>
                   {product.sellingPrice ? (
                     <Button
                       variant="contained"
@@ -175,4 +189,8 @@ export default function ProductsPage() {
       <Footer />
     </>
   );
+}
+
+export default function ProductsPage() {
+  return <Suspense fallback={<Box sx={{ display: "grid", minHeight: "50vh", placeItems: "center" }}><CircularProgress /></Box>}><ProductsContent /></Suspense>;
 }
