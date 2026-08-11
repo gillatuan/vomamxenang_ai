@@ -15,8 +15,8 @@ export function Header() {
 
   return (
     <AppBar position="sticky">
-      <Toolbar>
-        <Box sx={{ flexGrow: 1 }}>
+      <Toolbar sx={{ minHeight: 68, gap: { xs: 0.25, md: 0.75 }, px: { xs: 1.5, md: 3 } }}>
+        <Box sx={{ mr: "auto", display: { xs: "none", sm: "block" }, whiteSpace: "nowrap" }}>
           <MuiLink
             component={NextLink}
             href="/"
@@ -26,27 +26,23 @@ export function Header() {
           </MuiLink>
         </Box>
 
-        <Button color="inherit" component={NextLink} href="/">
-          Trang chủ
-        </Button>
-        <Button color="inherit" component={NextLink} href="/blog">
-          Blog
-        </Button>
-        <Button color="inherit" component={NextLink} href="/products">
-          Sản phẩm
-        </Button>
+        <Box component="nav" aria-label="Điều hướng chính" sx={{ display: "flex", alignItems: "center", gap: { xs: 0, md: 0.25 } }}>
+          <Button variant="text" color="inherit" component={NextLink} href="/" sx={navLinkSx}>Trang chủ</Button>
+          <Button variant="text" color="inherit" component={NextLink} href="/blog" sx={navLinkSx}>Blog</Button>
+          <Button variant="text" color="inherit" component={NextLink} href="/products" sx={navLinkSx}>Sản phẩm</Button>
+        </Box>
 
         {isAuthenticated ? (
           <>
-            <Button color="inherit" component={NextLink} href="/admin">
+            <Button variant="text" color="inherit" component={NextLink} href="/admin" sx={navLinkSx}>
               Admin ({user?.email})
             </Button>
-            <Button color="inherit" onClick={logout}>
+            <Button variant="outlined" color="inherit" onClick={logout} sx={accountButtonSx}>
               Đăng xuất
             </Button>
           </>
         ) : (
-          <Button color="inherit" component={NextLink} href="/auth/login">
+          <Button variant="outlined" color="inherit" component={NextLink} href="/auth/login" sx={accountButtonSx}>
             Đăng nhập
           </Button>
         )}
@@ -54,3 +50,23 @@ export function Header() {
     </AppBar>
   );
 }
+
+const navLinkSx = {
+  minWidth: "auto",
+  px: { xs: 0.75, sm: 1.25, md: 1.5 },
+  py: 0.9,
+  borderRadius: 1.5,
+  fontWeight: 600,
+  whiteSpace: "nowrap",
+  "&:hover": { backgroundColor: "rgba(255,255,255,0.14)" },
+};
+
+const accountButtonSx = {
+  ml: { xs: 0.25, md: 0.75 },
+  px: { xs: 1, md: 1.5 },
+  py: 0.7,
+  borderColor: "rgba(255,255,255,0.72)",
+  fontWeight: 700,
+  whiteSpace: "nowrap",
+  "&:hover": { borderColor: "#fff", backgroundColor: "rgba(255,255,255,0.14)" },
+};
