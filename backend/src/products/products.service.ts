@@ -16,10 +16,12 @@ export class ProductsService {
   async findOne(id: string) {
     return this.prisma.product.findUnique({
       where: { id },
-      include: ( {
-        productComments: { include: { user: { select: { id: true, email: true } } } },
+      include: {
+        productComments: {
+          include: { user: { select: { id: true, email: true } } },
+        },
         favouriteProducts: true,
-      } as any ),
+      },
     });
   }
 
