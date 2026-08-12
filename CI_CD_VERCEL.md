@@ -15,7 +15,7 @@ Thêm các **Repository secrets** sau:
 | --- | --- |
 | `VERCEL_TOKEN` | Personal access token của Vercel có quyền deploy. |
 | `VERCEL_ORG_ID` | Vercel team/org ID. |
-| `VERCEL_FRONTEND_PROJECT_ID` | `prj_aSC5TXzFHOYOlXmkaKrMRVbISzmJ` |
+| `VERCEL_FRONTEND_PROJECT_ID` | `prj_b5ax04n4xPcMnhGoQdswOFuY4XuZ` |
 | `VERCEL_BACKEND_PROJECT_ID` | `prj_leoAlnFpMZ9cLvmHauxXMHAuugWX` |
 
 Thêm **Repository variable** (không phải secret):
