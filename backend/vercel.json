@@ -1,0 +1,6 @@
+{
+  "buildCommand": "yarn prisma:generate && yarn build",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ]
+}
