@@ -124,4 +124,8 @@ export const adminManagementAPI = {
   priceMatrix: () => apiClient.get<PriceMatrixProduct[]>("/admin/management/price-matrix"),
   updatePriceMatrix: (productId: string, customerType: "RETAIL" | "B2B_TIER1" | "B2B_TIER2", price: number) => apiClient.post("/admin/management/price-matrix", { productId, customerType, price }),
   reports: () => apiClient.get<{ revenue: number; paidOrders: number; averageOrderValue: number; inventoryCost: number; topClients: { id: string; name: string; type: string; revenue: number; orders: number }[] }>("/admin/reports"),
+  users: () => apiClient.get<{ id: string; email: string; role: string; createdAt: string }[]>("/admin/management/users"),
+  productComments: () => apiClient.get<{ id: string; content: string; rating: number | null; createdAt: string; product: { sku: string; name: string }; user: { email: string } }[]>("/admin/management/product-comments"),
+  postComments: () => apiClient.get<{ id: string; content: string; createdAt: string; post: { title: string }; user: { email: string } }[]>("/admin/management/post-comments"),
+  favourites: () => apiClient.get<{ product: { id: string; sku: string; name: string; brand: string | null }; favouriteCount: number }[]>("/admin/management/favourites"),
 };

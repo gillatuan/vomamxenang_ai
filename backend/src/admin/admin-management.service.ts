@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AdminManagementService {
@@ -48,6 +49,19 @@ export class AdminManagementService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async createUser(email: string, password: string, role: 'ADMIN_MANAGER' | 'STOREKEEPER') {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return this.prisma.user.create({ data: { email, password: hashedPassword, role }, select: { id: true, email: true, role: true, createdAt: true } });
+  }
+
+  async updateUser(id: string, data: { role?: 'ADMIN_MANAGER' | 'STOREKEEPER'; password?: string }) {
+    const password = data.password ? await bcrypt.hash(data.password, 10) : undefined;
+    return this.prisma.user.update({ where: { id }, data: { role: data.role, password }, select: { id: true, email: true, role: true, createdAt: true } });
+  }
+
+  deleteProductComment(id: string) { return this.prisma.productComment.delete({ where: { id } }); }
+  deletePostComment(id: string) { return this.prisma.postComment.delete({ where: { id } }); }
 
   productComments() {
     return this.prisma.productComment.findMany({

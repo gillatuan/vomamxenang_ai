@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminManagementService } from './admin-management.service';
 import { UpdatePriceMatrixDto } from './dto/update-price-matrix.dto';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,12 +35,28 @@ export class AdminController {
   users() { return this.management.users(); }
 
   @Roles('ADMIN_MANAGER')
+  @Post('management/users')
+  createUser(@Body() dto: CreateAdminUserDto) { return this.management.createUser(dto.email, dto.password, dto.role); }
+
+  @Roles('ADMIN_MANAGER')
+  @Patch('management/users/:id')
+  updateUser(@Param('id') id: string, @Body() dto: UpdateAdminUserDto) { return this.management.updateUser(id, dto); }
+
+  @Roles('ADMIN_MANAGER')
   @Get('management/product-comments')
   productComments() { return this.management.productComments(); }
 
   @Roles('ADMIN_MANAGER')
+  @Delete('management/product-comments/:id')
+  deleteProductComment(@Param('id') id: string) { return this.management.deleteProductComment(id); }
+
+  @Roles('ADMIN_MANAGER')
   @Get('management/post-comments')
   postComments() { return this.management.postComments(); }
+
+  @Roles('ADMIN_MANAGER')
+  @Delete('management/post-comments/:id')
+  deletePostComment(@Param('id') id: string) { return this.management.deletePostComment(id); }
 
   @Roles('ADMIN_MANAGER')
   @Get('management/favourites')
