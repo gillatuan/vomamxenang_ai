@@ -14,19 +14,28 @@ async function main() {
     { id: 'user-keeper', email: 'keeper@vomamxenang.local', password: await bcrypt.hash('keeper123', 10), role: Role.STOREKEEPER },
     { id: 'user-customer', email: 'customer@vomamxenang.local', password: await bcrypt.hash('customer123', 10), role: Role.STOREKEEPER },
   ];
-  for (const user of users) await prisma.user.upsert({ where: { email: user.email }, update: user, create: user });
+  for (const user of users) {
+    const { id: _id, ...data } = user;
+    await prisma.user.upsert({ where: { email: user.email }, update: data, create: user });
+  }
 
   const clients = [
     { id: 'client-guest', name: 'Guest', email: 'guest@vomamxenang.local', phone: '', company: 'Guest', type: 'RETAIL', notes: 'Guest checkout account' },
     { id: 'client-logistics', name: 'Công ty Võ Mạnh Logistics', email: 'info@vomamxenang.local', phone: '0905123456', company: 'Võ Mạnh Logistics', type: 'B2B_TIER1', notes: 'Khách hàng doanh nghiệp thân thiết' },
     { id: 'client-thanhdat', name: 'Công ty Thành Đạt', email: 'contact@thanhdat.com', phone: '0987654321', company: 'Thành Đạt Co., Ltd.', type: 'B2B_TIER2', notes: 'Ưu tiên giao hàng trong tuần' },
   ];
-  for (const client of clients) await prisma.client.upsert({ where: { email: client.email }, update: client, create: client });
+  for (const client of clients) {
+    const { id: _id, ...data } = client;
+    await prisma.client.upsert({ where: { email: client.email }, update: data, create: client });
+  }
   const suppliers = [
     { id: 'supplier-casumina', name: 'Casumina Miền Nam', email: 'sales@casumina.example', phone: '02838290000', company: 'Casumina', address: 'TP. Hồ Chí Minh', notes: 'Nguồn lốp đặc' },
     { id: 'supplier-oem', name: 'OEM Forklift Parts', email: 'sales@oem.example', phone: '0909000111', company: 'OEM Parts', address: 'Bình Dương', notes: 'Mâm xe và phụ tùng' },
   ];
-  for (const supplier of suppliers) await prisma.supplier.upsert({ where: { email: supplier.email }, update: supplier, create: supplier });
+  for (const supplier of suppliers) {
+    const { id: _id, ...data } = supplier;
+    await prisma.supplier.upsert({ where: { email: supplier.email }, update: data, create: supplier });
+  }
 
   const categories = [
     { id: 'category-solid-6009', name: 'Lốp đặc 6.00-9', tireSize: '6.00-9', brand: 'Casumina', tireType: TireType.SOLID, rimType: RimType.CLICK, origin: 'Việt Nam', condition: TireCondition.NEW, specifications: 'Lốp đặc chịu tải 2.5 tấn' },
