@@ -1,63 +1,45 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { PrismaService } from '../prisma/prisma.service';
+import { AdminDashboardService } from './admin-dashboard.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly dashboard: AdminDashboardService) {}
+
+  @Get('dashboard/summary')
+  async summary(@Req() req: { user: { role: string } }) {
+    return this.dashboard.summary(req.user.role === 'ADMIN_MANAGER');
+  }
+
+  @Get('dashboard/low-stock')
+  async lowStock() {
+    return this.dashboard.inventoryAlerts();
+  }
+
+  @Roles('ADMIN_MANAGER')
+  @Get('dashboard/order-status')
+  async orderStatus() {
+    return this.dashboard.orderStatus();
+  }
+
+  @Get('dashboard/inventory-movement')
+  async inventoryMovement(@Query('range') range = '30d') {
+    const days = { '7d': 7, '30d': 30, '3m': 90, '6m': 180, '12m': 365 }[range] ?? 30;
+    return this.dashboard.inventoryMovement(days);
+  }
 
   @Roles('ADMIN_MANAGER')
   @Get('dashboard-stats')
   async stats() {
-    const totalClients = await this.prisma.client.count();
-    const revenueResult = await this.prisma.order.aggregate({ _sum: { totalAmount: true }, where: { status: 'PAID' } });
-    const paidOrders = await this.prisma.order.findMany({ where: { status: 'PAID' }, orderBy: { createdAt: 'asc' } });
-
-    const months = Array.from({ length: 6 }).map((_, index) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - 5 + index, 1);
-      const monthLabel = date.toLocaleString('default', { month: 'short' });
-      return { key: `${date.getFullYear()}-${date.getMonth() + 1}`, month: `${monthLabel} ${date.getFullYear()}`, revenue: 0 };
-    });
-
-    const revenueByMonth = paidOrders.reduce((acc: any, order: any) => {
-      const monthLabel = order.createdAt.toLocaleString('default', { month: 'short' });
-      const year = order.createdAt.getFullYear();
-      const label = `${monthLabel} ${year}`;
-      const existing = acc.find((entry: any) => entry.month === label);
-      if (existing) existing.revenue += Number(order.totalAmount.toString());
-      return acc;
-    }, months);
-
-    return { totalClients, totalRevenue: Number(revenueResult._sum.totalAmount?.toString() ?? '0'), revenueByMonth };
+    return this.dashboard.summary(true);
   }
 
   @Roles('ADMIN_MANAGER')
   @Get('inventory-alerts')
   async inventoryAlerts() {
-    const products = await this.prisma.product.findMany({
-      include: {
-        stocks: true,
-      },
-    });
-
-    const alerts = products
-      .map((product) => {
-        const quantity = product.stocks.reduce((sum, stock) => sum + stock.quantity, 0);
-        return {
-          productId: product.id,
-          sku: product.sku,
-          name: product.name,
-          minStock: product.minStock,
-          currentQuantity: quantity,
-          thresholdExceeded: quantity < product.minStock,
-        };
-      })
-      .filter((item) => item.thresholdExceeded);
-
-    return alerts;
+    return this.dashboard.inventoryAlerts();
   }
 }

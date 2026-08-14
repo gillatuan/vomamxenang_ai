@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api";
+import type { DashboardSummary, InventoryAlert, InventoryMovement, OrderStatusData } from "@/types/admin";
 
 export interface User {
   id: string;
@@ -104,4 +105,11 @@ export const ordersAPI = {
       "/orders/checkout-session",
       { items }
     ),
+};
+
+export const adminDashboardAPI = {
+  summary: () => apiClient.get<DashboardSummary>("/admin/dashboard/summary"),
+  lowStock: () => apiClient.get<InventoryAlert[]>("/admin/dashboard/low-stock"),
+  inventoryMovement: (range: "7d" | "30d" | "3m" | "6m" | "12m") => apiClient.get<InventoryMovement[]>("/admin/dashboard/inventory-movement", { params: { range } }),
+  orderStatus: () => apiClient.get<OrderStatusData[]>("/admin/dashboard/order-status"),
 };

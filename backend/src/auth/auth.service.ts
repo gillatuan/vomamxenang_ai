@@ -21,7 +21,8 @@ export class AuthService {
       throw new BadRequestException('Email is already registered');
     }
 
-    const role = isAllowedRole(dto.role) ? dto.role : 'STOREKEEPER';
+    // Public registration must never be allowed to grant administrative access.
+    const role: Role = 'STOREKEEPER';
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: {

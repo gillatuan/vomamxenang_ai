@@ -6,13 +6,14 @@ export class WheelRimsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.wheelRim.findMany({ 
-      orderBy: { createdAt: 'desc' } 
+    return this.prisma.wheelRim.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, sku: true, size: true, boltHoles: true, compatibleModels: true, brand: true, sellingPrice: true, createdAt: true },
     });
   }
 
   async findOne(id: string) {
-    return this.prisma.wheelRim.findUnique({ where: { id } });
+    return this.prisma.wheelRim.findUnique({ where: { id }, select: { id: true, sku: true, size: true, boltHoles: true, compatibleModels: true, brand: true, sellingPrice: true, createdAt: true } });
   }
 
   async create(data: any) {

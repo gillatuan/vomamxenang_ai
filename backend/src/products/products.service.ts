@@ -7,16 +7,19 @@ export class ProductsService {
 
   async findAll(condition?: string) {
     const where = condition ? { condition } : undefined;
-    return this.prisma.product.findMany({ 
+    return this.prisma.product.findMany({
       where,
-      orderBy: { createdAt: 'desc' } 
+      orderBy: { createdAt: 'desc' },
+      // Public catalog responses must never disclose purchase cost.
+      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, createdAt: true },
     });
   }
 
   async findOne(id: string) {
     return this.prisma.product.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, createdAt: true,
         productComments: {
           include: { user: { select: { id: true, email: true } } },
         },
