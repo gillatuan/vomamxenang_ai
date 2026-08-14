@@ -1,6 +1,10 @@
+import { config } from 'dotenv';
 import { PrismaClient, ProductType, Role, TireCondition, TireType, RimType, OrderStatus, TransactionType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
+// Prisma's standalone seed command does not load Nest's ConfigModule.
+// Load the same local file used by `yarn dev`, while preserving a supplied DATABASE_URL.
+config({ path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local' });
 const prisma = new PrismaClient();
 
 async function main() {
