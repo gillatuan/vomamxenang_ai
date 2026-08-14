@@ -39,7 +39,7 @@ BEGIN
       AND data_type IN ('timestamp without time zone', 'timestamp with time zone')
       AND column_default IS NULL
   LOOP
-    EXECUTE format('ALTER TABLE "%I" ALTER COLUMN "%I" SET DEFAULT now()', rec.table_name, rec.column_name);
+    EXECUTE format('ALTER TABLE %I ALTER COLUMN %I SET DEFAULT now()', rec.table_name, rec.column_name);
   END LOOP;
 END$$;
 
