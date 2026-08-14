@@ -118,3 +118,10 @@ export interface StockLocationRow { id: string; quantity: number; location: { lo
 export const inventoryAPI = {
   stockSummary: () => apiClient.get<StockLocationRow[]>("/inventory/stocks/summary"),
 };
+
+export interface PriceMatrixProduct { id: string; sku: string; name: string; sellingPrice: number | null; priceMatrix: { id: string; customerType: string; price: number }[]; }
+export const adminManagementAPI = {
+  priceMatrix: () => apiClient.get<PriceMatrixProduct[]>("/admin/management/price-matrix"),
+  updatePriceMatrix: (productId: string, customerType: "RETAIL" | "B2B_TIER1" | "B2B_TIER2", price: number) => apiClient.post("/admin/management/price-matrix", { productId, customerType, price }),
+  reports: () => apiClient.get<{ revenue: number; paidOrders: number; averageOrderValue: number; inventoryCost: number; topClients: { id: string; name: string; type: string; revenue: number; orders: number }[] }>("/admin/reports"),
+};
