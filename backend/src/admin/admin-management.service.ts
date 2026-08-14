@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
@@ -56,6 +56,12 @@ export class AdminManagementService {
   }
 
   async updateUser(id: string, data: { role?: 'ADMIN_MANAGER' | 'STOREKEEPER'; password?: string }) {
+    if (data.role === 'STOREKEEPER') {
+      const target = await this.prisma.user.findUnique({ where: { id }, select: { role: true } });
+      if (target?.role === 'ADMIN_MANAGER' && await this.prisma.user.count({ where: { role: 'ADMIN_MANAGER' } }) <= 1) {
+        throw new BadRequestException('At least one administrator account is required');
+      }
+    }
     const password = data.password ? await bcrypt.hash(data.password, 10) : undefined;
     return this.prisma.user.update({ where: { id }, data: { role: data.role, password }, select: { id: true, email: true, role: true, createdAt: true } });
   }

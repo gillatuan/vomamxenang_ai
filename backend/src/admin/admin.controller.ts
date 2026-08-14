@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -40,7 +40,12 @@ export class AdminController {
 
   @Roles('ADMIN_MANAGER')
   @Patch('management/users/:id')
-  updateUser(@Param('id') id: string, @Body() dto: UpdateAdminUserDto) { return this.management.updateUser(id, dto); }
+  updateUser(@Req() req: { user: { sub: string; role: string } }, @Param('id') id: string, @Body() dto: UpdateAdminUserDto) {
+    if (req.user.sub === id && dto.role && dto.role !== 'ADMIN_MANAGER') {
+      throw new BadRequestException('You cannot remove your own administrator role');
+    }
+    return this.management.updateUser(id, dto);
+  }
 
   @Roles('ADMIN_MANAGER')
   @Get('management/product-comments')
