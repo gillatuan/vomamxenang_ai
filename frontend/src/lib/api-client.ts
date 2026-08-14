@@ -113,3 +113,8 @@ export const adminDashboardAPI = {
   inventoryMovement: (range: "7d" | "30d" | "3m" | "6m" | "12m") => apiClient.get<InventoryMovement[]>("/admin/dashboard/inventory-movement", { params: { range } }),
   orderStatus: () => apiClient.get<OrderStatusData[]>("/admin/dashboard/order-status"),
 };
+
+export interface StockLocationRow { id: string; quantity: number; location: { locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }
+export const inventoryAPI = {
+  stockSummary: () => apiClient.get<StockLocationRow[]>("/inventory/stocks/summary"),
+};
