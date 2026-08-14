@@ -146,7 +146,7 @@ export const adminManagementAPI = {
 };
 
 export const categoriesAPI = {
-  getAll: () => apiClient.get<{ id: string; name: string; tireSize: string; brand: string; tireType: string; rimType: string; condition: string }[]>("/categories"),
+  getAll: () => apiClient.get<{ id: string; name: string; tireSize: string; brand: string; tireType: string; rimType: string; condition: string; origin: string; specifications?: string | null }[]>("/categories"),
   create: (data: Record<string, unknown>) => apiClient.post("/categories", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/categories/${id}`, data), delete: (id: string) => apiClient.delete(`/categories/${id}`),
 };
 export const suppliersAPI = {
