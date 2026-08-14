@@ -29,10 +29,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import PrintIcon from "@mui/icons-material/Print";
 import { useEffect, useMemo, useState } from "react";
-import { productsAPI, Product } from "@/lib/api-client";
+import { adminManagementAPI, productsAPI, Product } from "@/lib/api-client";
+
+type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -62,8 +64,8 @@ export default function ProductsPage() {
 
   const loadProducts = () => {
     setLoading(true);
-    productsAPI
-      .getAll()
+    adminManagementAPI
+      .products()
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -74,17 +76,17 @@ export default function ProductsPage() {
       });
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: AdminProduct) => {
     setEditingId(product.id);
     setFormData({
       type: product.type,
-      sku: product.id,
+      sku: product.sku,
       name: product.name,
-      importPrice: product.importPrice,
+      importPrice: product.importPrice ?? 0,
       sellingPrice: product.sellingPrice ?? 0,
       minStock: (product as any).minStock ?? 5,
       maxStock: (product as any).maxStock ?? 100,
-      quantityInStock: product.quantityInStock,
+      quantityInStock: product.stocks.reduce((total, stock) => total + stock.quantity, 0),
       imageUrl: product.imageUrl || "",
       description: product.description || "",
     });
@@ -93,11 +95,11 @@ export default function ProductsPage() {
 
   const handleSave = async () => {
     const payload = {
+      sku: formData.sku,
       type: formData.type,
       name: formData.name,
       importPrice: formData.importPrice,
       sellingPrice: formData.sellingPrice,
-      quantityInStock: formData.quantityInStock,
       imageUrl: formData.imageUrl,
       description: formData.description,
       minStock: formData.minStock,
@@ -208,7 +210,7 @@ export default function ProductsPage() {
                 <TableCell>{product.description || "-"}</TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
-                <TableCell>{product.quantityInStock}</TableCell>
+                <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
                 <TableCell>{`${(product as any).minStock ?? 5}/${(product as any).maxStock ?? 100}`}</TableCell>
                 <TableCell>
                   <IconButton aria-label="edit" size="small" onClick={() => handleEdit(product)}>
@@ -243,6 +245,9 @@ export default function ProductsPage() {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
+              <TextField fullWidth required disabled={Boolean(editingId)} label="SKU / mã QR" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Tên sản phẩm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </Grid>
               <Grid item xs={12}>
@@ -253,9 +258,6 @@ export default function ProductsPage() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Giá bán" type="number" value={formData.sellingPrice} onChange={(e) => setFormData({ ...formData, sellingPrice: Number(e.target.value) })} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Tồn kho" type="number" value={formData.quantityInStock} onChange={(e) => setFormData({ ...formData, quantityInStock: Number(e.target.value) })} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Min Stock" type="number" value={formData.minStock} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} />

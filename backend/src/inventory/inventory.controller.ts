@@ -19,8 +19,8 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('receipts')
-  createReceipt(@Body() createReceiptDto: CreateReceiptDto) {
-    return this.inventoryService.createReceipt(createReceiptDto);
+  createReceipt(@Req() req: any, @Body() createReceiptDto: CreateReceiptDto) {
+    return this.inventoryService.createReceipt(createReceiptDto, req.user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -43,8 +43,8 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('issues')
-  createIssue(@Body() createIssueDto: CreateIssueDto) {
-    return this.inventoryService.createIssue(createIssueDto);
+  createIssue(@Req() req: any, @Body() createIssueDto: CreateIssueDto) {
+    return this.inventoryService.createIssue(createIssueDto, req.user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -69,8 +69,13 @@ export class InventoryController {
   @Post('assembly')
   assembleInventory(@Req() req: any, @Body() body: any) {
     const { productId, wheelRimId, quantity, pressingFee, locationId } = body;
-    const userId = body.userId || req.user?.sub;
-    return this.inventoryService.assembleInventory(productId, wheelRimId, quantity, pressingFee, locationId, userId);
+    return this.inventoryService.assembleInventory(productId, wheelRimId, quantity, pressingFee, locationId, req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('assembly')
+  findAllAssemblyLogs() {
+    return this.inventoryService.findAllAssemblyLogs();
   }
 
   @UseGuards(JwtAuthGuard)

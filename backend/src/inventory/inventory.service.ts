@@ -7,7 +7,7 @@ import { CreateIssueDto } from './dto/create-issue.dto';
 export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
-  async createReceipt(createReceiptDto: CreateReceiptDto) {
+  async createReceipt(createReceiptDto: CreateReceiptDto, userId: string) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { id: createReceiptDto.supplierId },
     });
@@ -21,7 +21,7 @@ export class InventoryService {
         code: transactionCode,
         type: 'IMPORT',
         partnerName: supplier.name ?? supplier.company ?? supplier.email,
-        userId: createReceiptDto.supplierId,
+        userId,
         details: {
           create: createReceiptDto.items.map((item) => ({
             productId: item.productId,
@@ -95,14 +95,20 @@ export class InventoryService {
     return this.findReceiptById(id);
   }
 
-  async createIssue(createIssueDto: CreateIssueDto) {
+  async createIssue(createIssueDto: CreateIssueDto, userId: string) {
+    const client = createIssueDto.clientId
+      ? await this.prisma.client.findUnique({ where: { id: createIssueDto.clientId } })
+      : null;
+    if (createIssueDto.clientId && !client) {
+      throw new NotFoundException('Client not found');
+    }
     const transactionCode = `EXPORT-${Date.now()}`;
     return this.prisma.inventoryTransaction.create({
       data: {
         code: transactionCode,
         type: 'EXPORT',
-        partnerName: createIssueDto.clientId ?? 'Internal',
-        userId: createIssueDto.clientId ?? 'system',
+        partnerName: client?.name ?? 'Internal',
+        userId,
         details: {
           create: createIssueDto.items.map((item) => ({
             productId: item.productId,
@@ -178,6 +184,13 @@ export class InventoryService {
         location: true,
       },
       orderBy: { id: 'desc' },
+    });
+  }
+
+  async findAllAssemblyLogs() {
+    return this.prisma.assemblyLog.findMany({
+      include: { product: true, wheelRim: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

@@ -53,7 +53,7 @@ export default function ProductDetailPage() {
           <Stack spacing={1} sx={{ my: 3 }}>
             {product.brand && <Typography>Thương hiệu: <b>{product.brand}</b></Typography>}
             {product.size && <Typography>Kích thước: <b>{product.size}</b></Typography>}
-            <Typography>Tồn kho thực tế: <b>{product.quantityInStock}</b></Typography>
+            <Typography variant="body2" color="text.secondary">Tình trạng tồn kho được xác nhận khi đặt hàng.</Typography>
           </Stack>
           <Typography variant="h5" color="primary" fontWeight={700}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ báo giá"}</Typography>
           <Stack direction="row" spacing={1} sx={{ mt: 3 }}>
