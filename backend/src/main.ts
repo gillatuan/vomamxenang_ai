@@ -40,6 +40,6 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  await app.listen(configService.getOrThrow('PORT') ?? 3001);
+  await app.listen(configService.get('PORT', 3001));
 }
 bootstrap();

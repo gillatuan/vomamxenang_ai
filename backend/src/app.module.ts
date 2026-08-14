@@ -18,7 +18,11 @@ import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local',
+    }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
