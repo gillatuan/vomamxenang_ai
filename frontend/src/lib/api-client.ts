@@ -71,7 +71,7 @@ export interface Post {
   title: string;
   content: string;
   videoUrl?: string;
-  published: boolean;
+  published?: boolean;
 }
 
 export const postsAPI = {

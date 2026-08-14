@@ -16,7 +16,7 @@ export default function BlogPage() {
     postsAPI
       .getAll()
       .then((res) => {
-        setPosts(res.data.filter((p) => p.published));
+        setPosts(res.data);
         setLoading(false);
       })
       .catch(() => {

@@ -11,6 +11,11 @@ export class PostsController {
     return this.service.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() data: any) {

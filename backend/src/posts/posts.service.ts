@@ -9,6 +9,10 @@ export class PostsService {
     return this.prisma.post.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
+  async findOne(id: string) {
+    return this.prisma.post.findUnique({ where: { id } });
+  }
+
   async create(data: any) {
     return this.prisma.post.create({ data });
   }
