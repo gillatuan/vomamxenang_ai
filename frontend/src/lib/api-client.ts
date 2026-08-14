@@ -153,3 +153,6 @@ export const suppliersAPI = {
   getAll: () => apiClient.get<{ id: string; name: string; company: string | null; email: string; phone: string | null; address: string | null }[]>("/suppliers"),
   create: (data: Record<string, unknown>) => apiClient.post("/suppliers", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/suppliers/${id}`, data), delete: (id: string) => apiClient.delete(`/suppliers/${id}`),
 };
+export const wheelRimsAPI = {
+  create: (data: Record<string, unknown>) => apiClient.post("/wheel-rims", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/wheel-rims/${id}`, data), delete: (id: string) => apiClient.delete(`/wheel-rims/${id}`),
+};
