@@ -13,12 +13,15 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  const frontendUrls = (configService.get('FRONTEND_URL') || 'http://localhost:3000')
+  const frontendUrls: string[] = (configService.get<string>('FRONTEND_URL') || 'http://localhost:3000')
     .split(',')
     .map((url: string) => url.trim())
     .filter(Boolean);
+  if (configService.get('NODE_ENV') !== 'production') {
+    frontendUrls.push('http://localhost:3000', 'http://127.0.0.1:3000');
+  }
   app.enableCors({
-    origin: frontendUrls,
+    origin: [...new Set(frontendUrls)],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
