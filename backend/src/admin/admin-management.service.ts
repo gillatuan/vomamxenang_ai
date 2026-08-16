@@ -10,14 +10,14 @@ export class AdminManagementService {
   products() {
     return this.prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { stocks: { select: { quantity: true } }, _count: { select: { orderItems: true, favouriteProducts: true } } },
+      include: { stocks: { select: { quantity: true } }, _count: { select: { favouriteProducts: true } } },
     });
   }
 
   wheelRims() {
     return this.prisma.wheelRim.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { stocks: { select: { quantity: true } }, _count: { select: { orderItems: true } } },
+      include: { stocks: { select: { quantity: true } } },
     });
   }
 
