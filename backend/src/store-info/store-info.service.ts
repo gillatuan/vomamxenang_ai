@@ -8,6 +8,27 @@ export class StoreInfoService {
   constructor(private prisma: PrismaService) {}
   create(data: CreateStoreInfoDto) { return this.prisma.storeInfo.create({ data }); }
   findAll() { return this.prisma.storeInfo.findMany({ orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }] }); }
+  findPublic() {
+    return this.prisma.storeInfo.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+      // Keep administrative information such as taxCode private.
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        phone: true,
+        email: true,
+        website: true,
+        logoUrl: true,
+        facebookUrl: true,
+        businessHours: true,
+        notes: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
   async findOne(id: string) { const store = await this.prisma.storeInfo.findUnique({ where: { id } }); if (!store) throw new NotFoundException('Không tìm thấy cửa hàng.'); return store; }
   async update(id: string, data: UpdateStoreInfoDto) { await this.findOne(id); return this.prisma.storeInfo.update({ where: { id }, data }); }
   async remove(id: string) { await this.findOne(id); return this.prisma.storeInfo.delete({ where: { id } }); }

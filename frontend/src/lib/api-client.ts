@@ -167,8 +167,10 @@ export const suppliersAPI = {
   create: (data: Record<string, unknown>) => apiClient.post("/suppliers", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/suppliers/${id}`, data), delete: (id: string) => apiClient.delete(`/suppliers/${id}`),
 };
 export interface StoreInfo { id:string;name:string;address:string;phone:string;email?:string|null;website?:string|null;taxCode?:string|null;logoUrl?:string|null;facebookUrl?:string|null;businessHours?:string|null;notes?:string|null;isActive:boolean;createdAt:string;updatedAt:string; }
+export type PublicStoreInfo = Omit<StoreInfo, 'taxCode' | 'isActive'>;
 export type StoreInfoInput = Omit<StoreInfo,'id'|'createdAt'|'updatedAt'>;
 export const storeInfoAPI = {
+  getPublic:()=>apiClient.get<PublicStoreInfo | null>('/store-info/public'),
   getAll:()=>apiClient.get<StoreInfo[]>('/store-info'),
   getOne:(id:string)=>apiClient.get<StoreInfo>(`/store-info/${id}`),
   create:(data:StoreInfoInput)=>apiClient.post<StoreInfo>('/store-info',data),
