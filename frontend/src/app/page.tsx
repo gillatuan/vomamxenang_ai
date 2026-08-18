@@ -1,13 +1,42 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import NextLink from "next/link";
 import { Box, Container, Typography, Button, Grid } from "@mui/material";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { aboutAPI, type AboutPage } from "@/lib/api-client";
+
+const fallbackAbout = {
+  title: "Về Võ Mâm Xe Nâng",
+  summary: "Chúng tôi cung cấp lốp, mâm và dịch vụ bảo dưỡng xe nâng, giúp doanh nghiệp vận hành an toàn, bền bỉ và hiệu quả.",
+};
 
 export default function HomePage() {
+  const [about, setAbout] = useState<Pick<AboutPage, "title" | "summary">>(fallbackAbout);
+
+  useEffect(() => {
+    aboutAPI.getPublic().then(({ data }) => {
+      if (data) setAbout({ title: data.title, summary: data.summary });
+    }).catch(() => undefined);
+  }, []);
+
   return (
     <>
       <Header />
+      <Box component="section" sx={{ backgroundColor: "#fff8f1", py: { xs: 5, md: 7 } }}>
+        <Container maxWidth="md" sx={{ textAlign: "center" }}>
+          <Typography component="h2" variant="h4" fontWeight={800} sx={{ color: "#5d3416", mb: 2 }}>
+            {about.title}
+          </Typography>
+          <Typography color="text.secondary" sx={{ fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.8, mb: 3 }}>
+            {about.summary}
+          </Typography>
+          <Button component={NextLink} href="/about" variant="outlined" color="primary" size="large">
+            Xem thêm về chúng tôi
+          </Button>
+        </Container>
+      </Box>
       <Box
         sx={{
           backgroundImage:

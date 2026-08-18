@@ -43,6 +43,7 @@ export function PublicHeader() {
 
           <Box component="nav" aria-label="Điều hướng chính" sx={{ display: "flex", alignItems: "center", gap: { xs: 0, md: 0.25 } }}>
             <Button variant="text" color="inherit" component={NextLink} href="/" sx={navLinkSx}>Trang chủ</Button>
+            <Button variant="text" color="inherit" component={NextLink} href="/about" sx={navLinkSx}>Giới thiệu</Button>
             <Button variant="text" color="inherit" component={NextLink} href="/blog" sx={navLinkSx}>Blog</Button>
             <Button variant="text" color="inherit" component={NextLink} href="/products" sx={navLinkSx}>Sản phẩm</Button>
           </Box>

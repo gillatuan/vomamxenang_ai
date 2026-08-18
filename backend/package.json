@@ -3,16 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:dev": "nest start --watch",
-    "dev": "nest start --watch",
+    "start:dev": "prisma generate && nest start --watch",
+    "dev": "prisma generate && nest start --watch",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start:prod": "node dist/main.js",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js migrate deploy",
     "prisma:push:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js db push",
-    "seed": "ts-node --transpile-only prisma/seed.ts"
+    "seed": "prisma generate && ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

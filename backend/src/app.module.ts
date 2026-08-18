@@ -17,6 +17,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core"
 import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
 import { AiModule } from "./ai/ai.module"
 import { StoreInfoModule } from "./store-info/store-info.module"
+import { AboutModule } from "./about/about.module"
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { StoreInfoModule } from "./store-info/store-info.module"
     WheelRimsModule,
     AiModule,
     StoreInfoModule,
+    AboutModule,
   ],
   providers: [
     {

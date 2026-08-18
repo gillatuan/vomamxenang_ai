@@ -177,6 +177,15 @@ export const storeInfoAPI = {
   update:(id:string,data:Partial<StoreInfoInput>)=>apiClient.patch<StoreInfo>(`/store-info/${id}`,data),
   delete:(id:string)=>apiClient.delete(`/store-info/${id}`),
 };
+export interface AboutPage { id:string;title:string;summary:string;content:string;imageUrl?:string|null;isPublished:boolean;createdAt:string;updatedAt:string; }
+export type AboutPageInput = Omit<AboutPage, 'id' | 'createdAt' | 'updatedAt'>;
+export const aboutAPI = {
+  getPublic: () => apiClient.get<AboutPage | null>('/about/public'),
+  getAll: () => apiClient.get<AboutPage[]>('/about'),
+  create: (data: AboutPageInput) => apiClient.post<AboutPage>('/about', data),
+  update: (id: string, data: Partial<AboutPageInput>) => apiClient.patch<AboutPage>(`/about/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/about/${id}`),
+};
 export const wheelRimsAPI = {
   create: (data: Record<string, unknown>) => apiClient.post("/wheel-rims", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/wheel-rims/${id}`, data), delete: (id: string) => apiClient.delete(`/wheel-rims/${id}`),
 };

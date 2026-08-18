@@ -62,6 +62,16 @@ async function main() {
   };
   await prisma.storeInfo.upsert({ where: { id: storeInfo.id }, update: storeInfo, create: storeInfo });
 
+  const aboutPage = {
+    id: 'about-vomamxenang',
+    title: 'Về Võ Mâm Xe Nâng',
+    summary: 'Chúng tôi cung cấp lốp, mâm và dịch vụ bảo dưỡng xe nâng, giúp doanh nghiệp vận hành an toàn, bền bỉ và hiệu quả.',
+    content: 'Võ Mâm Xe Nâng chuyên cung cấp lốp đặc, lốp hơi, mâm xe và phụ tùng xe nâng cho kho bãi, nhà máy và đơn vị logistics.\n\nChúng tôi tư vấn giải pháp phù hợp theo tải trọng, điều kiện mặt bằng và tần suất vận hành, đồng thời hỗ trợ bảo dưỡng để thiết bị luôn hoạt động ổn định.\n\nVới sản phẩm được chọn lọc và đội ngũ tận tâm, chúng tôi hướng đến quan hệ hợp tác lâu dài cùng khách hàng.',
+    imageUrl: null,
+    isPublished: true,
+  };
+  await prisma.aboutPage.upsert({ where: { id: aboutPage.id }, update: aboutPage, create: aboutPage });
+
   const categories = [
     { id: 'category-solid-6009', name: 'Lốp đặc 6.00-9', tireSize: '6.00-9', brand: 'Casumina', tireType: TireType.SOLID, rimType: RimType.CLICK, origin: 'Việt Nam', condition: TireCondition.NEW, specifications: 'Lốp đặc chịu tải 2.5 tấn' },
     { id: 'category-pneumatic-70012', name: 'Lốp hơi 7.00-12', tireSize: '7.00-12', brand: 'Bridgestone', tireType: TireType.PNEUMATIC, rimType: RimType.LIP, origin: 'Thái Lan', condition: TireCondition.NEW, specifications: 'Lốp hơi cho xe nâng địa hình' },

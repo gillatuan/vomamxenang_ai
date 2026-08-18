@@ -5,7 +5,7 @@ import { Breadcrumbs, Link, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 
-const labels: Record<string, string> = { admin: "Dashboard", dashboard: "Dashboard", inventory: "Quản lý kho", products: "Sản phẩm", "wheel-rims": "Mâm xe", categories: "Danh mục", warehouses: "Kho hàng", stock: "Tồn kho", transactions: "Nhập / Xuất", assembly: "Ép mâm", sales: "Kinh doanh", orders: "Đơn hàng", clients: "Khách hàng", "price-matrix": "Bảng giá B2B", suppliers: "Nhà cung cấp", content: "Nội dung", posts: "Bài viết", "product-comments": "Bình luận sản phẩm", "post-comments": "Bình luận bài viết", favourites: "Sản phẩm yêu thích", users: "Người dùng", reports: "Báo cáo & thống kê" };
+const labels: Record<string, string> = { admin: "Dashboard", dashboard: "Dashboard", inventory: "Quản lý kho", products: "Sản phẩm", "wheel-rims": "Mâm xe", categories: "Danh mục", warehouses: "Kho hàng", stock: "Tồn kho", transactions: "Nhập / Xuất", assembly: "Ép mâm", sales: "Kinh doanh", orders: "Đơn hàng", clients: "Khách hàng", "price-matrix": "Bảng giá B2B", suppliers: "Nhà cung cấp", content: "Nội dung", about: "Giới thiệu", posts: "Bài viết", "product-comments": "Bình luận sản phẩm", "post-comments": "Bình luận bài viết", favourites: "Sản phẩm yêu thích", users: "Người dùng", reports: "Báo cáo & thống kê" };
 
 export function AdminBreadcrumbs() {
   const pathname = usePathname();
