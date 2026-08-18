@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js migrate deploy",
+    "prisma:push:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js db push",
     "seed": "ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
