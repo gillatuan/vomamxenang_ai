@@ -37,6 +37,21 @@ async function main() {
     await prisma.supplier.upsert({ where: { email: supplier.email }, update: data, create: supplier });
   }
 
+  // Nội dung mặc định được lấy từ footer frontend; có thể quản trị tại /admin/store-info.
+  const storeInfo = {
+    id: 'store-vomamxenang',
+    name: 'Võ Mâm Xe Nâng',
+    address: 'TP. Hồ Chí Minh, Việt Nam',
+    phone: '0905 123 456',
+    email: 'info@vomamxenang.com',
+    website: 'https://vomamxenang.com',
+    facebookUrl: 'https://www.facebook.com/',
+    businessHours: 'Liên hệ để được tư vấn và báo giá.',
+    notes: 'Chuyên cung cấp lốp và phụ tùng xe nâng chất lượng cao từ các nhà sản xuất hàng đầu. Theo dõi: Facebook | Instagram | YouTube. © 2026 Võ Mâm Xe Nâng. All rights reserved.',
+    isActive: true,
+  };
+  await prisma.storeInfo.upsert({ where: { id: storeInfo.id }, update: storeInfo, create: storeInfo });
+
   const categories = [
     { id: 'category-solid-6009', name: 'Lốp đặc 6.00-9', tireSize: '6.00-9', brand: 'Casumina', tireType: TireType.SOLID, rimType: RimType.CLICK, origin: 'Việt Nam', condition: TireCondition.NEW, specifications: 'Lốp đặc chịu tải 2.5 tấn' },
     { id: 'category-pneumatic-70012', name: 'Lốp hơi 7.00-12', tireSize: '7.00-12', brand: 'Bridgestone', tireType: TireType.PNEUMATIC, rimType: RimType.LIP, origin: 'Thái Lan', condition: TireCondition.NEW, specifications: 'Lốp hơi cho xe nâng địa hình' },
@@ -80,6 +95,6 @@ async function main() {
   await prisma.productComment.upsert({ where: { id: 'product-comment-1' }, update: { content: 'Lốp chạy êm và chịu tải tốt.', rating: 5 }, create: { id: 'product-comment-1', productId: 'product-1', userId: 'user-customer', content: 'Lốp chạy êm và chịu tải tốt.', rating: 5 } });
   await prisma.favouriteProduct.upsert({ where: { productId_userId: { productId: 'product-2', userId: 'user-customer' } }, update: {}, create: { productId: 'product-2', userId: 'user-customer' } });
   await prisma.postComment.upsert({ where: { id: 'post-comment-1' }, update: { content: 'Bài viết rất hữu ích cho đội vận hành.' }, create: { id: 'post-comment-1', postId: 'post-1', userId: 'user-customer', content: 'Bài viết rất hữu ích cho đội vận hành.' } });
-  console.log('Seed complete: users, clients, suppliers, categories, products, rims, warehouses, stock, prices, transactions, orders, posts and interactions.');
+  console.log('Seed complete: store info, users, clients, suppliers, categories, products, rims, warehouses, stock, prices, transactions, orders, posts and interactions.');
 }
 main().catch((error) => { console.error(error); process.exit(1); }).finally(() => prisma.$disconnect());
