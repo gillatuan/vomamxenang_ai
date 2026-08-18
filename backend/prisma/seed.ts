@@ -34,7 +34,17 @@ async function main() {
   ];
   for (const supplier of suppliers) {
     const { id: _id, ...data } = supplier;
-    await prisma.supplier.upsert({ where: { email: supplier.email }, update: data, create: supplier });
+    try {
+      await prisma.supplier.upsert({ where: { email: supplier.email }, update: data, create: supplier, select: { id: true } });
+    } catch (error: any) {
+      // Older local databases did not yet have Supplier.company. Seed the
+      // compatible fields so developers can migrate/seed incrementally.
+      if (error?.code !== 'P2022') throw error;
+      const { company: _company, ...legacyData } = data;
+      const { company: _createCompany, ...legacyCreate } = supplier;
+      console.warn('Supplier.company is absent in this database; seeding supplier without company. Run yarn prisma:migrate:local afterwards.');
+      await prisma.supplier.upsert({ where: { email: supplier.email }, update: legacyData, create: legacyCreate, select: { id: true } });
+    }
   }
 
   // Nội dung mặc định được lấy từ footer frontend; có thể quản trị tại /admin/store-info.
