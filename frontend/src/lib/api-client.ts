@@ -166,6 +166,15 @@ export const suppliersAPI = {
   getAll: () => apiClient.get<{ id: string; name: string; company: string | null; email: string; phone: string | null; address: string | null }[]>("/suppliers"),
   create: (data: Record<string, unknown>) => apiClient.post("/suppliers", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/suppliers/${id}`, data), delete: (id: string) => apiClient.delete(`/suppliers/${id}`),
 };
+export interface StoreInfo { id:string;name:string;address:string;phone:string;email?:string|null;website?:string|null;taxCode?:string|null;logoUrl?:string|null;facebookUrl?:string|null;businessHours?:string|null;notes?:string|null;isActive:boolean;createdAt:string;updatedAt:string; }
+export type StoreInfoInput = Omit<StoreInfo,'id'|'createdAt'|'updatedAt'>;
+export const storeInfoAPI = {
+  getAll:()=>apiClient.get<StoreInfo[]>('/store-info'),
+  getOne:(id:string)=>apiClient.get<StoreInfo>(`/store-info/${id}`),
+  create:(data:StoreInfoInput)=>apiClient.post<StoreInfo>('/store-info',data),
+  update:(id:string,data:Partial<StoreInfoInput>)=>apiClient.patch<StoreInfo>(`/store-info/${id}`,data),
+  delete:(id:string)=>apiClient.delete(`/store-info/${id}`),
+};
 export const wheelRimsAPI = {
   create: (data: Record<string, unknown>) => apiClient.post("/wheel-rims", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/wheel-rims/${id}`, data), delete: (id: string) => apiClient.delete(`/wheel-rims/${id}`),
 };

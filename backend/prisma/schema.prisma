@@ -99,6 +99,23 @@ model Supplier {
   createdAt DateTime @default(now())
 }
 
+model StoreInfo {
+  id            String   @id @default(uuid())
+  name          String
+  address       String
+  phone         String
+  email         String?
+  website       String?
+  taxCode       String?
+  logoUrl       String?
+  facebookUrl   String?
+  businessHours String?
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Category {
   id            String    @id @default(uuid())
   name          String

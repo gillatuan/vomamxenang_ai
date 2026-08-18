@@ -15,6 +15,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SettingsIcon from "@mui/icons-material/Settings";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,7 +31,7 @@ const groups: Group[] = [
   { label: "NHÀ CUNG CẤP", icon: <LocalShippingIcon />, items: [{ label: "Nhà cung cấp", href: "/admin/suppliers", icon: <LocalShippingIcon />, adminOnly: true }] },
   { label: "NỘI DUNG", icon: <ArticleIcon />, items: [{ label: "Bài viết", href: "/admin/content/posts", icon: <ArticleIcon />, adminOnly: true }, { label: "Bình luận sản phẩm", href: "/admin/content/product-comments", icon: <ArticleIcon />, adminOnly: true }, { label: "Bình luận bài viết", href: "/admin/content/post-comments", icon: <ArticleIcon />, adminOnly: true }, { label: "Sản phẩm yêu thích", href: "/admin/content/favourites", icon: <AssessmentIcon />, adminOnly: true }] },
   { label: "AI STUDIO", icon: <AutoAwesomeIcon />, items: [{ label: "Tổng quan", href: "/admin/ai", icon: <AutoAwesomeIcon />, adminOnly: true }, { label: "Tạo sản phẩm", href: "/admin/ai/product", icon: <InventoryIcon />, adminOnly: true }, { label: "Tạo bài viết", href: "/admin/ai/blog", icon: <ArticleIcon />, adminOnly: true }, { label: "Tạo SEO", href: "/admin/ai/seo", icon: <AssessmentIcon />, adminOnly: true }] },
-  { label: "HỆ THỐNG", icon: <PersonIcon />, items: [{ label: "Người dùng", href: "/admin/users", icon: <PersonIcon />, adminOnly: true }] },
+  { label: "HỆ THỐNG", icon: <PersonIcon />, items: [{ label: "Người dùng", href: "/admin/users", icon: <PersonIcon />, adminOnly: true }, { label: "Thông tin cửa hàng", href: "/admin/store-info", icon: <StorefrontIcon />, adminOnly: true }] },
   { label: "PHÂN TÍCH", icon: <AssessmentIcon />, items: [{ label: "Báo cáo & thống kê", href: "/admin/reports", icon: <AssessmentIcon />, adminOnly: true }] },
 ];
 
