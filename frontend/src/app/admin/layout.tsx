@@ -20,7 +20,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isInitialized, logout, user } = useAuth();
+  const { isAuthenticated, isInitialized, isAdminManager, logout, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -41,7 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isAuthenticated && isLoginRoute) {
       router.push("/admin");
     }
-  }, [isAuthenticated, isInitialized, isLoginRoute, router]);
+    if (isAuthenticated && pathname.startsWith("/admin/ai") && !isAdminManager) router.replace("/admin/dashboard");
+  }, [isAuthenticated, isInitialized, isLoginRoute, isAdminManager, pathname, router]);
 
   if (!isInitialized) {
     return (

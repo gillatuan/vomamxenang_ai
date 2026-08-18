@@ -13,7 +13,7 @@ import { Post, postsAPI } from "@/lib/api-client";
 export default function PostsAdminPage() {
   const [rows, setRows] = useState<Post[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
   const [editing, setEditing] = useState<Post | null>(null); const [open, setOpen] = useState(false); const [form, setForm] = useState({ title: "", content: "", videoUrl: "" });
-  const load = () => { setLoading(true); postsAPI.getAll().then((response) => setRows(response.data)).catch(() => setError(true)).finally(() => setLoading(false)); };
+  const load = () => { setLoading(true); postsAPI.getAllAdmin().then((response) => setRows(response.data)).catch(() => setError(true)).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
   const save = async () => { const data = { title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined }; if (!data.title || !data.content) return; if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data); setOpen(false); load(); };
   const remove = async (id: string) => { if (window.confirm("Xóa bài viết này?")) { await postsAPI.delete(id); load(); } };

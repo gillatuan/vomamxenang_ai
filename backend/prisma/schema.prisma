@@ -41,6 +41,23 @@ enum OrderStatus {
   FAILED
 }
 
+enum AiGenerationType {
+  PRODUCT
+  BLOG
+  SEO
+}
+
+enum AiGenerationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum TransactionType {
   IMPORT        // Nhập kho thông thường
   EXPORT        // Xuất kho bán hàng
@@ -115,6 +132,14 @@ model Product {
   maxStock        Int           @default(100) // Định mức tồn tối đa
   imageUrl        String?
   description     String?
+  slug            String?       @unique
+  shortDescription String?
+  highlights      Json?
+  specifications  Json?
+  applications    Json?
+  seo             Json?
+  tags             String[]      @default([])
+  status           ContentStatus @default(PUBLISHED)
   createdAt       DateTime      @default(now())
   
   // Quan hệ
@@ -273,8 +298,29 @@ model Post {
   title     String
   content   String
   videoUrl  String?
+  slug      String?       @unique
+  excerpt   String?
+  tableOfContents Json?
+  seo       Json?
+  tags      String[]      @default([])
+  status    ContentStatus @default(PUBLISHED)
   createdAt DateTime @default(now())
   postComments PostComment[]
+}
+
+model AiGeneration {
+  id          String             @id @default(cuid())
+  type        AiGenerationType
+  prompt      String
+  input       Json
+  output      Json?
+  status      AiGenerationStatus @default(PENDING)
+  provider    String?
+  model       String?
+  error       String?
+  createdById String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 }
 
 // User interactions

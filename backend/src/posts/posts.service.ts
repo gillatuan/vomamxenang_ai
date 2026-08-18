@@ -6,12 +6,16 @@ export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.post.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.post.findMany({ where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' } });
   }
 
+  async findAllAdmin() { return this.prisma.post.findMany({ orderBy: { createdAt: 'desc' } }); }
+
   async findOne(id: string) {
-    return this.prisma.post.findUnique({ where: { id } });
+    return this.prisma.post.findUnique({ where: { id, status: 'PUBLISHED' } });
   }
+
+  async findOneAdmin(id: string) { return this.prisma.post.findUnique({ where: { id } }); }
 
   async create(data: any) {
     return this.prisma.post.create({ data });

@@ -15,6 +15,7 @@ import { SupplierModule } from "./supplier/supplier.module"
 import { WheelRimsModule } from "./wheel-rims/wheel-rims.module"
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core"
 import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
+import { AiModule } from "./ai/ai.module"
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
     InventoryModule,
     SupplierModule,
     WheelRimsModule,
+    AiModule,
   ],
   providers: [
     {

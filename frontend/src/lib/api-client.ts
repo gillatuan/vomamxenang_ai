@@ -79,6 +79,7 @@ export interface Post {
 
 export const postsAPI = {
   getAll: () => apiClient.get<Post[]>("/posts"),
+  getAllAdmin: () => apiClient.get<Post[]>("/posts/admin/all"),
   getOne: (id: string) => apiClient.get<Post>(`/posts/${id}`),
 
   create: (data: Partial<Post>) => apiClient.post<Post>("/posts", data),
@@ -87,6 +88,18 @@ export const postsAPI = {
     apiClient.patch<Post>(`/posts/${id}`, data),
 
   delete: (id: string) => apiClient.delete(`/posts/${id}`),
+};
+
+export interface GeneratedProduct { name:string;slug:string;shortDescription:string;description:string;highlights:string[];specifications:{name:string;value:string}[];applications:string[];seo:{title:string;description:string;keywords:string[]};tags:string[];imageAltTexts:{imageIndex:number;alt:string}[];missingInformation:string[]; }
+export interface GeneratedBlog { title:string;slug:string;excerpt:string;content:string;tableOfContents:{title:string;anchor:string}[];seo:{title:string;description:string;primaryKeyword:string;secondaryKeywords:string[]};tags:string[];imageAltTexts:{imageIndex:number;alt:string}[];relatedProductSuggestions:string[];missingInformation:string[]; }
+export interface GeneratedSeo { title:string;metaDescription:string;slug:string;primaryKeyword:string;secondaryKeywords:string[];tags:string[];suggestedHeadings:string[];imageAltTexts:string[];suggestions:string[]; }
+export const aiAPI = {
+  generateProduct:(payload:Record<string,unknown>)=>apiClient.post<GeneratedProduct>('/ai/generate/product',payload),
+  generateBlog:(payload:Record<string,unknown>)=>apiClient.post<GeneratedBlog>('/ai/generate/blog',payload),
+  generateSeo:(payload:Record<string,unknown>)=>apiClient.post<GeneratedSeo>('/ai/generate/seo',payload),
+  saveProductDraft:(output:GeneratedProduct)=>apiClient.post('/ai/draft/product',output),
+  saveBlogDraft:(output:GeneratedBlog)=>apiClient.post('/ai/draft/blog',output),
+  applySeo:(payload:{sourceType:'PRODUCT'|'BLOG';sourceId:string;seo:GeneratedSeo})=>apiClient.post('/ai/apply/seo',payload),
 };
 
 export interface Order {

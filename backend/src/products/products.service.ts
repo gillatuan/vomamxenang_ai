@@ -6,7 +6,7 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(condition?: string) {
-    const where = condition ? { condition } : undefined;
+    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}) };
     return this.prisma.product.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -17,7 +17,7 @@ export class ProductsService {
 
   async findOne(id: string) {
     return this.prisma.product.findUnique({
-      where: { id },
+      where: { id, status: 'PUBLISHED' },
       select: {
         id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, createdAt: true,
         productComments: {
@@ -27,6 +27,8 @@ export class ProductsService {
       },
     });
   }
+
+  async findOneAdmin(id: string) { return this.prisma.product.findUnique({ where: { id } }); }
 
   async create(data: any) {
     return this.prisma.product.create({ data });

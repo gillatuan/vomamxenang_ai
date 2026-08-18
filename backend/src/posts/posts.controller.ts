@@ -13,6 +13,13 @@ export class PostsController {
     return this.service.findAll();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
+  @Get('admin/all')
+  findAllAdmin() {
+    return this.service.findAllAdmin();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
