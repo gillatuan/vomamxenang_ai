@@ -127,6 +127,15 @@ model AboutPage {
   updatedAt   DateTime @updatedAt
 }
 
+// Tracks immutable, versioned data releases independently for each database.
+// A seed is recorded only after its transaction has completed successfully.
+model SeedHistory {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  executedAt  DateTime @default(now())
+}
+
 model Category {
   id            String    @id @default(uuid())
   name          String

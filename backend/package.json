@@ -13,7 +13,10 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js migrate deploy",
     "prisma:push:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js db push",
-    "seed": "prisma generate && ts-node --transpile-only prisma/seed.ts"
+    "seed": "prisma generate && ts-node --transpile-only prisma/seed.ts",
+    "db:seed": "yarn seed",
+    "db:seed:production": "prisma generate && ts-node --transpile-only prisma/seed-production.ts",
+    "test:production-seed": "ts-node --transpile-only test/production-seed-runner.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

@@ -37,6 +37,7 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - run: yarn lint
       - run: yarn tsc --noEmit -p tsconfig.json
       - run: yarn build
         env:
@@ -58,6 +59,10 @@ jobs:
           cache-dependency-path: backend/yarn.lock
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - name: Typecheck backend
+        run: yarn tsc --noEmit -p tsconfig.build.json
+      - name: Test production seed runner
+        run: yarn test:production-seed
       - run: yarn build
 
   deploy-production:
@@ -85,6 +90,7 @@ jobs:
           cd backend
           yarn install --frozen-lockfile
           yarn prisma:migrate
+          APP_ENV=production yarn db:seed:production
 
       - name: Deploy backend
         env:
