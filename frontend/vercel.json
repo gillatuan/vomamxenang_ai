@@ -1,8 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_BASE": "https://vomamxenang-backend.vercel.app/api/v1",
-    "NEXT_PUBLIC_ENV": "production"
-  }
+  "outputDirectory": ".next"
 }

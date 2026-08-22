@@ -1,6 +1,6 @@
 export interface ProductionSeedDatabase {
   product: {
-    upsert(args: unknown): Promise<unknown>;
+    createMany(args: unknown): Promise<unknown>;
   };
 }
 

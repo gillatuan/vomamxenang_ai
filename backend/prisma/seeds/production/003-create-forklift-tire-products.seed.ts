@@ -7,16 +7,12 @@ export const createForkliftTireProductsSeed: ProductionSeed = {
   name: 'Create forklift tire product drafts',
   preview: { productsToCreate: forkliftTireProducts.length },
   async run(database) {
-    for (const sourceProduct of forkliftTireProducts) {
-      // Generated catalog content must be reviewed in Admin before publishing.
-      // An empty update intentionally preserves a product that an admin already
-      // created with the same slug.
-      const product = { ...sourceProduct, status: ContentStatus.DRAFT };
-      await database.product.upsert({
-        where: { slug: product.slug },
-        update: {},
-        create: product,
-      });
-    }
+    // A single insert keeps the interactive transaction well below Prisma
+    // Accelerate's timeout. skipDuplicates protects manual/admin products that
+    // already use a catalog slug and never overwrites their fields.
+    await database.product.createMany({
+      data: forkliftTireProducts.map((product) => ({ ...product, status: ContentStatus.DRAFT })),
+      skipDuplicates: true,
+    });
   },
 };

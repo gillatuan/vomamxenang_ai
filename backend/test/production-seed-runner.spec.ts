@@ -10,9 +10,9 @@ class FakeSeedClient implements ProductionSeedClient {
   readonly products = new Map<string, unknown>();
 
   readonly product = {
-    upsert: async (args: unknown) => {
-      const input = args as { where: { slug: string }; create: unknown };
-      if (!this.products.has(input.where.slug)) this.products.set(input.where.slug, input.create);
+    createMany: async (args: unknown) => {
+      const input = args as { data: Array<{ slug: string }> };
+      for (const product of input.data) if (!this.products.has(product.slug)) this.products.set(product.slug, product);
     },
   };
 
@@ -48,8 +48,7 @@ const successfulSeed: ProductionSeed = {
   name: 'Test product release',
   preview: { productsToCreate: 2 },
   async run(database) {
-    await database.product.upsert({ where: { slug: 'test-a' }, update: {}, create: { slug: 'test-a' } });
-    await database.product.upsert({ where: { slug: 'test-b' }, update: {}, create: { slug: 'test-b' } });
+    await database.product.createMany({ data: [{ slug: 'test-a' }, { slug: 'test-b' }], skipDuplicates: true });
   },
 };
 
@@ -58,7 +57,7 @@ const failingSeed: ProductionSeed = {
   name: 'Test rollback',
   preview: { productsToCreate: 1 },
   async run(database) {
-    await database.product.upsert({ where: { slug: 'rollback-product' }, update: {}, create: { slug: 'rollback-product' } });
+    await database.product.createMany({ data: [{ slug: 'rollback-product' }], skipDuplicates: true });
     throw new Error('intentional seed failure');
   },
 };
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
 
   const thirdSeed: ProductionSeed = {
     key: '005-test-follow-up', name: 'Test follow-up release', preview: { productsToCreate: 1 },
-    async run(database) { await database.product.upsert({ where: { slug: 'test-c' }, update: {}, create: { slug: 'test-c' } }); },
+    async run(database) { await database.product.createMany({ data: [{ slug: 'test-c' }], skipDuplicates: true }); },
   };
   const thirdRun = await runProductionSeeds(client, [successfulSeed, thirdSeed], false);
   expect(thirdRun.skipped.includes(successfulSeed.key), 'Old seed must remain skipped after adding a new seed.');
