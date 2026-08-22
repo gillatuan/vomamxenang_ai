@@ -77,21 +77,6 @@ jobs:
           node-version: 20
       - run: npm install --global vercel@58.9.2
 
-      - name: Apply Prisma migrations with Vercel production environment
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
-        run: |
-          vercel env pull backend/.env.ci --environment=production --token="$VERCEL_TOKEN"
-          set -a
-          . ./backend/.env.ci
-          set +a
-          cd backend
-          yarn install --frozen-lockfile
-          yarn prisma:migrate
-          APP_ENV=production yarn db:seed:production
-
       - name: Deploy backend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

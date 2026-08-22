@@ -13,7 +13,10 @@ export interface ProductionSeedTransaction extends ProductionSeedDatabase {
 }
 
 export interface ProductionSeedClient extends ProductionSeedTransaction {
-  $transaction<T>(callback: (transaction: ProductionSeedTransaction) => Promise<T>): Promise<T>;
+  $transaction<T>(
+    callback: (transaction: ProductionSeedTransaction) => Promise<T>,
+    options?: { maxWait?: number; timeout?: number },
+  ): Promise<T>;
 }
 
 export interface ProductionSeedRunSummary {
@@ -54,7 +57,8 @@ export async function runProductionSeeds(
       await seed.run(transaction);
       await transaction.seedHistory.create({ data: { key: seed.key, name: seed.name } });
       return true;
-    });
+    // Prisma Accelerate caps interactive transactions at 15 seconds.
+    }, { maxWait: 15_000, timeout: 15_000 });
 
     if (ran) {
       summary.executed.push(seed.key);

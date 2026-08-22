@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn build",
+  "buildCommand": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production && yarn build",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" }
   ]
