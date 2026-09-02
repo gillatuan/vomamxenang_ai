@@ -27,8 +27,10 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import PrintIcon from "@mui/icons-material/Print";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useEffect, useMemo, useState } from "react";
 import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/api-client";
 
@@ -39,6 +41,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState<AdminProduct | null>(null);
   const [openQrDialog, setOpenQrDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -70,6 +73,7 @@ export default function ProductsPage() {
       .products()
       .then((res) => {
         setProducts(res.data);
+        setError(null);
         setLoading(false);
       })
       .catch(() => {
@@ -97,6 +101,10 @@ export default function ProductsPage() {
   };
 
   const handleSave = async (status: ContentStatus = formData.status) => {
+    if (!formData.sku.trim() || !formData.name.trim()) {
+      setError("Vui lòng nhập SKU và tên sản phẩm trước khi lưu.");
+      return;
+    }
     const payload = {
       sku: formData.sku,
       type: formData.type,
@@ -121,8 +129,8 @@ export default function ProductsPage() {
       setEditingId(null);
       setPreviewData({ sku: formData.sku || payload.name, name: formData.name });
       setOpenQrDialog(true);
-    } catch (err) {
-      alert("Lỗi khi lưu sản phẩm");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Không thể lưu sản phẩm.");
     }
   };
 
@@ -134,7 +142,7 @@ export default function ProductsPage() {
       await productsAPI.update(product.id, { status: nextStatus });
       loadProducts();
     } catch {
-      alert("Không thể cập nhật trạng thái sản phẩm");
+      setError("Không thể cập nhật trạng thái sản phẩm.");
     }
   };
 
@@ -144,7 +152,7 @@ export default function ProductsPage() {
         await productsAPI.delete(id);
         loadProducts();
       } catch (err) {
-        alert("Lỗi khi xóa sản phẩm");
+        setError("Không thể xóa sản phẩm.");
       }
     }
   };
@@ -159,7 +167,6 @@ export default function ProductsPage() {
   const rows = filteredProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
     <Box>
@@ -171,6 +178,7 @@ export default function ProductsPage() {
           },
         }}
       />
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
           <Tab label="Danh mục Vỏ xe" />
@@ -206,7 +214,7 @@ export default function ProductsPage() {
       </Stack>
 
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ minWidth: 1050 }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
               <TableCell>Tên</TableCell>
@@ -237,20 +245,15 @@ export default function ProductsPage() {
                     color={(product.status ?? "PUBLISHED") === "DRAFT" ? "default" : "success"}
                   />
                 </TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    color={(product.status ?? "PUBLISHED") === "DRAFT" ? "success" : "inherit"}
-                    onClick={() => handleSaveProductStatus(product)}
-                  >
-                    {(product.status ?? "PUBLISHED") === "DRAFT" ? "Publish" : "Về nháp"}
-                  </Button>
-                  <IconButton aria-label="edit" size="small" onClick={() => handleEdit(product)}>
-                    <AddIcon />
-                  </IconButton>
-                  <IconButton aria-label="delete" size="small" color="error" onClick={() => handleDelete(product.id)}>
-                    <DeleteIcon />
-                  </IconButton>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Button size="small" startIcon={<VisibilityIcon />} onClick={() => setViewingProduct(product)}>Xem</Button>
+                    <Button size="small" startIcon={<EditIcon />} onClick={() => handleEdit(product)}>Sửa</Button>
+                    <Button size="small" color={(product.status ?? "PUBLISHED") === "DRAFT" ? "success" : "inherit"} onClick={() => handleSaveProductStatus(product)}>
+                      {(product.status ?? "PUBLISHED") === "DRAFT" ? "Publish" : "Về nháp"}
+                    </Button>
+                    <IconButton aria-label="Xóa sản phẩm" size="small" color="error" onClick={() => handleDelete(product.id)}><DeleteIcon /></IconButton>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
@@ -316,6 +319,25 @@ export default function ProductsPage() {
               Publish và in tem
             </Button>
           </Box>
+        </Box>
+      </Dialog>
+
+      <Dialog open={Boolean(viewingProduct)} onClose={() => setViewingProduct(null)} maxWidth="sm" fullWidth>
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom>{viewingProduct?.name}</Typography>
+          {viewingProduct?.imageUrl && <Box component="img" src={viewingProduct.imageUrl} alt={viewingProduct.name} sx={{ width: "100%", maxHeight: 260, objectFit: "contain", mb: 2, borderRadius: 1, bgcolor: "grey.100" }} />}
+          <Stack spacing={1}>
+            <Typography><b>SKU:</b> {viewingProduct?.sku}</Typography>
+            <Typography><b>Loại:</b> {viewingProduct?.type}</Typography>
+            <Typography><b>Trạng thái:</b> {(viewingProduct?.status ?? "PUBLISHED") === "PUBLISHED" ? "Đã publish" : "Nháp"}</Typography>
+            <Typography><b>Giá nhập:</b> {(viewingProduct?.importPrice ?? 0).toLocaleString()} ₫</Typography>
+            <Typography><b>Giá bán:</b> {viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}</Typography>
+            <Typography><b>Mô tả:</b> {viewingProduct?.description || "Chưa có mô tả."}</Typography>
+          </Stack>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 3 }}>
+            <Button onClick={() => setViewingProduct(null)}>Đóng</Button>
+            {viewingProduct && <Button variant="contained" startIcon={<EditIcon />} onClick={() => { handleEdit(viewingProduct); setViewingProduct(null); }}>Chỉnh sửa</Button>}
+          </Stack>
         </Box>
       </Dialog>
 
