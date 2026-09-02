@@ -24,5 +24,18 @@ export class AiService {
   async generateSeo(userId:string,input:GenerateSeoDto){let source:unknown=input;if(input.sourceType==='PRODUCT'){const product=await this.products.findOneAdmin(input.sourceId!);if(!product)throw new NotFoundException('Product not found.');source={sourceType:'PRODUCT',title:product.name,content:product.description,primaryKeyword:input.primaryKeyword};}if(input.sourceType==='BLOG'){const post=await this.posts.findOneAdmin(input.sourceId!);if(!post)throw new NotFoundException('Blog post not found.');source={sourceType:'BLOG',title:post.title,content:post.content,primaryKeyword:input.primaryKeyword};}return this.run('SEO',userId,input as unknown as Record<string,unknown>,()=>this.seoAi.generate(source));}
   saveProductDraft(output:GeneratedProduct){return this.products.create({sku:`AI-DRAFT-${Date.now()}`,name:output.name,importPrice:0,description:output.description,slug:output.slug,shortDescription:output.shortDescription,highlights:output.highlights,specifications:output.specifications,applications:output.applications,seo:output.seo,tags:output.tags,status:'DRAFT'});}
   saveBlogDraft(output:GeneratedBlog){return this.posts.create({title:output.title,content:output.content,slug:output.slug,excerpt:output.excerpt,tableOfContents:output.tableOfContents,seo:output.seo,tags:output.tags,status:'DRAFT'});}
-  async applySeo(input:{sourceType:'PRODUCT'|'BLOG';sourceId:string;seo:GeneratedSeo}){if(input.sourceType==='PRODUCT')return this.products.update(input.sourceId,{slug:input.seo.slug,seo:{title:input.seo.title,description:input.seo.metaDescription,keywords:[input.seo.primaryKeyword,...input.seo.secondaryKeywords]},tags:input.seo.tags});return this.posts.update(input.sourceId,{slug:input.seo.slug,seo:{title:input.seo.title,description:input.seo.metaDescription,primaryKeyword:input.seo.primaryKeyword,secondaryKeywords:input.seo.secondaryKeywords},tags:input.seo.tags});}
+  async applySeo(input:{sourceType:'PRODUCT'|'BLOG';sourceId:string;seo:GeneratedSeo}){
+    const keywords=[input.seo.primaryKeyword,...input.seo.secondaryKeywords].filter(Boolean);
+    const seo={
+      title:input.seo.title,
+      description:input.seo.metaDescription,
+      keywords,
+      openGraph:{title:input.seo.ogTitle||input.seo.title,description:input.seo.ogDescription||input.seo.metaDescription,type:input.sourceType==='PRODUCT'?'product':'article'},
+      twitter:{card:'summary_large_image',title:input.seo.ogTitle||input.seo.title,description:input.seo.ogDescription||input.seo.metaDescription},
+      robots:input.seo.robots||'index,follow',
+      ...(input.seo.canonicalPath?.startsWith('/')?{canonicalPath:input.seo.canonicalPath}:{}),
+    };
+    if(input.sourceType==='PRODUCT')return this.products.update(input.sourceId,{slug:input.seo.slug,seo,tags:input.seo.tags});
+    return this.posts.update(input.sourceId,{slug:input.seo.slug,seo,tags:input.seo.tags});
+  }
 }

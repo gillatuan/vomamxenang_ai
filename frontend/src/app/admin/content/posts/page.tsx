@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
+import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -8,18 +8,89 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { AdminGridState } from "@/components/admin/AdminGridState";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { Post, postsAPI } from "@/lib/api-client";
+import { ContentStatus, Post, postsAPI } from "@/lib/api-client";
+
+type PostForm = { title: string; content: string; videoUrl: string; status: ContentStatus };
+const emptyForm: PostForm = { title: "", content: "", videoUrl: "", status: "DRAFT" };
 
 export default function PostsAdminPage() {
-  const [rows, setRows] = useState<Post[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
-  const [editing, setEditing] = useState<Post | null>(null); const [open, setOpen] = useState(false); const [form, setForm] = useState({ title: "", content: "", videoUrl: "" });
-  const load = () => { setLoading(true); postsAPI.getAllAdmin().then((response) => setRows(response.data)).catch(() => setError(true)).finally(() => setLoading(false)); };
+  const [rows, setRows] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Post | null>(null);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<PostForm>(emptyForm);
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    postsAPI.getAllAdmin().then((response) => setRows(response.data)).catch(() => setError("Không thể tải danh sách bài viết.")).finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, []);
-  const save = async () => { const data = { title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined }; if (!data.title || !data.content) return; if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data); setOpen(false); load(); };
-  const remove = async (id: string) => { if (window.confirm("Xóa bài viết này?")) { await postsAPI.delete(id); load(); } };
+
+  const openEditor = (post?: Post) => {
+    setEditing(post ?? null);
+    setForm(post ? { title: post.title, content: post.content, videoUrl: post.videoUrl ?? "", status: post.status ?? "PUBLISHED" } : emptyForm);
+    setOpen(true);
+  };
+
+  const save = async (status: ContentStatus) => {
+    const data = { title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
+    if (!data.title || !data.content) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
+    try {
+      if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
+      setOpen(false);
+      load();
+    } catch { setError("Không thể lưu bài viết."); }
+  };
+
+  const changeStatus = async (post: Post) => {
+    const currentStatus = post.status ?? "PUBLISHED";
+    try {
+      await postsAPI.update(post.id, { status: currentStatus === "PUBLISHED" ? "DRAFT" : "PUBLISHED" });
+      load();
+    } catch { setError("Không thể cập nhật trạng thái bài viết."); }
+  };
+
+  const remove = async (id: string) => {
+    if (!window.confirm("Xóa bài viết này?")) return;
+    try { await postsAPI.delete(id); load(); } catch { setError("Không thể xóa bài viết."); }
+  };
+
   const columns: GridColDef<Post>[] = [
-    { field: "title", headerName: "Tiêu đề", flex: 1.4 }, { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => row.content.slice(0, 180) },
-    { field: "actions", headerName: "Thao tác", sortable: false, width: 120, renderCell: (params: GridRenderCellParams<Post>) => <><IconButton aria-label="Sửa" onClick={() => { setEditing(params.row); setForm({ title: params.row.title, content: params.row.content, videoUrl: params.row.videoUrl ?? "" }); setOpen(true); }}><EditIcon /></IconButton><IconButton aria-label="Xóa" color="error" onClick={() => remove(params.row.id)}><DeleteIcon /></IconButton></> },
+    { field: "title", headerName: "Tiêu đề", flex: 1.4 },
+    { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => row.content.slice(0, 180) },
+    { field: "status", headerName: "Trạng thái", width: 130, renderCell: (params: GridRenderCellParams<Post>) => {
+      const status = params.row.status ?? "PUBLISHED";
+      return <Chip size="small" label={status === "PUBLISHED" ? "Đã publish" : "Nháp"} color={status === "PUBLISHED" ? "success" : "default"} />;
+    } },
+    { field: "actions", headerName: "Thao tác", sortable: false, width: 250, renderCell: (params: GridRenderCellParams<Post>) => {
+      const status = params.row.status ?? "PUBLISHED";
+      return <>
+        <Button size="small" color={status === "DRAFT" ? "success" : "inherit"} onClick={() => changeStatus(params.row)}>{status === "DRAFT" ? "Publish" : "Về nháp"}</Button>
+        <IconButton aria-label="Sửa" onClick={() => openEditor(params.row)}><EditIcon /></IconButton>
+        <IconButton aria-label="Xóa" color="error" onClick={() => remove(params.row.id)}><DeleteIcon /></IconButton>
+      </>;
+    } },
   ];
-  return <Box><AdminPageHeader title="Bài viết" actions={<Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditing(null); setForm({ title: "", content: "", videoUrl: "" }); setOpen(true); }}>Tạo bài viết</Button>} /><AdminGridState loading={loading} error={error} empty={!loading && !error && !rows.length} />{!loading && !error && rows.length > 0 && <DataGrid autoHeight rows={rows} columns={columns} disableRowSelectionOnClick />}<Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth><DialogTitle>{editing ? "Chỉnh sửa bài viết" : "Tạo bài viết"}</DialogTitle><DialogContent><TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} /><TextField required fullWidth multiline minRows={8} label="Nội dung" value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} sx={{ mb: 2 }} /><TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} /></DialogContent><DialogActions><Button onClick={() => setOpen(false)}>Hủy</Button><Button variant="contained" onClick={save}>Lưu</Button></DialogActions></Dialog></Box>;
+
+  return <Box>
+    <AdminPageHeader title="Bài viết" actions={<Button variant="contained" startIcon={<AddIcon />} onClick={() => openEditor()}>Tạo bài viết</Button>} />
+    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <AdminGridState loading={loading} error={Boolean(error)} empty={!loading && !error && !rows.length} />
+    {!loading && !error && rows.length > 0 && <DataGrid autoHeight rows={rows} columns={columns} disableRowSelectionOnClick />}
+    <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      <DialogTitle>{editing ? "Chỉnh sửa bài viết" : "Tạo bài viết"}</DialogTitle>
+      <DialogContent>
+        <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
+        <TextField required fullWidth multiline minRows={8} label="Nội dung" value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} sx={{ mb: 2 }} />
+        <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpen(false)}>Hủy</Button>
+        <Button variant="outlined" onClick={() => save("DRAFT")}>Lưu nháp</Button>
+        <Button variant="contained" onClick={() => save("PUBLISHED")}>Publish</Button>
+      </DialogActions>
+    </Dialog>
+  </Box>;
 }

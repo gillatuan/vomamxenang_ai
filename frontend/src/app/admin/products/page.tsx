@@ -23,13 +23,14 @@ import {
   IconButton,
   GlobalStyles,
   Grid,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import PrintIcon from "@mui/icons-material/Print";
 import { useEffect, useMemo, useState } from "react";
-import { adminManagementAPI, productsAPI, Product } from "@/lib/api-client";
+import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/api-client";
 
 type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
 
@@ -56,6 +57,7 @@ export default function ProductsPage() {
     quantityInStock: 0,
     imageUrl: "",
     description: "",
+    status: "DRAFT" as ContentStatus,
   });
 
   useEffect(() => {
@@ -89,11 +91,12 @@ export default function ProductsPage() {
       quantityInStock: product.stocks.reduce((total, stock) => total + stock.quantity, 0),
       imageUrl: product.imageUrl || "",
       description: product.description || "",
+      status: product.status ?? "PUBLISHED",
     });
     setOpenDialog(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (status: ContentStatus = formData.status) => {
     const payload = {
       sku: formData.sku,
       type: formData.type,
@@ -104,6 +107,7 @@ export default function ProductsPage() {
       description: formData.description,
       minStock: formData.minStock,
       maxStock: formData.maxStock,
+      status,
     };
 
     try {
@@ -119,6 +123,18 @@ export default function ProductsPage() {
       setOpenQrDialog(true);
     } catch (err) {
       alert("Lỗi khi lưu sản phẩm");
+    }
+  };
+
+  const handleSaveProductStatus = async (product: AdminProduct) => {
+    const currentStatus = product.status ?? "PUBLISHED";
+    const nextStatus: ContentStatus = currentStatus === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+
+    try {
+      await productsAPI.update(product.id, { status: nextStatus });
+      loadProducts();
+    } catch {
+      alert("Không thể cập nhật trạng thái sản phẩm");
     }
   };
 
@@ -181,6 +197,7 @@ export default function ProductsPage() {
             quantityInStock: 0,
             imageUrl: "",
             description: "",
+            status: "DRAFT",
           });
           setOpenDialog(true);
         }}>
@@ -199,6 +216,7 @@ export default function ProductsPage() {
               <TableCell>Giá bán</TableCell>
               <TableCell>Tồn kho</TableCell>
               <TableCell>Min/Max</TableCell>
+              <TableCell>Trạng thái</TableCell>
               <TableCell>Hành động</TableCell>
             </TableRow>
           </TableHead>
@@ -213,6 +231,20 @@ export default function ProductsPage() {
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
                 <TableCell>{`${(product as any).minStock ?? 5}/${(product as any).maxStock ?? 100}`}</TableCell>
                 <TableCell>
+                  <Chip
+                    size="small"
+                    label={(product.status ?? "PUBLISHED") === "DRAFT" ? "Nháp" : "Đã publish"}
+                    color={(product.status ?? "PUBLISHED") === "DRAFT" ? "default" : "success"}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="small"
+                    color={(product.status ?? "PUBLISHED") === "DRAFT" ? "success" : "inherit"}
+                    onClick={() => handleSaveProductStatus(product)}
+                  >
+                    {(product.status ?? "PUBLISHED") === "DRAFT" ? "Publish" : "Về nháp"}
+                  </Button>
                   <IconButton aria-label="edit" size="small" onClick={() => handleEdit(product)}>
                     <AddIcon />
                   </IconButton>
@@ -277,8 +309,11 @@ export default function ProductsPage() {
             <Button variant="outlined" onClick={() => setOpenDialog(false)}>
               Hủy
             </Button>
-            <Button variant="contained" onClick={handleSave}>
-              Lưu và in tem
+            <Button variant="outlined" onClick={() => handleSave("DRAFT")}>
+              Lưu nháp
+            </Button>
+            <Button variant="contained" onClick={() => handleSave("PUBLISHED")}>
+              Publish và in tem
             </Button>
           </Box>
         </Box>

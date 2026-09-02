@@ -3,10 +3,11 @@ import { AdminController } from './admin.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminManagementService } from './admin-management.service';
+import { CacheRevalidationService } from './cache-revalidation.service';
 
 @Module({
   imports: [PrismaModule],
   controllers: [AdminController],
-  providers: [AdminDashboardService, AdminManagementService],
+  providers: [AdminDashboardService, AdminManagementService, CacheRevalidationService],
 })
 export class AdminModule {}

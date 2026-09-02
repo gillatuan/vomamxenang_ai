@@ -35,6 +35,22 @@ export interface Product {
   condition?: "NEW" | "NEW_100" | "USED";
   brand?: string;
   size?: string;
+  status?: ContentStatus;
+  slug?: string;
+  seo?: SeoMetadata;
+  tags?: string[];
+}
+
+export type ContentStatus = "DRAFT" | "PUBLISHED";
+
+export interface SeoMetadata {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  canonicalPath?: string;
+  robots?: "index,follow" | "noindex,nofollow";
+  openGraph?: { title?: string; description?: string; type?: "product" | "article" };
+  twitter?: { card?: "summary_large_image"; title?: string; description?: string };
 }
 
 export const productsAPI = {
@@ -74,7 +90,10 @@ export interface Post {
   title: string;
   content: string;
   videoUrl?: string;
-  published?: boolean;
+  status?: ContentStatus;
+  slug?: string;
+  seo?: SeoMetadata;
+  tags?: string[];
 }
 
 export const postsAPI = {
@@ -92,7 +111,7 @@ export const postsAPI = {
 
 export interface GeneratedProduct { name:string;slug:string;shortDescription:string;description:string;highlights:string[];specifications:{name:string;value:string}[];applications:string[];seo:{title:string;description:string;keywords:string[]};tags:string[];imageAltTexts:{imageIndex:number;alt:string}[];missingInformation:string[]; }
 export interface GeneratedBlog { title:string;slug:string;excerpt:string;content:string;tableOfContents:{title:string;anchor:string}[];seo:{title:string;description:string;primaryKeyword:string;secondaryKeywords:string[]};tags:string[];imageAltTexts:{imageIndex:number;alt:string}[];relatedProductSuggestions:string[];missingInformation:string[]; }
-export interface GeneratedSeo { title:string;metaDescription:string;slug:string;primaryKeyword:string;secondaryKeywords:string[];tags:string[];suggestedHeadings:string[];imageAltTexts:string[];suggestions:string[]; }
+export interface GeneratedSeo { title:string;metaDescription:string;slug:string;primaryKeyword:string;secondaryKeywords:string[];tags:string[];suggestedHeadings:string[];imageAltTexts:string[];suggestions:string[];ogTitle?:string;ogDescription?:string;canonicalPath?:string;robots?:"index,follow"|"noindex,nofollow"; }
 export const aiAPI = {
   generateProduct:(payload:Record<string,unknown>)=>apiClient.post<GeneratedProduct>('/ai/generate/product',payload),
   generateBlog:(payload:Record<string,unknown>)=>apiClient.post<GeneratedBlog>('/ai/generate/blog',payload),
@@ -134,6 +153,11 @@ export const adminDashboardAPI = {
   lowStock: () => apiClient.get<InventoryAlert[]>("/admin/dashboard/low-stock"),
   inventoryMovement: (range: "7d" | "30d" | "3m" | "6m" | "12m") => apiClient.get<InventoryMovement[]>("/admin/dashboard/inventory-movement", { params: { range } }),
   orderStatus: () => apiClient.get<OrderStatusData[]>("/admin/dashboard/order-status"),
+};
+
+export const cacheAPI = {
+  purge: (data: { scope: "ALL" | "PRODUCT" | "POST" | "PATH"; id?: string; path?: string }) =>
+    apiClient.post<{ revalidated: boolean; paths: string[] }>("/admin/cache/purge", data),
 };
 
 export interface StockLocationRow { id: string; quantity: number; location: { locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }

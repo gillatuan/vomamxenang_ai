@@ -7,11 +7,12 @@ import { AdminManagementService } from './admin-management.service';
 import { UpdatePriceMatrixDto } from './dto/update-price-matrix.dto';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
+import { CachePurgeScope, CacheRevalidationService } from './cache-revalidation.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  constructor(private readonly dashboard: AdminDashboardService, private readonly management: AdminManagementService) {}
+  constructor(private readonly dashboard: AdminDashboardService, private readonly management: AdminManagementService, private readonly cache: CacheRevalidationService) {}
 
   @Get('management/products')
   products() { return this.management.products(); }
@@ -103,5 +104,11 @@ export class AdminController {
   @Get('inventory-alerts')
   async inventoryAlerts() {
     return this.dashboard.inventoryAlerts();
+  }
+
+  @Roles('ADMIN_MANAGER')
+  @Post('cache/purge')
+  purgeCache(@Body() body: { scope: CachePurgeScope; id?: string; path?: string }) {
+    return this.cache.purge(body);
   }
 }

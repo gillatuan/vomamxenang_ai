@@ -18,6 +18,8 @@ export interface GeneratedSeo {
   title: string; metaDescription: string; slug: string; primaryKeyword: string;
   secondaryKeywords: string[]; tags: string[]; suggestedHeadings: string[];
   imageAltTexts: string[]; suggestions: string[];
+  ogTitle?: string; ogDescription?: string; canonicalPath?: string;
+  robots?: 'index,follow' | 'noindex,nofollow';
 }
 
 export type JsonSchema = Record<string, unknown>;

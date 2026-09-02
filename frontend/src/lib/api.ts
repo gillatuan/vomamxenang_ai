@@ -30,7 +30,10 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
-        window.location.href = "/auth/login";
+        localStorage.removeItem("user");
+        document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+        const loginPath = window.location.pathname.startsWith("/admin") ? "/admin/login" : "/auth/login";
+        if (window.location.pathname !== loginPath) window.location.href = loginPath;
       }
     }
     return Promise.reject(error);

@@ -11,7 +11,7 @@ export class ProductsService {
       where,
       orderBy: { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, slug: true, seo: true, tags: true, createdAt: true },
     });
   }
 
@@ -19,7 +19,7 @@ export class ProductsService {
     return this.prisma.product.findUnique({
       where: { id, status: 'PUBLISHED' },
       select: {
-        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, createdAt: true,
+        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, description: true, slug: true, seo: true, tags: true, createdAt: true,
         productComments: {
           include: { user: { select: { id: true, email: true } } },
         },

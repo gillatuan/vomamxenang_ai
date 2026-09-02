@@ -60,7 +60,7 @@ export function PublicHeader() {
               </Button>
             </>
           ) : (
-            <Button variant="outlined" color="inherit" component={NextLink} href="/auth/login" sx={accountButtonSx}>
+            <Button variant="outlined" color="inherit" component={NextLink} href="/admin/login" sx={accountButtonSx}>
               Đăng nhập
             </Button>
           )}

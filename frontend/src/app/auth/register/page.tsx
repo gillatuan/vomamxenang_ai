@@ -27,7 +27,7 @@ export default function RegisterPage() {
     try {
       await authAPI.register(email, password);
       setSuccess("Đăng ký thành công. Vui lòng đăng nhập.");
-      setTimeout(() => router.push("/auth/login"), 1200);
+      setTimeout(() => router.push("/admin/login"), 1200);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Đăng ký thất bại");
     } finally {
@@ -39,7 +39,7 @@ export default function RegisterPage() {
     <Container maxWidth="xs" sx={{ pt: 8 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 3, bgcolor: "background.paper", borderRadius: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Đăng ký</Typography>
-        <MuiLink component={NextLink} href="/auth/login">← Quay lại Đăng nhập</MuiLink>
+        <MuiLink component={NextLink} href="/admin/login">← Quay lại Đăng nhập</MuiLink>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
