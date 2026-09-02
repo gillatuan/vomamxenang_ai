@@ -134,12 +134,15 @@ export interface Order {
   status: "PENDING" | "PAID" | "FAILED";
   stripeSessionId?: string;
   createdAt: string;
+  items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
 
 export const ordersAPI = {
   getAll: () => apiClient.get<Order[]>("/orders"),
 
   create: (data: Partial<Order>) => apiClient.post<Order>("/orders", data),
+  updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
+  delete: (id: string) => apiClient.delete(`/orders/${id}`),
 
   createCheckoutSession: (items: any[]) =>
     apiClient.post<{ sessionId: string; url: string }>(
@@ -167,6 +170,18 @@ export const inventoryAPI = {
   assembly: () => apiClient.get<{ id: string; quantity: number; pressingFee: number; createdAt: string; product: { sku: string; name: string }; wheelRim: { sku: string; size: string; brand?: string | null } }[]>("/inventory/assembly"),
 };
 
+export interface WarehouseLocation { id: string; warehouseId: string; locationCode: string; zone: string; rack: string; slot: string; capacity: number; }
+export interface Warehouse { id: string; code: string; name: string; locations?: WarehouseLocation[]; }
+export const warehousesAPI = {
+  map: () => apiClient.get<Warehouse[]>("/warehouse/map"),
+  create: (data: { code: string; name: string }) => apiClient.post<Warehouse>("/warehouse", data),
+  update: (id: string, data: Partial<{ code: string; name: string }>) => apiClient.patch<Warehouse>(`/warehouse/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/warehouse/${id}`),
+  createLocation: (data: Omit<WarehouseLocation, "id">) => apiClient.post<WarehouseLocation>("/warehouse/locations", data),
+  updateLocation: (id: string, data: Partial<Omit<WarehouseLocation, "id">>) => apiClient.patch<WarehouseLocation>(`/warehouse/locations/${id}`, data),
+  deleteLocation: (id: string) => apiClient.delete(`/warehouse/locations/${id}`),
+};
+
 export interface PriceMatrixProduct { id: string; sku: string; name: string; sellingPrice: number | null; priceMatrix: { id: string; customerType: string; price: number }[]; }
 export const adminManagementAPI = {
   products: () => apiClient.get<(Product & { importPrice: number; stocks: { quantity: number }[] })[]>("/admin/management/products"),
@@ -176,8 +191,11 @@ export const adminManagementAPI = {
   users: () => apiClient.get<{ id: string; email: string; role: string; createdAt: string }[]>("/admin/management/users"),
   createUser: (data: { email: string; password: string; role: "ADMIN_MANAGER" | "STOREKEEPER" }) => apiClient.post("/admin/management/users", data),
   updateUser: (id: string, data: { role?: "ADMIN_MANAGER" | "STOREKEEPER"; password?: string }) => apiClient.patch(`/admin/management/users/${id}`, data),
+  deleteUser: (id: string) => apiClient.delete(`/admin/management/users/${id}`),
   productComments: () => apiClient.get<{ id: string; content: string; rating: number | null; createdAt: string; product: { sku: string; name: string }; user: { email: string } }[]>("/admin/management/product-comments"),
+  deleteProductComment: (id: string) => apiClient.delete(`/admin/management/product-comments/${id}`),
   postComments: () => apiClient.get<{ id: string; content: string; createdAt: string; post: { title: string }; user: { email: string } }[]>("/admin/management/post-comments"),
+  deletePostComment: (id: string) => apiClient.delete(`/admin/management/post-comments/${id}`),
   favourites: () => apiClient.get<{ product: { id: string; sku: string; name: string; brand: string | null }; favouriteCount: number }[]>("/admin/management/favourites"),
   wheelRims: () => apiClient.get<{ id: string; sku: string; size: string; boltHoles: number; brand: string | null; sellingPrice: number | null; stocks: { quantity: number }[] }[]>("/admin/management/wheel-rims"),
 };

@@ -4,6 +4,7 @@ import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogT
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { AdminGridState } from "@/components/admin/AdminGridState";
@@ -19,6 +20,7 @@ export default function PostsAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Post | null>(null);
   const [open, setOpen] = useState(false);
+  const [viewing, setViewing] = useState<Post | null>(null);
   const [form, setForm] = useState<PostForm>(emptyForm);
 
   const load = () => {
@@ -64,9 +66,10 @@ export default function PostsAdminPage() {
       const status = params.row.status ?? "PUBLISHED";
       return <Chip size="small" label={status === "PUBLISHED" ? "Đã publish" : "Nháp"} color={status === "PUBLISHED" ? "success" : "default"} />;
     } },
-    { field: "actions", headerName: "Thao tác", sortable: false, width: 250, renderCell: (params: GridRenderCellParams<Post>) => {
+    { field: "actions", headerName: "Thao tác", sortable: false, width: 310, renderCell: (params: GridRenderCellParams<Post>) => {
       const status = params.row.status ?? "PUBLISHED";
       return <>
+        <Button size="small" startIcon={<VisibilityIcon />} onClick={() => setViewing(params.row)}>Xem</Button>
         <Button size="small" color={status === "DRAFT" ? "success" : "inherit"} onClick={() => changeStatus(params.row)}>{status === "DRAFT" ? "Publish" : "Về nháp"}</Button>
         <IconButton aria-label="Sửa" onClick={() => openEditor(params.row)}><EditIcon /></IconButton>
         <IconButton aria-label="Xóa" color="error" onClick={() => remove(params.row.id)}><DeleteIcon /></IconButton>
@@ -91,6 +94,11 @@ export default function PostsAdminPage() {
         <Button variant="outlined" onClick={() => save("DRAFT")}>Lưu nháp</Button>
         <Button variant="contained" onClick={() => save("PUBLISHED")}>Publish</Button>
       </DialogActions>
+    </Dialog>
+    <Dialog open={Boolean(viewing)} onClose={() => setViewing(null)} maxWidth="md" fullWidth>
+      <DialogTitle>{viewing?.title}</DialogTitle>
+      <DialogContent><Box sx={{ whiteSpace: "pre-wrap" }}>{viewing?.content}</Box>{viewing?.videoUrl && <Box sx={{ mt: 2 }}><a href={viewing.videoUrl} target="_blank" rel="noreferrer">Mở video đính kèm</a></Box>}</DialogContent>
+      <DialogActions><Button onClick={() => setViewing(null)}>Đóng</Button><Button variant="contained" onClick={() => { if (viewing) { setViewing(null); openEditor(viewing); } }}>Chỉnh sửa</Button></DialogActions>
     </Dialog>
   </Box>;
 }

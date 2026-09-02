@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { getStripeClient } from '../stripe';
 
@@ -7,11 +8,28 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.order.findMany({ include: { client: true }, orderBy: { createdAt: 'desc' } });
+    return this.prisma.order.findMany({ include: { client: true, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
   }
 
   async create(data: any) {
     return this.prisma.order.create({ data });
+  }
+
+  async updateStatus(id: string, status: OrderStatus) {
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true } });
+    if (!order) throw new BadRequestException('Order not found');
+    if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
+    return this.prisma.order.update({ where: { id }, data: { status } });
+  }
+
+  async deleteDraft(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true } });
+    if (!order) throw new BadRequestException('Order not found');
+    if (order.status === OrderStatus.PAID || order.stripeSessionId) throw new BadRequestException('Paid or checkout orders cannot be deleted');
+    return this.prisma.$transaction([
+      this.prisma.orderItem.deleteMany({ where: { orderId: id } }),
+      this.prisma.order.delete({ where: { id } }),
+    ]);
   }
 
   async createCheckoutSession(body: any, req: any) {

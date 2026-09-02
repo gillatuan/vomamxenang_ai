@@ -49,6 +49,15 @@ export class AdminController {
   }
 
   @Roles('ADMIN_MANAGER')
+  @Delete('management/users/:id')
+  deleteUser(@Req() req: { user: { sub: string } }, @Param('id') id: string) {
+    if (req.user.sub === id) {
+      throw new BadRequestException('You cannot delete your own account');
+    }
+    return this.management.deleteUser(id);
+  }
+
+  @Roles('ADMIN_MANAGER')
   @Get('management/product-comments')
   productComments() { return this.management.productComments(); }
 

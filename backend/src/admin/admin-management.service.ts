@@ -66,6 +66,15 @@ export class AdminManagementService {
     return this.prisma.user.update({ where: { id }, data: { role: data.role, password }, select: { id: true, email: true, role: true, createdAt: true } });
   }
 
+  async deleteUser(id: string) {
+    const target = await this.prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (!target) throw new BadRequestException('User not found');
+    if (target.role === 'ADMIN_MANAGER' && await this.prisma.user.count({ where: { role: 'ADMIN_MANAGER' } }) <= 1) {
+      throw new BadRequestException('At least one administrator account is required');
+    }
+    return this.prisma.user.delete({ where: { id }, select: { id: true, email: true } });
+  }
+
   deleteProductComment(id: string) { return this.prisma.productComment.delete({ where: { id } }); }
   deletePostComment(id: string) { return this.prisma.postComment.delete({ where: { id } }); }
 
