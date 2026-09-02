@@ -137,11 +137,15 @@ export default function ProductsPage() {
   const handleSaveProductStatus = async (product: AdminProduct) => {
     const currentStatus = product.status ?? "PUBLISHED";
     const nextStatus: ContentStatus = currentStatus === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+    const previousProducts = products;
+
+    setProducts((current) => current.map((item) => item.id === product.id ? { ...item, status: nextStatus } : item));
 
     try {
-      await productsAPI.update(product.id, { status: nextStatus });
-      loadProducts();
+      const response = await productsAPI.update(product.id, { status: nextStatus });
+      setProducts((current) => current.map((item) => item.id === product.id ? { ...item, ...response.data, stocks: item.stocks } : item));
     } catch {
+      setProducts(previousProducts);
       setError("Không thể cập nhật trạng thái sản phẩm.");
     }
   };
