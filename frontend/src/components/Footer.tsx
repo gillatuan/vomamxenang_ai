@@ -33,28 +33,29 @@ export function Footer() {
     <Box
       component="footer"
       sx={{
-        backgroundColor: "#333",
+        backgroundColor: "#1a1a1a",
         color: "white",
-        padding: "2rem 0",
-        marginTop: "4rem",
+        padding: { xs: "3.5rem 0 2rem", md: "5rem 0 2rem" },
+        marginTop: 0,
       }}
     >
-      <Container>
-        <Grid container spacing={2}>
+      <Container maxWidth={false} sx={{ maxWidth: 1440 }}>
+        <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: ".76rem", mb: 5 }}>VÕ MÂM XE NÂNG</Typography>
+        <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6">Về chúng tôi</Typography>
-            <Typography variant="body2">
+            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Về chúng tôi</Typography>
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", lineHeight: 1.7 }}>
               {about}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6">Liên hệ</Typography>
-            {storeInfo.email && <Typography variant="body2">Email: {storeInfo.email}</Typography>}
-            {storeInfo.phone && <Typography variant="body2">Phone: {storeInfo.phone}</Typography>}
+            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Liên hệ</Typography>
+            {storeInfo.email && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>Email: {storeInfo.email}</Typography>}
+            {storeInfo.phone && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: .5 }}>Phone: {storeInfo.phone}</Typography>}
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6">Theo dõi</Typography>
-            <Typography variant="body2">
+            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Theo dõi</Typography>
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>
               {storeInfo.facebookUrl ? (
                 <Link href={storeInfo.facebookUrl} target="_blank" rel="noreferrer" color="inherit" underline="hover">
                   Facebook
@@ -63,7 +64,7 @@ export function Footer() {
             </Typography>
           </Grid>
         </Grid>
-        <Typography variant="body2" sx={{ marginTop: "2rem", textAlign: "center" }}>
+        <Typography variant="body2" sx={{ marginTop: { xs: 5, md: 7 }, pt: 2, borderTop: "1px solid rgba(255,255,255,.18)", color: "rgba(255,255,255,.55)", fontSize: ".75rem" }}>
           © {new Date().getFullYear()} {storeInfo.name || fallbackStoreInfo.name}. All rights reserved.
         </Typography>
       </Container>

@@ -78,43 +78,44 @@ function ProductsContent() {
   return (
     <>
       <PublicHeader />
-      <Container sx={{ padding: "4rem 0" }}>
-        <Typography variant="h4" sx={{ marginBottom: "2rem", fontWeight: "bold" }}>
-          Sản phẩm
-        </Typography>
+      <Box component="main"><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 6, md: 10 }, pb: { xs: 4, md: 6 } }}>
+        <Typography sx={{ fontSize: ".68rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>DANH MỤC SẢN PHẨM</Typography>
+        <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 570, lineHeight: 1.7, mb: 5 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
         {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
 
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
-              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
                 {product.imageUrl && (
                   <Box
                     component="img"
                     src={product.imageUrl}
                     alt={product.name}
-                    sx={{ width: "100%", height: "200px", objectFit: "cover" }}
+                    sx={{ width: "100%", height: { xs: 260, md: 330 }, objectFit: "cover", bgcolor: "#e9e5dc", transition: "transform .45s ease" }}
                   />
                 )}
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6">{product.name}</Typography>
+                {!product.imageUrl && <Box sx={{ height: { xs: 260, md: 330 }, bgcolor: "#e9e5dc", display: "grid", placeItems: "center", color: "text.secondary", fontSize: ".7rem", letterSpacing: ".13em" }}>VÕ MÂM XE NÂNG</Box>}
+                <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25, pb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>{product.name}</Typography>
                   <Chip
                     size="small"
                     sx={{ mt: 1 }}
                     color={product.condition === "USED" ? "warning" : "success"}
                     label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"}
                   />
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1, lineHeight: 1.6 }}>
                     {product.description}
                   </Typography>
-                  <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: "bold" }}>
+                  <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
                     {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}
                   </Typography>
                 </CardContent>
-                <CardActions>
-                  <Button component={NextLink} href={`/products/${product.id}`} size="small">
+                <CardActions sx={{ px: 0, pb: 0, gap: 1 }}>
+                  <Button component={NextLink} href={`/products/${product.id}`} size="small" variant="text" sx={{ px: 0, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>
                     Xem chi tiết
                   </Button>
                   {product.sellingPrice ? (
@@ -140,7 +141,7 @@ function ProductsContent() {
             </Grid>
           ))}
         </Grid>
-      </Container>
+      </Container></Box>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <Box sx={{ padding: "2rem" }}>

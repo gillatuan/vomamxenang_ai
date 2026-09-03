@@ -28,25 +28,24 @@ export default function BlogPage() {
   return (
     <>
       <Header />
-      <Container sx={{ padding: "4rem 0" }}>
-        <Typography variant="h4" sx={{ marginBottom: "2rem", fontWeight: "bold" }}>
-          Blog
-        </Typography>
+      <Container component="main" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 6, md: 10 } }}>
+        <Typography sx={{ fontSize: ".68rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>KIẾN THỨC VẬN HÀNH</Typography>
+        <Typography component="h1" variant="h2" sx={{ mb: 5 }}>Câu chuyện từ xưởng và đội xe.</Typography>
 
         {loading && <CircularProgress />}
         {error && <Typography color="error">{error}</Typography>}
 
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
           {posts.map((post) => (
             <Grid item xs={12} sm={6} md={4} key={post.id}>
-              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent" }}>
                 {post.videoUrl && (
                   <Box
                     sx={{
                       width: "100%",
                       paddingBottom: "56.25%",
                       position: "relative",
-                      backgroundColor: "#f0f0f0",
+                      backgroundColor: "#e9e5dc",
                     }}
                   >
                     <iframe
@@ -63,14 +62,14 @@ export default function BlogPage() {
                     />
                   </Box>
                 )}
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" sx={{ marginBottom: "0.5rem" }}>
+                <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25 }}>
+                  <Typography variant="h6" sx={{ marginBottom: "0.75rem", fontWeight: 600 }}>
                     {post.title}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {post.content.substring(0, 100)}...
                   </Typography>
-                  <Button component={NextLink} href={`/blog/${post.id}`} sx={{ mt: 2 }}>Đọc thêm</Button>
+                  <Button component={NextLink} href={`/blog/${post.id}`} variant="text" sx={{ px: 0, mt: 2, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>Đọc thêm</Button>
                 </CardContent>
               </Card>
             </Grid>
