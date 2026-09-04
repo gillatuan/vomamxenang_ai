@@ -13,6 +13,11 @@ export class ProductsController {
     return this.service.findAll(condition);
   }
 
+  @Get('reviews/featured')
+  featuredReviews() {
+    return this.service.featuredReviews();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

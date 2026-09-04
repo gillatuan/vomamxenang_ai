@@ -28,6 +28,26 @@ export class ProductsService {
     });
   }
 
+  async featuredReviews() {
+    const comments = await this.prisma.productComment.findMany({
+      where: { rating: { not: null } },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        content: true,
+        rating: true,
+        createdAt: true,
+        product: { select: { id: true, name: true } },
+        user: { select: { email: true } },
+      },
+    });
+    return comments.map(({ user, ...comment }) => ({
+      ...comment,
+      reviewerName: `Khách hàng ${user.email.slice(0, 1).toUpperCase()}.`,
+    }));
+  }
+
   async findOneAdmin(id: string) { return this.prisma.product.findUnique({ where: { id } }); }
 
   async create(data: any) {

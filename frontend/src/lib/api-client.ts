@@ -63,6 +63,7 @@ export const productsAPI = {
     apiClient.patch<Product>(`/products/${id}`, data),
 
   delete: (id: string) => apiClient.delete(`/products/${id}`),
+  featuredReviews: () => apiClient.get<{ id: string; content: string; rating: number | null; createdAt: string; product: { id: string; name: string }; reviewerName: string }[]>("/products/reviews/featured"),
 };
 
 export interface Client {
