@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, Container, Divider, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, Container, Divider, Grid, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -41,6 +41,10 @@ export default function ProductDetailPage() {
   if (loading) return <Box sx={{ display: "grid", placeItems: "center", minHeight: "60vh" }}><CircularProgress /></Box>;
   if (!product) return <><PublicHeader /><Container sx={{ py: 8 }}><Alert severity="error">Không tìm thấy sản phẩm.</Alert></Container></>;
 
+  const specifications = Array.isArray(product.specifications) ? product.specifications : [];
+  const highlights = Array.isArray(product.highlights) ? product.highlights : [];
+  const applications = Array.isArray(product.applications) ? product.applications : [];
+
   return <>
     <PublicHeader />
     <Container sx={{ py: { xs: 3, md: 6 } }}>
@@ -49,7 +53,7 @@ export default function ProductDetailPage() {
         <Box sx={{ flex: 1 }}>
           <Chip color={product.condition === "USED" ? "warning" : "success"} label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"} />
           <Typography variant="h4" fontWeight={700} sx={{ mt: 1 }}>{product.name}</Typography>
-          <Typography color="text.secondary" sx={{ mt: 2 }}>{product.description || "Thông tin sản phẩm đang được cập nhật."}</Typography>
+          <Typography color="text.secondary" sx={{ mt: 2 }}>{product.shortDescription || product.description || "Thông tin sản phẩm đang được cập nhật."}</Typography>
           <Stack spacing={1} sx={{ my: 3 }}>
             {product.brand && <Typography>Thương hiệu: <b>{product.brand}</b></Typography>}
             {product.size && <Typography>Kích thước: <b>{product.size}</b></Typography>}
@@ -62,6 +66,24 @@ export default function ProductDetailPage() {
           </Stack>
         </Box>
       </Stack>
+      {(highlights.length > 0 || specifications.length > 0 || applications.length > 0) && <Grid container spacing={3} sx={{ mt: 2 }}>
+        {highlights.length > 0 && <Grid item xs={12} md={4}><Card variant="outlined" sx={{ height: "100%" }}><CardContent>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Điểm đáng chú ý</Typography>
+          <Stack component="ul" spacing={1} sx={{ pl: 2, my: 0 }}>{highlights.map((item) => <Typography component="li" key={item} color="text.secondary">{item}</Typography>)}</Stack>
+        </CardContent></Card></Grid>}
+        {specifications.length > 0 && <Grid item xs={12} md={4}><Card variant="outlined" sx={{ height: "100%" }}><CardContent>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Thông số cần đối chiếu</Typography>
+          <Stack spacing={1.25}>{specifications.map((item) => <Box key={item.label}><Typography variant="body2" color="text.secondary">{item.label}</Typography><Typography fontWeight={600}>{item.value}</Typography></Box>)}</Stack>
+        </CardContent></Card></Grid>}
+        {applications.length > 0 && <Grid item xs={12} md={4}><Card variant="outlined" sx={{ height: "100%" }}><CardContent>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Ứng dụng phù hợp</Typography>
+          <Stack component="ul" spacing={1} sx={{ pl: 2, my: 0 }}>{applications.map((item) => <Typography component="li" key={item} color="text.secondary">{item}</Typography>)}</Stack>
+        </CardContent></Card></Grid>}
+      </Grid>}
+      {product.description && <Card variant="outlined" sx={{ mt: 3 }}><CardContent>
+        <Typography variant="h6" fontWeight={700} gutterBottom>Tư vấn lựa chọn & lắp đặt</Typography>
+        <Typography color="text.secondary" sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>{product.description}</Typography>
+      </CardContent></Card>}
       <Divider sx={{ my: 5 }} />
       <Typography variant="h5" fontWeight={700} gutterBottom>Đánh giá & bình luận</Typography>
       <Card component="form" onSubmit={submitComment} sx={{ mb: 3 }}><CardContent>

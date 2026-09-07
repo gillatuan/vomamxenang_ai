@@ -31,7 +31,11 @@ export interface Product {
   minStock?: number;
   maxStock?: number;
   imageUrl?: string;
+  shortDescription?: string;
   description?: string;
+  highlights?: string[];
+  specifications?: Array<{ label: string; value: string }>;
+  applications?: string[];
   condition?: "NEW" | "NEW_100" | "USED";
   brand?: string;
   size?: string;
