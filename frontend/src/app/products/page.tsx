@@ -21,6 +21,7 @@ import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
+import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
 import { productsAPI, clientsAPI, Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
 
@@ -35,6 +36,7 @@ function ProductsContent() {
   const addItem = useCartStore((state) => state.addItem);
   const searchParams = useSearchParams();
   const condition = searchParams.get("condition") || undefined;
+  const watermark = useStoreWatermark();
 
   useEffect(() => {
     productsAPI
@@ -90,15 +92,7 @@ function ProductsContent() {
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
-                {product.imageUrl && (
-                  <Box
-                    component="img"
-                    src={product.imageUrl}
-                    alt={product.name}
-                    sx={{ width: "100%", height: { xs: 260, md: 330 }, objectFit: "cover", bgcolor: "#e9e5dc", transition: "transform .45s ease" }}
-                  />
-                )}
-                {!product.imageUrl && <Box sx={{ height: { xs: 260, md: 330 }, bgcolor: "#e9e5dc", display: "grid", placeItems: "center", color: "text.secondary", fontSize: ".7rem", letterSpacing: ".13em" }}>VÕ MÂM XE NÂNG</Box>}
+                <ProductImage src={product.imageUrl || "/images/products/solid-warehouse.png"} alt={product.name} watermark={watermark} imageSx={{ height: { xs: 260, md: 330 } }} />
                 <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25, pb: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>{product.name}</Typography>
                   <Chip

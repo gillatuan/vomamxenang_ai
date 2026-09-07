@@ -7,6 +7,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
+import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Product, productsAPI } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
@@ -26,6 +27,7 @@ export default function ProductDetailPage() {
   const [rating, setRating] = useState<number | null>(5);
   const [content, setContent] = useState("");
   const addItem = useCartStore((state) => state.addItem);
+  const watermark = useStoreWatermark();
 
   useEffect(() => {
     productsAPI.getOne(id).then((response) => setProduct(response.data)).catch(() => setProduct(null)).finally(() => setLoading(false));
@@ -49,7 +51,7 @@ export default function ProductDetailPage() {
     <PublicHeader />
     <Container sx={{ py: { xs: 3, md: 6 } }}>
       <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-        <Box component="img" src={product.imageUrl || "/placeholder-product.jpg"} alt={product.name} sx={{ width: { xs: "100%", md: "48%" }, maxHeight: 420, objectFit: "cover", borderRadius: 2, bgcolor: "grey.100" }} />
+        <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 2, overflow: "hidden" }}><ProductImage src={product.imageUrl || "/images/products/solid-warehouse.png"} alt={product.name} watermark={watermark} imageSx={{ height: { xs: 300, md: 420 } }} /></Box>
         <Box sx={{ flex: 1 }}>
           <Chip color={product.condition === "USED" ? "warning" : "success"} label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"} />
           <Typography variant="h4" fontWeight={700} sx={{ mt: 1 }}>{product.name}</Typography>

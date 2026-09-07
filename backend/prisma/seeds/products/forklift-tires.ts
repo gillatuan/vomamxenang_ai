@@ -160,6 +160,22 @@ export const forkliftTireProducts: ForkliftTireProductSeed[] = [
   },
 ];
 
+const catalogImageByProductId: Record<string, string> = {
+  'product-tire-phoenix-600-9-sharp-floor': '/images/products/solid-workshop.png',
+  'product-tire-solitech-500-8-clean-floor': '/images/products/non-marking-clean-floor.png',
+  'product-tire-dunlop-700-12-outdoor': '/images/products/pneumatic-outdoor.png',
+  'product-tire-yokohama-700-12-yard': '/images/products/pneumatic-outdoor.png',
+  'product-tire-tiron-700-12-replacement': '/images/products/pneumatic-outdoor.png',
+  'product-tire-deestone-700-12-mixed-ground': '/images/products/pneumatic-outdoor.png',
+  'product-tire-bridgestone-700-12-inspection': '/images/products/pneumatic-outdoor.png',
+  'product-tire-used-600-9-selection': '/images/products/solid-workshop.png',
+};
+
+for (const product of forkliftTireProducts) {
+  product.imageUrl = catalogImageByProductId[product.id]
+    ?? (product.tireType === 'NON_MARKING' ? '/images/products/non-marking-clean-floor.png' : '/images/products/solid-warehouse.png');
+}
+
 function normalize(value: string): string {
   return value.toLocaleLowerCase('vi-VN').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
 }
