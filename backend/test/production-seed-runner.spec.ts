@@ -14,7 +14,12 @@ class FakeSeedClient implements ProductionSeedClient {
       const input = args as { data: Array<{ slug: string }> };
       for (const product of input.data) if (!this.products.has(product.slug)) this.products.set(product.slug, product);
     },
+    update: async () => ({}),
+    updateMany: async () => ({}),
+    upsert: async () => ({}),
   };
+
+  readonly post = { upsert: async () => ({}) };
 
   readonly seedHistory = {
     findUnique: async ({ where }: { where: { key: string } }) => this.histories.get(where.key) ?? null,
