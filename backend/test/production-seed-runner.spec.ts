@@ -20,6 +20,7 @@ class FakeSeedClient implements ProductionSeedClient {
   };
 
   readonly post = { upsert: async () => ({}) };
+  readonly storeInfo = { upsert: async () => ({}) };
 
   readonly seedHistory = {
     findUnique: async ({ where }: { where: { key: string } }) => this.histories.get(where.key) ?? null,

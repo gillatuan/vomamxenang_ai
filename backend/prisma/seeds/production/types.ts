@@ -8,6 +8,9 @@ export interface ProductionSeedDatabase {
   post: {
     upsert(args: unknown): Promise<unknown>;
   };
+  storeInfo: {
+    upsert(args: unknown): Promise<unknown>;
+  };
 }
 
 export interface ProductionSeed {
