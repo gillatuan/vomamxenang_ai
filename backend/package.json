@@ -15,7 +15,10 @@
     "prisma:push:local": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/prisma/build/index.js db push",
     "seed": "prisma generate && ts-node --transpile-only prisma/seed.ts",
     "db:seed": "yarn seed",
+    "db:content:sync:local": "prisma generate && ts-node --transpile-only prisma/seed-content.ts",
+    "db:sync:local": "yarn prisma:migrate:local && yarn db:seed && yarn db:content:sync:local",
     "db:seed:production": "prisma generate && ts-node --transpile-only prisma/seed-production.ts",
+    "db:sync:production": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production",
     "test:production-seed": "ts-node --transpile-only test/production-seed-runner.spec.ts"
   },
   "dependencies": {
