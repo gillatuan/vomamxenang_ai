@@ -3,7 +3,8 @@ import type { Product, Post } from '@/lib/api-client';
 import { contentKeywords, contentPath, RelatedContent } from './content-seo';
 import { richTextPlain } from './rich-text';
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://vomamxenang.com').replace(/\/$/, '');
+import { siteUrl } from './site-config';
+export { siteUrl } from './site-config';
 const apiUrl = (process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vomamxenang-backend.vercel.app/api/v1').replace(/\/$/, '');
 export type PublicSeoItem = Partial<Product & Post> & { id: string; createdAt?: string; excerpt?: string; aliases?: string[] };
 
