@@ -70,7 +70,7 @@ export default function BlogPage() {
                   <Typography variant="body2" color="textSecondary">
                     {richTextPlain(post.content).substring(0, 100)}...
                   </Typography>
-                  <Button component={NextLink} href={`/blog/${post.id}`} variant="text" sx={{ px: 0, mt: 2, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>Đọc thêm</Button>
+                  <Button component={NextLink} href={`/blog/${post.slug || post.id}`} variant="text" sx={{ px: 0, mt: 2, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>Đọc thêm</Button>
                 </CardContent>
               </Card>
             </Grid>

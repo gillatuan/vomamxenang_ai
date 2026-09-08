@@ -170,6 +170,7 @@ model Product {
   imageUrl        String?
   description     String?
   slug            String?       @unique
+  aliases         String[]      @default([])
   shortDescription String?
   highlights      Json?
   specifications  Json?
@@ -336,6 +337,7 @@ model Post {
   content   String
   videoUrl  String?
   slug      String?       @unique
+  aliases   String[]      @default([])
   excerpt   String?
   tableOfContents Json?
   seo       Json?

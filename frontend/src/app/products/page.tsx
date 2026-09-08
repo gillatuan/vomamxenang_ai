@@ -110,7 +110,7 @@ function ProductsContent() {
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ px: 0, pb: 0, gap: 1 }}>
-                  <Button component={NextLink} href={`/products/${product.id}`} size="small" variant="text" sx={{ px: 0, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>
+                  <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>
                     Xem chi tiết
                   </Button>
                   {product.sellingPrice ? (

@@ -1,4 +1,6 @@
 "use client";
+import ContentSeoFields from "@/components/ContentSeoFields";
+import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
@@ -14,8 +16,8 @@ import { AdminGridState } from "@/components/admin/AdminGridState";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ContentStatus, Post, postsAPI } from "@/lib/api-client";
 
-type PostForm = { title: string; content: string; videoUrl: string; status: ContentStatus };
-const emptyForm: PostForm = { title: "", content: "", videoUrl: "", status: "DRAFT" };
+type PostForm = { slug: string; seo: SeoMetadata; title: string; content: string; videoUrl: string; status: ContentStatus };
+const emptyForm: PostForm = { slug: "", seo: {}, title: "", content: "", videoUrl: "", status: "DRAFT" };
 
 export default function PostsAdminPage() {
   const [rows, setRows] = useState<Post[]>([]);
@@ -35,18 +37,18 @@ export default function PostsAdminPage() {
 
   const openEditor = (post?: Post) => {
     setEditing(post ?? null);
-    setForm(post ? { title: post.title, content: post.content, videoUrl: post.videoUrl ?? "", status: post.status ?? "PUBLISHED" } : emptyForm);
+    setForm(post ? { slug: post.slug || "", seo: post.seo || {}, title: post.title, content: post.content, videoUrl: post.videoUrl ?? "", status: post.status ?? "PUBLISHED" } : emptyForm);
     setOpen(true);
   };
 
   const save = async (status: ContentStatus) => {
-    const data = { title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
+    const data = { slug: form.slug, seo: { ...form.seo, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
     if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
     try {
       if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
       setOpen(false);
       load();
-    } catch { setError("Không thể lưu bài viết."); }
+    } catch (error: any) { setError(error.response?.data?.message || "Không thể lưu bài viết."); }
   };
 
   const changeStatus = async (post: Post) => {
@@ -88,7 +90,9 @@ export default function PostsAdminPage() {
     <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
       <DialogTitle>{editing ? "Chỉnh sửa bài viết" : "Tạo bài viết"}</DialogTitle>
       <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
+        <ContentSeoFields id={editing?.id} kind="blog" title={form.title} content={form.content} slug={form.slug} seo={form.seo} onChange={(data) => setForm(current => ({ ...current, ...data }))} onContentChange={(content) => setForm(current => ({ ...current, content }))} />
         <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>

@@ -1,6 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-};
+const { PHASE_DEVELOPMENT_SERVER } = require("next/constants");
 
-module.exports = nextConfig;
+/** @type {import('next').NextConfig} */
+module.exports = (phase) => ({
+  reactStrictMode: true,
+  // Keep production builds from overwriting a running development server's chunks.
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
+});

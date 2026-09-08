@@ -62,7 +62,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell><MuiLink component={NextLink} href={`/products/${item.id}`} onClick={onClose}>{item.name}</MuiLink></TableCell>
+                      <TableCell><MuiLink component={NextLink} href={`/products/${item.slug || item.id}`} onClick={onClose}>{item.name}</MuiLink></TableCell>
                       <TableCell align="right">
                         <input
                           type="number"

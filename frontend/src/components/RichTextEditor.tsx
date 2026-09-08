@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { EditorContent, useEditor } from "@tiptap/react";
+import { postsAPI, productsAPI } from "@/lib/api-client";
+import { contentPath, RelatedContent } from "@/lib/content-seo";
 import StarterKit from "@tiptap/starter-kit";
 import { richTextHtml, richTextStyles } from "@/lib/rich-text";
 
 export default function RichTextEditor({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   const id = useId();
+  const [related, setRelated] = useState<RelatedContent[]>([]);
+  const [relatedError, setRelatedError] = useState(false);
+  const [linkText, setLinkText] = useState("");
   const [linkOpen, setLinkOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [linkError, setLinkError] = useState(false);
@@ -26,10 +31,21 @@ export default function RichTextEditor({ label, value, onChange }: { label: stri
     }
   }, [editor, value]);
 
+  useEffect(() => {
+    if (!linkOpen) return;
+    let active = true;
+    setRelatedError(false);
+    Promise.all([productsAPI.getAll(), postsAPI.getAll()]).then(([products, posts]) => {
+      if (active) setRelated([...products.data.map(item => ({ ...item, kind: 'products' as const })), ...posts.data.map(item => ({ ...item, kind: 'blog' as const }))]);
+    }).catch(() => { if (active) setRelatedError(true); });
+    return () => { active = false; };
+  }, [linkOpen]);
+
   const applyLink = () => {
     const href = url.trim();
     if (href && !/^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i.test(href)) { setLinkError(true); return; }
-    if (href) editor?.chain().focus().extendMarkRange("link").setLink({ href }).run();
+    if (href && editor?.state.selection.empty && linkText) editor.chain().focus().insertContent({ type: 'text', text: linkText, marks: [{ type: 'link', attrs: { href } }] }).run();
+    else if (href) editor?.chain().focus().extendMarkRange("link").setLink({ href }).run();
     else editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     setLinkOpen(false);
   };
@@ -43,7 +59,7 @@ export default function RichTextEditor({ label, value, onChange }: { label: stri
     { label: "Danh sách", active: editor?.isActive("bulletList"), run: () => editor?.chain().focus().toggleBulletList().run() },
     { label: "Đánh số", active: editor?.isActive("orderedList"), run: () => editor?.chain().focus().toggleOrderedList().run() },
     { label: "Trích dẫn", active: editor?.isActive("blockquote"), run: () => editor?.chain().focus().toggleBlockquote().run() },
-    { label: "Liên kết", active: editor?.isActive("link"), run: () => { setUrl(editor?.getAttributes("link").href || ""); setLinkError(false); setLinkOpen(true); } },
+    { label: "Liên kết", active: editor?.isActive("link"), run: () => { setUrl(editor?.getAttributes("link").href || ""); setLinkError(false); setLinkText(""); setLinkOpen(true); } },
     { label: "Bỏ liên kết", run: () => editor?.chain().focus().unsetLink().run() },
     { label: "Hoàn tác", run: () => editor?.chain().focus().undo().run() },
     { label: "Làm lại", run: () => editor?.chain().focus().redo().run() },
@@ -59,7 +75,11 @@ export default function RichTextEditor({ label, value, onChange }: { label: stri
     </Box>
     <Dialog open={linkOpen} onClose={() => setLinkOpen(false)} fullWidth maxWidth="sm">
       <DialogTitle>Chèn / sửa liên kết</DialogTitle>
-      <DialogContent><TextField autoFocus fullWidth label="Địa chỉ liên kết" value={url} onChange={(event) => { setUrl(event.target.value); setLinkError(false); }} error={linkError} helperText={linkError ? "Dùng https://, http://, mailto:, tel:, / hoặc #." : "Để trống để bỏ liên kết."} sx={{ mt: 1 }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyLink(); } }} /></DialogContent>
+      <DialogContent>
+        <Autocomplete options={related.filter(item => item.slug)} getOptionLabel={item => `${item.kind === 'products' ? 'Sản phẩm' : 'Bài viết'}: ${item.name || item.title}`} isOptionEqualToValue={(a, b) => a.id === b.id && a.kind === b.kind} onChange={(_, item) => { if (item) { setUrl(contentPath(item, item.kind)); setLinkText(item.name || item.title || ''); setLinkError(false); } }} renderInput={params => <TextField {...params} label="Chọn sản phẩm / bài viết liên quan" sx={{ mt: 1, mb: 2 }} />} />
+        {relatedError && <Alert severity="warning">Không tải được danh sách liên quan. Bạn vẫn có thể nhập liên kết bên dưới.</Alert>}
+        <TextField fullWidth label="Văn bản liên kết (khi chưa bôi đen nội dung)" value={linkText} onChange={event => setLinkText(event.target.value)} sx={{ mb: 2 }} />
+        <TextField autoFocus fullWidth label="Địa chỉ liên kết" value={url} onChange={(event) => { setUrl(event.target.value); setLinkError(false); }} error={linkError} helperText={linkError ? "Dùng https://, http://, mailto:, tel:, / hoặc #." : "Để trống để bỏ liên kết."} sx={{ mt: 1 }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyLink(); } }} /></DialogContent>
       <DialogActions><Button onClick={() => setLinkOpen(false)}>Hủy</Button><Button onClick={applyLink}>Áp dụng</Button></DialogActions>
     </Dialog>
   </Box>;

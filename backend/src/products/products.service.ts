@@ -1,3 +1,4 @@
+import { saveContent } from '../content/content-alias';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,15 +12,15 @@ export class ProductsService {
       where,
       orderBy: { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, seo: true, tags: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
     });
   }
 
   async findOne(id: string) {
-    return this.prisma.product.findUnique({
-      where: { id, status: 'PUBLISHED' },
+    return this.prisma.product.findFirst({
+      where: { status: 'PUBLISHED', OR: [{ id }, { slug: id }, { aliases: { has: id } }] },
       select: {
-        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, seo: true, tags: true, createdAt: true,
+        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true,
         productComments: {
           include: { user: { select: { id: true, email: true } } },
         },
@@ -51,11 +52,11 @@ export class ProductsService {
   async findOneAdmin(id: string) { return this.prisma.product.findUnique({ where: { id } }); }
 
   async create(data: any) {
-    return this.prisma.product.create({ data });
+    return saveContent(this.prisma, 'product', data);
   }
 
   async update(id: string, data: any) {
-    return this.prisma.product.update({ where: { id }, data });
+    return saveContent(this.prisma, 'product', data, id);
   }
 
   async remove(id: string) {

@@ -1,4 +1,6 @@
 "use client";
+import ContentSeoFields from "@/components/ContentSeoFields";
+import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
@@ -63,6 +65,8 @@ export default function ProductsPage() {
     quantityInStock: 0,
     imageUrl: "",
     description: "",
+    slug: "",
+    seo: {} as SeoMetadata,
     status: "DRAFT" as ContentStatus,
   });
 
@@ -98,6 +102,8 @@ export default function ProductsPage() {
       quantityInStock: product.stocks.reduce((total, stock) => total + stock.quantity, 0),
       imageUrl: product.imageUrl || "",
       description: product.description || "",
+      slug: product.slug || "",
+      seo: product.seo || {},
       status: product.status ?? "PUBLISHED",
     });
     setOpenDialog(true);
@@ -116,6 +122,8 @@ export default function ProductsPage() {
       sellingPrice: formData.sellingPrice,
       imageUrl: formData.imageUrl,
       description: formData.description,
+      slug: formData.slug,
+      seo: { ...formData.seo, keywords: (formData.seo.keywords || []).map(word => word.trim()).filter(Boolean) },
       minStock: formData.minStock,
       maxStock: formData.maxStock,
       status,
@@ -212,6 +220,8 @@ export default function ProductsPage() {
             quantityInStock: 0,
             imageUrl: "",
             description: "",
+            slug: "",
+            seo: {} as SeoMetadata,
             status: "DRAFT",
           });
           setOpenDialog(true);
@@ -285,6 +295,7 @@ export default function ProductsPage() {
           <Typography variant="h6" gutterBottom>
             {editingId ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
           </Typography>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth required disabled={Boolean(editingId)} label="SKU / mã QR" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
@@ -293,6 +304,7 @@ export default function ProductsPage() {
               <TextField fullWidth label="Tên sản phẩm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </Grid>
               <Grid item xs={12}>
+              <ContentSeoFields id={editingId || ""} kind="products" title={formData.name} content={formData.description} slug={formData.slug} seo={formData.seo} onChange={(data) => setFormData(current => ({ ...current, ...data }))} onContentChange={(description) => setFormData(current => ({ ...current, description }))} />
               <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} />
             </Grid>
             <Grid item xs={12} sm={6}>
