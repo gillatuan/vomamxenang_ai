@@ -1,4 +1,5 @@
 "use client";
+import { richTextPlain } from "@/lib/rich-text";
 
 import {
   Box,
@@ -102,7 +103,7 @@ function ProductsContent() {
                     label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"}
                   />
                   <Typography variant="body2" color="textSecondary" sx={{ mt: 1, lineHeight: 1.6 }}>
-                    {product.description}
+                    {richTextPlain(product.description || "")}
                   </Typography>
                   <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
                     {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}

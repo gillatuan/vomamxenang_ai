@@ -1,4 +1,7 @@
 "use client";
+import RichTextEditor from "@/components/RichTextEditor";
+import RichTextContent from "@/components/RichTextContent";
+import { richTextPlain } from "@/lib/rich-text";
 
 import {
   Box,
@@ -165,7 +168,7 @@ export default function ProductsPage() {
     const type = activeTab === 0 ? "TIRE" : "RIM";
     return products
       .filter((item) => item.type === type)
-      .filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()) || item.description?.toLowerCase().includes(searchText.toLowerCase()));
+      .filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()) || richTextPlain(item.description || "").toLowerCase().includes(searchText.toLowerCase()));
   }, [activeTab, products, searchText]);
 
   const rows = filteredProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -237,7 +240,7 @@ export default function ProductsPage() {
               <TableRow key={product.id}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.type}</TableCell>
-                <TableCell>{product.description || "-"}</TableCell>
+                <TableCell>{richTextPlain(product.description || "") || "-"}</TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
@@ -290,7 +293,7 @@ export default function ProductsPage() {
               <TextField fullWidth label="Tên sản phẩm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </Grid>
               <Grid item xs={12}>
-              <TextField fullWidth label="Mô tả" multiline rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+              <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Giá nhập" type="number" value={formData.importPrice} onChange={(e) => setFormData({ ...formData, importPrice: Number(e.target.value) })} />
@@ -306,9 +309,6 @@ export default function ProductsPage() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Link ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField fullWidth label="Mô tả" multiline rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
             </Grid>
           </Grid>
 
@@ -336,7 +336,7 @@ export default function ProductsPage() {
             <Typography><b>Trạng thái:</b> {(viewingProduct?.status ?? "PUBLISHED") === "PUBLISHED" ? "Đã publish" : "Nháp"}</Typography>
             <Typography><b>Giá nhập:</b> {(viewingProduct?.importPrice ?? 0).toLocaleString()} ₫</Typography>
             <Typography><b>Giá bán:</b> {viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}</Typography>
-            <Typography><b>Mô tả:</b> {viewingProduct?.description || "Chưa có mô tả."}</Typography>
+            <Box><Typography fontWeight={700}>Mô tả:</Typography><RichTextContent value={viewingProduct?.description || "Chưa có mô tả."} /></Box>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 3 }}>
             <Button onClick={() => setViewingProduct(null)}>Đóng</Button>

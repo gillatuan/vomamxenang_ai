@@ -1,4 +1,5 @@
 "use client";
+import { richTextPlain } from "@/lib/rich-text";
 
 import { Box, Button, Card, CardContent, CircularProgress, Container, Grid, Typography } from "@mui/material";
 import NextLink from "next/link";
@@ -67,7 +68,7 @@ export default function BlogPage() {
                     {post.title}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    {post.content.substring(0, 100)}...
+                    {richTextPlain(post.content).substring(0, 100)}...
                   </Typography>
                   <Button component={NextLink} href={`/blog/${post.id}`} variant="text" sx={{ px: 0, mt: 2, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px" }}>Đọc thêm</Button>
                 </CardContent>

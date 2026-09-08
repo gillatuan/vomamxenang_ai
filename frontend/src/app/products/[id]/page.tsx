@@ -1,4 +1,6 @@
 "use client";
+import RichTextContent from "@/components/RichTextContent";
+import { richTextPlain } from "@/lib/rich-text";
 
 import { Alert, Avatar, Box, Button, Card, CardContent, Chip, CircularProgress, Container, Divider, Grid, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -55,7 +57,7 @@ export default function ProductDetailPage() {
         <Box sx={{ flex: 1 }}>
           <Chip color={product.condition === "USED" ? "warning" : "success"} label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"} />
           <Typography variant="h4" fontWeight={700} sx={{ mt: 1 }}>{product.name}</Typography>
-          <Typography color="text.secondary" sx={{ mt: 2 }}>{product.shortDescription || product.description || "Thông tin sản phẩm đang được cập nhật."}</Typography>
+          <Typography color="text.secondary" sx={{ mt: 2 }}>{product.shortDescription || richTextPlain(product.description || "") || "Thông tin sản phẩm đang được cập nhật."}</Typography>
           <Stack spacing={1} sx={{ my: 3 }}>
             {product.brand && <Typography>Thương hiệu: <b>{product.brand}</b></Typography>}
             {product.size && <Typography>Kích thước: <b>{product.size}</b></Typography>}
@@ -84,7 +86,7 @@ export default function ProductDetailPage() {
       </Grid>}
       {product.description && <Card variant="outlined" sx={{ mt: 3 }}><CardContent>
         <Typography variant="h6" fontWeight={700} gutterBottom>Tư vấn lựa chọn & lắp đặt</Typography>
-        <Typography color="text.secondary" sx={{ whiteSpace: "pre-line", lineHeight: 1.8 }}>{product.description}</Typography>
+        <RichTextContent value={product.description} />
       </CardContent></Card>}
       <Divider sx={{ my: 5 }} />
       <Typography variant="h5" fontWeight={700} gutterBottom>Đánh giá & bình luận</Typography>

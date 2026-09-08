@@ -1,4 +1,5 @@
 "use client";
+import RichTextContent from "@/components/RichTextContent";
 
 import { Avatar, Box, Card, CardContent, CircularProgress, Container, Divider, Rating, Stack, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
@@ -24,7 +25,7 @@ export default function BlogDetailPage() {
     <Typography variant="h3" fontWeight={700}>{post.title}</Typography>
     <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>Chia sẻ kiến thức về lốp và mâm xe nâng</Typography>
     {embedUrl && <Box sx={{ position: "relative", pt: "56.25%", mb: 4, borderRadius: 2, overflow: "hidden" }}><Box component="iframe" src={embedUrl} title={post.title} allowFullScreen sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }} /></Box>}
-    <Typography whiteSpace="pre-wrap" lineHeight={1.8}>{post.content}</Typography>
+    <RichTextContent value={post.content} />
     <Divider sx={{ my: 5 }} />
     <Typography variant="h5" fontWeight={700} gutterBottom>Bình luận</Typography>
     <Stack spacing={2}>{comments.map((comment) => <Card key={comment.name} variant="outlined"><CardContent><Stack direction="row" spacing={1} alignItems="center"><Avatar>{comment.name[0]}</Avatar><Box><Typography fontWeight={700}>{comment.name}</Typography><Rating value={5} size="small" readOnly /></Box></Stack><Typography sx={{ mt: 1 }}>{comment.text}</Typography></CardContent></Card>)}</Stack>

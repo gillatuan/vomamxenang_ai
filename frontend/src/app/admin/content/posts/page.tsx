@@ -1,4 +1,7 @@
 "use client";
+import RichTextEditor from "@/components/RichTextEditor";
+import RichTextContent from "@/components/RichTextContent";
+import { richTextPlain } from "@/lib/rich-text";
 
 import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -38,7 +41,7 @@ export default function PostsAdminPage() {
 
   const save = async (status: ContentStatus) => {
     const data = { title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
-    if (!data.title || !data.content) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
+    if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
     try {
       if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
       setOpen(false);
@@ -61,7 +64,7 @@ export default function PostsAdminPage() {
 
   const columns: GridColDef<Post>[] = [
     { field: "title", headerName: "Tiêu đề", flex: 1.4 },
-    { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => row.content.slice(0, 180) },
+    { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
     { field: "status", headerName: "Trạng thái", width: 130, renderCell: (params: GridRenderCellParams<Post>) => {
       const status = params.row.status ?? "PUBLISHED";
       return <Chip size="small" label={status === "PUBLISHED" ? "Đã publish" : "Nháp"} color={status === "PUBLISHED" ? "success" : "default"} />;
@@ -86,7 +89,7 @@ export default function PostsAdminPage() {
       <DialogTitle>{editing ? "Chỉnh sửa bài viết" : "Tạo bài viết"}</DialogTitle>
       <DialogContent>
         <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
-        <TextField required fullWidth multiline minRows={8} label="Nội dung" value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} sx={{ mb: 2 }} />
+        <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>
       <DialogActions>
@@ -97,7 +100,7 @@ export default function PostsAdminPage() {
     </Dialog>
     <Dialog open={Boolean(viewing)} onClose={() => setViewing(null)} maxWidth="md" fullWidth>
       <DialogTitle>{viewing?.title}</DialogTitle>
-      <DialogContent><Box sx={{ whiteSpace: "pre-wrap" }}>{viewing?.content}</Box>{viewing?.videoUrl && <Box sx={{ mt: 2 }}><a href={viewing.videoUrl} target="_blank" rel="noreferrer">Mở video đính kèm</a></Box>}</DialogContent>
+      <DialogContent><RichTextContent value={viewing?.content} />{viewing?.videoUrl && <Box sx={{ mt: 2 }}><a href={viewing.videoUrl} target="_blank" rel="noreferrer">Mở video đính kèm</a></Box>}</DialogContent>
       <DialogActions><Button onClick={() => setViewing(null)}>Đóng</Button><Button variant="contained" onClick={() => { if (viewing) { setViewing(null); openEditor(viewing); } }}>Chỉnh sửa</Button></DialogActions>
     </Dialog>
   </Box>;
