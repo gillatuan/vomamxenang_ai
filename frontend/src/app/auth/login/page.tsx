@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api-client";
 import { useAuth } from "@/context/auth";
+import GoBackButton from "@/components/GoBackButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,11 +35,11 @@ export default function LoginPage() {
   return (
     <Container maxWidth="xs" sx={{ pt: 8 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 3, bgcolor: "background.paper", borderRadius: 2 }}>
+        <GoBackButton />
         <Avatar sx={{ bgcolor: "primary.main", mb: 1 }}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography variant="h6" sx={{ mb: 2 }}>Đăng nhập</Typography>
-        <MuiLink component={NextLink} href="/" sx={{ alignSelf: "flex-start" }}>← Quay lại Trang Chủ</MuiLink>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
           <TextField label="Email" type="email" fullWidth required value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mt: 2 }} />

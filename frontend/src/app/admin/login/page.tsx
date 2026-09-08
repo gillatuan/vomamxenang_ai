@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api-client";
 import { useAuth } from "@/context/auth";
+import GoBackButton from "@/components/GoBackButton";
 
 export default function LoginPage() {
   const theme = useTheme();
@@ -61,6 +62,7 @@ export default function LoginPage() {
           boxShadow: theme.shadows[3],
         }}
       >
+        <GoBackButton />
         <Avatar sx={{ m: 1, bgcolor: theme.palette.primary.main }}>
           <LockOutlinedIcon />
         </Avatar>
