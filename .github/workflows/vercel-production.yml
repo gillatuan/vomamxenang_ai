@@ -37,6 +37,7 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - run: node --test tests/*.test.cjs
       - run: yarn lint
       - run: yarn tsc --noEmit -p tsconfig.json
       - run: yarn build
@@ -61,6 +62,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Typecheck backend
         run: yarn tsc --noEmit -p tsconfig.build.json
+      - run: yarn test:seo
       - name: Test production seed runner
         run: yarn test:production-seed
       - run: yarn build

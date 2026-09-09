@@ -39,6 +39,7 @@ export interface Product {
   condition?: "NEW" | "NEW_100" | "USED";
   brand?: string;
   size?: string;
+  tireType?: string;
   status?: ContentStatus;
   slug?: string;
   seo?: SeoMetadata;
@@ -48,6 +49,8 @@ export interface Product {
 export type ContentStatus = "DRAFT" | "PUBLISHED";
 
 export interface SeoMetadata {
+  imageAlt?: string;
+  imageUrl?: string;
   title?: string;
   description?: string;
   keywords?: string[];

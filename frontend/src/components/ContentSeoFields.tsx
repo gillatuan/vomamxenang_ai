@@ -33,6 +33,10 @@ export default function ContentSeoFields({ id = '', kind, title, content, slug, 
       </Stack>
       <TextField fullWidth label="Tiêu đề SEO" value={seo.title || ''} placeholder={title} onChange={event => updateSeo({ title: event.target.value })} />
       <TextField fullWidth multiline minRows={2} label="Mô tả tìm kiếm" value={seo.description || ''} placeholder={richTextPlain(content).slice(0, 160)} onChange={event => updateSeo({ description: event.target.value })} helperText={`${(seo.description || '').length} ký tự · Viết tóm tắt tự nhiên, rõ nội dung trang.`} />
+      <TextField fullWidth label="Từ khóa chính" value={seo.primaryKeyword || ''} onChange={event => updateSeo({ primaryKeyword: event.target.value })} />
+      <TextField fullWidth label="Từ khóa phụ" value={(seo.secondaryKeywords || []).join(',')} onChange={event => updateSeo({ secondaryKeywords: event.target.value.split(',') })} />
+      {kind === 'blog' && <TextField fullWidth label="URL ảnh đại diện bài viết" value={seo.imageUrl || ''} onChange={event => updateSeo({ imageUrl: event.target.value })} helperText="Dùng ảnh thực tế mà bạn có quyền sử dụng." />}
+      <TextField fullWidth label="Alt ảnh đại diện" value={seo.imageAlt || ''} onChange={event => updateSeo({ imageAlt: event.target.value })} helperText="Mô tả đúng hình ảnh; mặc định dùng tên sản phẩm." />
       <TextField fullWidth label="Từ khóa (phân cách bằng dấu phẩy)" value={(seo.keywords || []).join(',')} onChange={event => updateSeo({ keywords: event.target.value.split(',') })} helperText="Dùng cụm từ liên quan đến nội dung. Từ khóa cũng giúp gợi ý liên kết nội bộ." />
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
         <Button variant="outlined" onClick={() => updateSeo({ title: seo.title || title, description: seo.description || richTextPlain(content).slice(0, 160), keywords: [...new Set([title, ...(seo.keywords || [])].map(word => word.trim()).filter(Boolean))] })}>Điền SEO từ nội dung</Button>

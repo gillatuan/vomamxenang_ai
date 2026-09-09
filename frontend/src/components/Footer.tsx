@@ -43,18 +43,18 @@ export function Footer() {
         <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: ".76rem", mb: 5 }}>VÕ MÂM XE NÂNG</Typography>
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Về chúng tôi</Typography>
+            <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Về chúng tôi</Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", lineHeight: 1.7 }}>
               {about}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Liên hệ</Typography>
+            <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Liên hệ</Typography>
             {storeInfo.email && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>Email: {storeInfo.email}</Typography>}
             {storeInfo.phone && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: .5 }}>Phone: {storeInfo.phone}</Typography>}
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Theo dõi</Typography>
+            <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Theo dõi</Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>
               {storeInfo.facebookUrl ? (
                 <Link href={storeInfo.facebookUrl} target="_blank" rel="noreferrer" color="inherit" underline="hover">

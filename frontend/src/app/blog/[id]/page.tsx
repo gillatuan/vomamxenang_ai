@@ -1,6 +1,7 @@
+import { RelatedContentNav } from "@/components/RelatedContentNav";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getPublicSeoItem, getRelatedCatalog, contentMetadata, contentJsonLd } from "@/lib/public-seo";
-import { contentPath, linkRelatedContent } from "@/lib/content-seo";
+import { contentPath, relatedContent } from "@/lib/content-seo";
 import type { Post } from "@/lib/api-client";
 import BlogDetail from "./BlogDetail";
 
@@ -15,6 +16,6 @@ export default async function Page({ params }: Props) {
   if (!item) notFound();
   if (item.slug && params.id !== item.slug) permanentRedirect(contentPath(item, "blog"));
   const catalog = await getRelatedCatalog();
-  const content = linkRelatedContent(item.content || "", catalog, { id: item.id, kind: "blog" });
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: contentJsonLd(item, "blog") }} /><BlogDetail post={{ ...item, content: content } as Post} /></>;
+  const related = relatedContent({ ...item, kind: "blog" }, catalog);
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: contentJsonLd(item, "blog") }} /><BlogDetail post={item as Post} related={<RelatedContentNav items={related} />} /></>;
 }

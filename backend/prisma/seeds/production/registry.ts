@@ -1,3 +1,4 @@
+import { seoOpportunitiesSeed } from './009-seo-opportunities.seed';
 import { ProductionSeed } from './types';
 import { createForkliftTireProductsSeed } from './003-create-forklift-tire-products.seed';
 import { curatePublicContentSeed } from './004-curate-public-content.seed';
@@ -15,4 +16,5 @@ export const productionSeeds: readonly ProductionSeed[] = [
   expandProductContentSeed,
   addCatalogImagesSeed,
   syncRecycledTireArticleSeed,
+  seoOpportunitiesSeed,
 ];

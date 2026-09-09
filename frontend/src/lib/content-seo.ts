@@ -5,7 +5,7 @@ export function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 120).replace(/-$/, '');
 }
-export type RelatedContent = { id: string; slug?: string; aliases?: string[]; name?: string; title?: string; tags?: string[]; seo?: SeoMetadata; kind: 'products' | 'blog' };
+export type RelatedContent = { id: string; slug?: string; aliases?: string[]; name?: string; title?: string; size?: string; brand?: string; tireType?: string; tags?: string[]; seo?: SeoMetadata; kind: 'products' | 'blog' };
 export const contentPath = (item: { id: string; slug?: string | null }, kind: 'products' | 'blog') => `/${kind}/${encodeURIComponent(item.slug || item.id)}`;
 export function contentKeywords(item: { name?: string; title?: string; tags?: string[]; seo?: SeoMetadata }) {
   return [...new Set([...(item.seo?.keywords || []), item.seo?.primaryKeyword || '', ...(item.seo?.secondaryKeywords || []), item.name || item.title || '', ...(item.tags || [])].map(x => x.trim()).filter(Boolean))].slice(0, 12);
@@ -59,4 +59,19 @@ export function linkRelatedContent(value: string, candidates: RelatedContent[], 
     }
     return fragments.map(fragment => fragment.value).join('');
   }).join('');
+}
+
+// Related navigation is computed from actual attributes; descriptions remain editor-controlled.
+export function relatedContent(current: RelatedContent, catalog: RelatedContent[]) {
+  const ranked = catalog.filter(item => item.id !== current.id || item.kind !== current.kind).map(item => {
+    let score = 0;
+    if (current.size && current.size === item.size) score += 35;
+    if (current.brand && current.brand === item.brand) score += 35;
+    if (current.tireType && current.tireType === item.tireType) score += 15;
+    const shared = (current.tags || []).filter(tag => (item.tags || []).includes(tag) && tag.toLowerCase() !== 'lốp xe nâng');
+    score += Math.min(24, shared.length * 8);
+    if (current.kind !== item.kind && shared.length) score += 10;
+    return { item, score };
+  }).filter(entry => entry.score >= 24).sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id)).map(entry => entry.item);
+  return [...ranked.filter(item => item.kind === 'products').slice(0, 3), ...ranked.filter(item => item.kind === 'blog').slice(0, 3)];
 }

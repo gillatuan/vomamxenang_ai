@@ -1,3 +1,4 @@
+import { SeoModule } from "./seo/seo.module"
 import { Module } from "@nestjs/common"
 import { AdminModule } from "./admin/admin.module"
 import { AuthModule } from "./auth/auth.module"
@@ -62,6 +63,7 @@ import { AboutModule } from "./about/about.module"
     AiModule,
     StoreInfoModule,
     AboutModule,
+    SeoModule,
   ],
   providers: [
     {

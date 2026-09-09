@@ -394,3 +394,100 @@ model PostComment {
   content   String
   createdAt DateTime @default(now())
 }
+
+// V3 stores reviewable recommendations independently of published content.
+enum BacklinkOpportunityType {
+  FORUM
+  BUSINESS_DIRECTORY
+  INDUSTRY_DIRECTORY
+  B2B_MARKETPLACE
+  BLOG
+  NEWS
+  GUEST_POST
+  SUPPLIER
+  PARTNER
+  ASSOCIATION
+  COMMUNITY
+  SOCIAL_PROFILE
+  LOCAL_CITATION
+  RESOURCE_PAGE
+}
+enum BacklinkStatus {
+  DISCOVERED
+  REVIEWING
+  APPROVED
+  CONTACTED
+  SUBMITTED
+  LIVE
+  REJECTED
+  REMOVED
+}
+model SeoAudit {
+  id String @id @default(cuid())
+  report Json
+  createdAt DateTime @default(now())
+}
+model InternalLinkSuggestion {
+  id String @id @default(cuid())
+  sourceType String
+  sourceId String
+  targetType String
+  targetId String
+  sourceUrl String
+  targetUrl String
+  anchorText String
+  reason String
+  score Int
+  status String @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([sourceType, sourceId, targetType, targetId])
+}
+model BacklinkOpportunity {
+  id String @id @default(cuid())
+  domain String
+  url String
+  name String
+  type BacklinkOpportunityType
+  relevanceScore Int?
+  authorityScore Int?
+  spamRiskScore Int?
+  supportsRegistration Boolean?
+  supportsPosting Boolean?
+  supportsProfileLink Boolean?
+  supportsGuestPost Boolean?
+  contactUrl String?
+  contactEmail String?
+  status BacklinkStatus @default(DISCOVERED)
+  notes String?
+  evidence String
+  evidenceUrl String
+  details Json
+  suggestedTargetUrl String
+  suggestedAnchorTexts String[]
+  suggestedApproach String
+  risk String @default("UNKNOWN")
+  requiresManualReview Boolean @default(true)
+  outreach Json?
+  discoveredAt DateTime @default(now())
+  lastCheckedAt DateTime?
+  updatedAt DateTime @updatedAt
+  backlinks Backlink[]
+  @@unique([domain, url])
+  @@index([status, relevanceScore])
+}
+model Backlink {
+  id String @id @default(cuid())
+  opportunityId String
+  opportunity BacklinkOpportunity @relation(fields: [opportunityId], references: [id])
+  sourceUrl String
+  sourceDomain String
+  targetUrl String
+  anchorText String?
+  rel String?
+  firstSeenAt DateTime?
+  lastCheckedAt DateTime?
+  isLive Boolean @default(false)
+  verificationNote String?
+  @@unique([sourceUrl, targetUrl])
+}

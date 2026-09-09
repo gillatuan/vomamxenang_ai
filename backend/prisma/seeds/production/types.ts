@@ -1,4 +1,5 @@
 export interface ProductionSeedDatabase {
+  backlinkOpportunity?: { upsert(args: unknown): Promise<unknown> };
   product: {
     createMany(args: unknown): Promise<unknown>;
     update(args: unknown): Promise<unknown>;

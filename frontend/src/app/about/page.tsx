@@ -28,7 +28,7 @@ export default function AboutPage() {
         <Typography component="h1" variant="h3" fontWeight={800} sx={{ color: "#5d3416", mb: 2 }}>
           {about.title || fallbackAbout.title}
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ lineHeight: 1.7, mb: 4 }}>
+        <Typography component="p" variant="h6" color="text.secondary" sx={{ lineHeight: 1.7, mb: 4 }}>
           {about.summary || fallbackAbout.summary}
         </Typography>
         {about.imageUrl && <Box component="img" src={about.imageUrl} alt={about.title || fallbackAbout.title} sx={{ width: "100%", maxHeight: 420, objectFit: "cover", borderRadius: 3, mb: 4 }} />}
