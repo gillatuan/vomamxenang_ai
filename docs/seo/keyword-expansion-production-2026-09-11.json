@@ -1,0 +1,2520 @@
+{
+  "id": "cmtx7253c0027jxtdttmr3b79",
+  "report": {
+    "pages": [
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com",
+        "kind": "PAGE",
+        "meta": "Tìm hiểu vỏ mâm xe nâng: danh mục lốp đặc, lốp hơi, thông số mâm và hướng dẫn lựa chọn theo kích thước, cấu hình xe, điều kiện vận hành.",
+        "path": "/",
+        "score": 100,
+        "title": "Vỏ mâm xe nâng | Vỏ xe nâng, lốp đặc và mâm",
+        "issues": [],
+        "schemas": [
+          "Organization",
+          "WebSite"
+        ],
+        "incoming": [
+          "/products",
+          "/blog",
+          "/about",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login"
+        ],
+        "canonical": "https://www.vomamxenang.com",
+        "wordCount": 190,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/about",
+        "kind": "PAGE",
+        "meta": "Tìm hiểu Võ Mâm Xe Nâng và dịch vụ tư vấn, cung cấp lốp, mâm, phụ tùng xe nâng.",
+        "path": "/about",
+        "score": 100,
+        "title": "Giới thiệu Võ Mâm Xe Nâng | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [],
+        "incoming": [
+          "/",
+          "/products",
+          "/blog",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login"
+        ],
+        "canonical": "https://www.vomamxenang.com/about",
+        "wordCount": 74,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/blog",
+        "kind": "PAGE",
+        "meta": "Hướng dẫn chọn lốp, đọc thông số, kiểm tra mâm và bảo dưỡng xe nâng trong kho xưởng.",
+        "path": "/blog",
+        "score": 100,
+        "title": "Kiến thức lốp và mâm xe nâng | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [],
+        "incoming": [
+          "/",
+          "/products",
+          "/about",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog",
+        "wordCount": 189,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "post-1",
+        "url": "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+        "kind": "POST",
+        "meta": "So sánh lốp đặc và lốp hơi xe nâng theo môi trường vận hành, kiểm tra mâm và kế hoạch bảo trì.",
+        "path": "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+        "score": 91,
+        "title": "Nên chọn lốp đặc hay lốp hơi cho xe nâng?",
+        "issues": [
+          {
+            "code": "MISSING_IMAGE",
+            "detail": "Chưa có ảnh trong HTML",
+            "severity": "Low"
+          },
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "BlogPosting",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/blog",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+        "wordCount": 167,
+        "contextual": [
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "post-2",
+        "url": "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+        "kind": "POST",
+        "meta": "Hướng dẫn đọc size lốp xe nâng, kiểm tra mâm và chuẩn bị thông tin trước khi thay lốp.",
+        "path": "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+        "score": 91,
+        "title": "Cách đọc thông số lốp xe nâng trước khi thay",
+        "issues": [
+          {
+            "code": "MISSING_IMAGE",
+            "detail": "Chưa có ảnh trong HTML",
+            "severity": "Low"
+          },
+          {
+            "code": "THIN_CONTENT",
+            "detail": "147 từ; ngưỡng sàng lọc, cần đánh giá thủ công",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "BlogPosting",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/blog",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+        "wordCount": 147,
+        "contextual": [
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "contextualIncoming": [
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "post-4",
+        "url": "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+        "kind": "POST",
+        "meta": "Hướng dẫn kiểm tra mâm xe nâng trước khi ép lốp để hạn chế rung, mòn bất thường và sai cấu hình.",
+        "path": "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+        "score": 98,
+        "title": "5 điểm cần kiểm tra ở mâm xe nâng trước khi ép lốp",
+        "issues": [
+          {
+            "code": "MISSING_IMAGE",
+            "detail": "Chưa có ảnh trong HTML",
+            "severity": "Low"
+          }
+        ],
+        "schemas": [
+          "BlogPosting",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/blog",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+        "wordCount": 175,
+        "contextual": [
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": [
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "post-3",
+        "url": "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach",
+        "kind": "POST",
+        "meta": "Tìm hiểu khi nào nên chọn lốp xe nâng không để lại vệt và các bước kiểm tra mâm, tải trọng trước khi thay.",
+        "path": "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+        "score": 77,
+        "title": "Khi nào nên dùng lốp xe nâng không để lại vệt?",
+        "issues": [
+          {
+            "code": "MISSING_IMAGE",
+            "detail": "Chưa có ảnh trong HTML",
+            "severity": "Low"
+          },
+          {
+            "code": "NO_INTERNAL_LINKS",
+            "detail": "Mô tả chưa có liên kết nội bộ",
+            "severity": "Medium"
+          },
+          {
+            "code": "NO_PRODUCT_LINKS",
+            "detail": "Bài viết chưa dẫn tới sản phẩm trong nội dung",
+            "severity": "Medium"
+          },
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "BlogPosting",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/blog"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach",
+        "wordCount": 150,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "0d3e5af7-dddf-4401-a35e-51ee8dafa4a6",
+        "url": "https://www.vomamxenang.com/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+        "kind": "POST",
+        "meta": "Từ 2 vỏ xe nâng cũ đến một bánh xe rùa hoàn chỉnh Mục tiêu: tận dụng phần cao su còn tốt của lốp xe nâng đã qua sử dụng để tạo bánh xe rùa bền, phù hợp môi trườ",
+        "path": "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+        "score": 91,
+        "title": "Từ 2 vỏ xe nâng cũ đến một bánh xe rùa hoàn chỉnh",
+        "issues": [
+          {
+            "code": "MISSING_IMAGE",
+            "detail": "Chưa có ảnh trong HTML",
+            "severity": "Low"
+          },
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "BlogPosting",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/blog"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "canonical": "https://www.vomamxenang.com/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+        "wordCount": 802,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/lop-dac-xe-nang",
+        "kind": "PAGE",
+        "meta": "Danh mục lốp đặc xe nâng theo size và thương hiệu thực tế. Đối chiếu mâm, vị trí bánh và điều kiện nền kho trước khi chọn vỏ.",
+        "path": "/lop-dac-xe-nang",
+        "score": 100,
+        "title": "Vỏ đặc xe nâng | Kích thước, sản phẩm và hướng dẫn chọn",
+        "issues": [],
+        "schemas": [
+          "BreadcrumbList",
+          "CollectionPage"
+        ],
+        "incoming": [
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "canonical": "https://www.vomamxenang.com/lop-dac-xe-nang",
+        "wordCount": 338,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/mam-xe-nang",
+        "kind": "PAGE",
+        "meta": "Xem mâm xe nâng theo kích thước, số lỗ và thông tin model đang được ghi nhận. Đối chiếu mâm thực tế trước khi chọn vỏ hoặc thực hiện ép lắp.",
+        "path": "/mam-xe-nang",
+        "score": 100,
+        "title": "Mâm xe nâng | Thông số và cách đối chiếu với vỏ",
+        "issues": [],
+        "schemas": [
+          "BreadcrumbList",
+          "CollectionPage"
+        ],
+        "incoming": [
+          "/",
+          "/products",
+          "/blog",
+          "/about",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/products",
+          "/admin/login",
+          "/mam-xe-nang/rim-1",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+          "/lop-dac-xe-nang"
+        ],
+        "canonical": "https://www.vomamxenang.com/mam-xe-nang",
+        "wordCount": 280,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/mam-xe-nang/rim-1",
+        "kind": "PAGE",
+        "meta": "Mâm xe nâng 6.50-10 5 lỗ · OEM. Thông tin dòng xe ghi nhận: Toyota, Komatsu. Đối chiếu kích thước và cấu hình lắp thực tế trước khi đặt hàng.",
+        "path": "/mam-xe-nang/rim-1",
+        "score": 100,
+        "title": "Mâm xe nâng 6.50-10 5 lỗ · OEM",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/mam-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "canonical": "https://www.vomamxenang.com/mam-xe-nang/rim-1",
+        "wordCount": 143,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/products",
+        "kind": "PAGE",
+        "meta": "Danh mục lốp đặc, lốp hơi, mâm và dịch vụ xe nâng. Xem kích thước, thương hiệu và tư vấn lựa chọn phù hợp.",
+        "path": "/products",
+        "score": 100,
+        "title": "Sản phẩm lốp và mâm xe nâng | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [],
+        "incoming": [
+          "/",
+          "/blog",
+          "/about",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/admin/login",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong"
+        ],
+        "canonical": "https://www.vomamxenang.com/products",
+        "wordCount": 3732,
+        "contextual": [],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-3",
+        "url": "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+        "kind": "PRODUCT",
+        "meta": "Dịch vụ khảo sát, thay lốp và ép mâm xe nâng theo cấu hình thực tế. Kiểm tra lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi thi công.",
+        "path": "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+        "score": 93,
+        "title": "Khảo sát, thay lốp và ép mâm xe nâng | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+        "wordCount": 158,
+        "contextual": [
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-casumina-600-9-rim-check",
+        "url": "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc CASUMINA kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+        "score": 93,
+        "title": "Lốp đặc Casumina 6.00-9 cần đối chiếu mâm | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+        "wordCount": 204,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-komachi-600-9-shift",
+        "url": "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc KOMACHI kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+        "score": 100,
+        "title": "Lốp đặc Komachi 6.00-9 cho xe nâng chạy ca | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+        "wordCount": 205,
+        "contextual": [
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": [
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-masai-600-9-indoor",
+        "url": "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc MASAI kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+        "score": 100,
+        "title": "Lốp đặc Masai 6.00-9 cho lối đi trong nhà | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+        "wordCount": 205,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": [
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-mr-solid-500-8-compact",
+        "url": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc MR.SOLID kích thước 5.00-8 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "score": 93,
+        "title": "Lốp đặc MR.SOLID 5.00-8 cho xe nâng gọn | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "wordCount": 204,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-nexen-600-9-warehouse",
+        "url": "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc NEXEN kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+        "score": 93,
+        "title": "Lốp đặc Nexen 6.00-9 cho kho xưởng | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+        "wordCount": 203,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-phoenix-600-9-sharp-floor",
+        "url": "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc PHOENIX kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+        "score": 93,
+        "title": "Lốp đặc Phoenix 6.00-9 cho nền nhiều vật sắc | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+        "wordCount": 205,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-solitech-500-8-clean-floor",
+        "url": "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc không để lại vệt SOLITECH kích thước 5.00-8 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+        "score": 100,
+        "title": "Lốp đặc Solitech 5.00-8 cho nền sạch | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+        "wordCount": 200,
+        "contextual": [
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": [
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-success-600-9-maintenance",
+        "url": "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc SUCCESS kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+        "score": 93,
+        "title": "Lốp đặc Success 6.00-9 cho bảo trì định kỳ | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+        "wordCount": 205,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-1",
+        "url": "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "score": 86,
+        "title": "Lốp đặc xe nâng 6.00-9 cho kho xưởng | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          },
+          {
+            "code": "DUPLICATE_META",
+            "detail": "Trùng nội dung với URL khác trong audit",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "wordCount": 204,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-bridgestone-700-12-inspection",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi BRIDGESTONE kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+        "score": 93,
+        "title": "Lốp hơi Bridgestone 7.00-12 cần kiểm tra mâm | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+        "wordCount": 202,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-deestone-700-12-mixed-ground",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi DEESTONE kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+        "score": 93,
+        "title": "Lốp hơi Deestone 7.00-12 cho nền hỗn hợp | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+        "wordCount": 202,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-dunlop-700-12-outdoor",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi DUNLOP kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+        "score": 100,
+        "title": "Lốp hơi Dunlop 7.00-12 cho bãi ngoài trời | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+        "wordCount": 202,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "contextualIncoming": [
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-tiron-700-12-replacement",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi TIRON kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+        "score": 93,
+        "title": "Lốp hơi Tiron 7.00-12 thay thế theo kích thước | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+        "wordCount": 203,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-2",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "score": 100,
+        "title": "Lốp hơi xe nâng 7.00-12 cho sân bãi | Võ Mâm Xe Nâng",
+        "issues": [],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "wordCount": 202,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca"
+        ],
+        "contextualIncoming": [
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ]
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-yokohama-700-12-yard",
+        "url": "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp hơi YOKOHAMA kích thước 7.00-12 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+        "score": 93,
+        "title": "Lốp hơi Yokohama 7.00-12 cho khu giao nhận | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "NO_CONTEXTUAL_INCOMING",
+            "detail": "Chưa có liên kết tới trong mô tả Product/Post; xem gợi ý source",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+        "wordCount": 202,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai"
+        ],
+        "contextualIncoming": []
+      },
+      {
+        "h1": 1,
+        "id": "product-tire-used-600-9-selection",
+        "url": "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+        "kind": "PRODUCT",
+        "meta": "Tư vấn lốp đặc kích thước 6.00-9 cho xe nâng. Đối chiếu lốp cũ, mâm, vị trí bánh và điều kiện vận hành trước khi lắp.",
+        "path": "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+        "score": 93,
+        "title": "Lốp xe nâng cũ 6.00-9 cần kiểm tra thực tế | Võ Mâm Xe Nâng",
+        "issues": [
+          {
+            "code": "DUPLICATE_META",
+            "detail": "Trùng nội dung với URL khác trong audit",
+            "severity": "Medium"
+          }
+        ],
+        "schemas": [
+          "Product",
+          "BreadcrumbList"
+        ],
+        "incoming": [
+          "/products",
+          "/vo-xe-nang",
+          "/lop-dac-xe-nang",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/vo-xe-nang",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/lop-dac-xe-nang",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "canonical": "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+        "wordCount": 204,
+        "contextual": [
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi"
+        ],
+        "contextualIncoming": [
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh"
+        ]
+      },
+      {
+        "h1": 1,
+        "url": "https://www.vomamxenang.com/vo-xe-nang",
+        "kind": "PAGE",
+        "meta": "Xem các loại vỏ xe nâng đang có trong danh mục, đối chiếu kích thước và thương hiệu. Tham khảo hướng dẫn chọn lốp đặc, lốp hơi và mâm phù hợp.",
+        "path": "/vo-xe-nang",
+        "score": 100,
+        "title": "Vỏ xe nâng | Chọn lốp theo kích thước và điều kiện vận hành",
+        "issues": [],
+        "schemas": [
+          "BreadcrumbList",
+          "CollectionPage"
+        ],
+        "incoming": [
+          "/",
+          "/products",
+          "/blog",
+          "/about",
+          "/lop-dac-xe-nang",
+          "/mam-xe-nang/rim-1",
+          "/mam-xe-nang",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/blog/lop-khong-de-lai-vet-cho-kho-sach",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "outgoing": [
+          "/",
+          "/about",
+          "/blog",
+          "/mam-xe-nang",
+          "/products",
+          "/admin/login",
+          "/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "/lop-dac-xe-nang"
+        ],
+        "canonical": "https://www.vomamxenang.com/vo-xe-nang",
+        "wordCount": 404,
+        "contextual": [],
+        "contextualIncoming": []
+      }
+    ],
+    "scope": "Public server-rendered HTML + stored descriptions; external links excluded. Unknown fetches are not passes. No search-engine rankings.",
+    "issues": {
+      "Low": 5,
+      "High": 0,
+      "Medium": 19,
+      "Critical": 0
+    },
+    "checkedAt": "2026-09-11T16:52:18.687Z",
+    "redirects": {},
+    "unchecked": [],
+    "keywordMap": [
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ mâm xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "https://www.vomamxenang.com/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+          "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+          "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach"
+        ],
+        "secondaryKeywords": [
+          "vỏ và mâm xe nâng",
+          "vỏ mâm bánh xe nâng"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "NAVIGATIONAL",
+        "keyword": "vomamxenang.com",
+        "primaryUrl": "https://www.vomamxenang.com/",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "Võ Mâm Xe Nâng chính thức"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/vo-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [
+          "lốp xe nâng",
+          "vỏ lốp xe nâng",
+          "bánh xe nâng"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "lốp xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/vo-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "giá vỏ xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/vo-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [
+          "mua vỏ xe nâng",
+          "nhà cung cấp vỏ xe nâng"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ đặc xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/lop-dac-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [
+          "lốp đặc xe nâng",
+          "vỏ xe nâng đặc"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ hơi xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop"
+        ],
+        "secondaryKeywords": [
+          "lốp hơi xe nâng",
+          "vỏ xe nâng hơi"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "mâm xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/mam-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "secondaryKeywords": [
+          "mâm bánh xe nâng",
+          "mâm lốp xe nâng"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "mâm xe nâng 6.50-10 5 lỗ",
+        "primaryUrl": "https://www.vomamxenang.com/mam-xe-nang/rim-1",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "mâm xe nâng 5 lỗ"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "mâm xe nâng Toyota",
+        "primaryUrl": "https://www.vomamxenang.com/mam-xe-nang/rim-1",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "cần đối chiếu model và cấu hình lắp thực tế"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "mâm xe nâng Komatsu",
+        "primaryUrl": "https://www.vomamxenang.com/mam-xe-nang/rim-1",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "cần đối chiếu model và cấu hình lắp thực tế"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ xe nâng 7.00-12",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan"
+        ],
+        "secondaryKeywords": [
+          "lốp xe nâng 7.00-12"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "lốp xe nâng 7.00-12",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ xe nâng 6.00-9",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky"
+        ],
+        "secondaryKeywords": [
+          "lốp xe nâng 6.00-9"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "lốp xe nâng 6.00-9",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "vỏ xe nâng 5.00-8",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach"
+        ],
+        "secondaryKeywords": [
+          "lốp xe nâng 5.00-8"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "lốp xe nâng 5.00-8",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng DUNLOP",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng DUNLOP"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng TIRON",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng TIRON"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng SUCCESS",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng SUCCESS"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng BRIDGESTONE",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng BRIDGESTONE"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng SOLITECH",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng SOLITECH"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng YOKOHAMA",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng YOKOHAMA"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng MASAI",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng MASAI"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng MR.SOLID",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng MR.SOLID"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng PHOENIX",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng PHOENIX"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng DEESTONE",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng DEESTONE"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng NEXEN",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng NEXEN"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng KOMACHI",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng KOMACHI"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "COMMERCIAL INVESTIGATION",
+        "keyword": "vỏ xe nâng CASUMINA",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+        "supportingUrls": [],
+        "secondaryKeywords": [
+          "lốp xe nâng CASUMINA"
+        ],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi Dunlop 7.00-12 cho bãi ngoài trời",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi Tiron 7.00-12 thay thế theo kích thước",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Success 6.00-9 cho bảo trì định kỳ",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi Bridgestone 7.00-12 cần kiểm tra mâm",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi xe nâng 7.00-12 cho sân bãi",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Dịch vụ khảo sát, thay lốp và ép mâm xe nâng",
+        "primaryUrl": "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Solitech 5.00-8 cho nền sạch",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi Yokohama 7.00-12 cho khu giao nhận",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Masai 6.00-9 cho lối đi trong nhà",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc MR.SOLID 5.00-8 cho xe nâng gọn",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Phoenix 6.00-9 cho nền nhiều vật sắc",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp hơi Deestone 7.00-12 cho nền hỗn hợp",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp xe nâng cũ 6.00-9 cần kiểm tra thực tế",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc xe nâng 6.00-9 cho kho xưởng",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Nexen 6.00-9 cho kho xưởng",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+          "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Komachi 6.00-9 cho xe nâng chạy ca",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "TRANSACTIONAL",
+        "keyword": "Lốp đặc Casumina 6.00-9 cần đối chiếu mâm",
+        "primaryUrl": "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-dunlop-7-00-12-cho-bai-ngoai-troi",
+          "https://www.vomamxenang.com/products/lop-hoi-tiron-7-00-12-thay-theo-kich-thuoc",
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/lop-hoi-bridgestone-7-00-12-can-kiem-tra-mam",
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-solitech-5-00-8-cho-nen-sach",
+          "https://www.vomamxenang.com/products/lop-hoi-yokohama-7-00-12-cho-khu-giao-nhan",
+          "https://www.vomamxenang.com/products/lop-dac-masai-6-00-9-cho-loi-di-trong-nha",
+          "https://www.vomamxenang.com/products/lop-dac-mr-solid-5-00-8-cho-xe-nang-gon",
+          "https://www.vomamxenang.com/products/lop-dac-phoenix-6-00-9-cho-nen-nhieu-vat-sac",
+          "https://www.vomamxenang.com/products/lop-hoi-deestone-7-00-12-cho-nen-hon-hop",
+          "https://www.vomamxenang.com/products/lop-xe-nang-cu-6-00-9-can-kiem-tra-thuc-te",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-komachi-6-00-9-cho-xe-nang-chay-ca",
+          "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "INFORMATIONAL",
+        "keyword": "Nên chọn lốp đặc hay lốp hơi cho xe nâng?",
+        "primaryUrl": "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-hoi-xe-nang-7-00-12-cho-san-bai",
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "INFORMATIONAL",
+        "keyword": "Từ 2 vỏ xe nâng cũ đến một bánh xe rùa hoàn chỉnh",
+        "primaryUrl": "https://www.vomamxenang.com/blog/tu-2-vo-xe-nang-cu-den-mot-banh-xe-rua-hoan-chinh",
+        "supportingUrls": [],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "INFORMATIONAL",
+        "keyword": "Cách đọc thông số lốp xe nâng trước khi thay",
+        "primaryUrl": "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "INFORMATIONAL",
+        "keyword": "5 điểm cần kiểm tra ở mâm xe nâng trước khi ép lốp",
+        "primaryUrl": "https://www.vomamxenang.com/blog/kiem-tra-mam-xe-nang-truoc-khi-ep-lop",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-success-6-00-9-cho-bao-tri-dinh-ky",
+          "https://www.vomamxenang.com/products/dich-vu-thay-lop-ep-mam-xe-nang",
+          "https://www.vomamxenang.com/products/lop-dac-casumina-6-00-9-can-doi-chieu-mam",
+          "https://www.vomamxenang.com/blog/doc-thong-so-lop-xe-nang-truoc-khi-thay"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      },
+      {
+        "intent": "INFORMATIONAL",
+        "keyword": "Khi nào nên dùng lốp xe nâng không để lại vệt?",
+        "primaryUrl": "https://www.vomamxenang.com/blog/lop-khong-de-lai-vet-cho-kho-sach",
+        "supportingUrls": [
+          "https://www.vomamxenang.com/products/lop-dac-xe-nang-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/products/lop-dac-nexen-6-00-9-cho-kho-xuong",
+          "https://www.vomamxenang.com/blog/chon-lop-dac-hay-lop-hoi-cho-xe-nang"
+        ],
+        "secondaryKeywords": [],
+        "competingPrimaryUrls": []
+      }
+    ],
+    "suggestions": 79,
+    "additionalLinksChecked": 0
+  },
+  "createdAt": "2026-09-11T16:52:18.887Z"
+}
