@@ -57,7 +57,7 @@ export interface SeoMetadata {
   primaryKeyword?: string;
   secondaryKeywords?: string[];
   canonicalPath?: string;
-  robots?: "index,follow" | "noindex,nofollow";
+  robots?: "index,follow" | "noindex,nofollow" | "noindex,follow";
   openGraph?: { title?: string; description?: string; type?: "product" | "article" };
   twitter?: { card?: "summary_large_image"; title?: string; description?: string };
 }

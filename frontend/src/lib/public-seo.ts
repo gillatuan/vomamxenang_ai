@@ -1,3 +1,7 @@
+import { uniqueKeywords } from './seo/keyword-utils';
+import { productSeoDefaults } from './seo/product-seo';
+import { breadcrumbSchema, Crumb, jsonLd } from './seo/structured-data';
+import type { PublicRim } from './seo/rim-seo';
 import type { Metadata } from 'next';
 import type { Product, Post } from '@/lib/api-client';
 import { contentKeywords, contentPath, RelatedContent } from './content-seo';
@@ -27,9 +31,10 @@ export async function getRelatedCatalog(): Promise<RelatedContent[]> {
 }
 export function seoValues(item: PublicSeoItem, fallbackPath: string) {
   const contentSeo = item.seo ?? {};
-  const title = contentSeo.title || item.name || item.title || 'Võ Mâm Xe Nâng';
-  const description = richTextPlain(contentSeo.description || item.shortDescription || item.excerpt || item.description || item.content || title).slice(0, 160);
-  return { title, description, canonical: `${siteUrl}${fallbackPath}`, keywords: contentKeywords(item), robots: contentSeo.robots || 'index,follow', openGraph: contentSeo.openGraph, twitter: contentSeo.twitter };
+  const defaults = item.name ? productSeoDefaults(item) : { title: item.title || 'Võ Mâm Xe Nâng', description: richTextPlain(item.excerpt || item.content || item.title || '').slice(0, 160) };
+  const title = contentSeo.title?.trim() || defaults.title;
+  const description = richTextPlain(contentSeo.description?.trim() || defaults.description || title).slice(0, 160);
+  return { title, description, canonical: `${siteUrl}${fallbackPath}`, keywords: uniqueKeywords([...contentKeywords(item), ...(item.name && !contentSeo.primaryKeyword ? [productSeoDefaults(item).primaryKeyword, ...productSeoDefaults(item).secondaryKeywords] : [])]), robots: contentSeo.robots || 'index,follow', openGraph: contentSeo.openGraph, twitter: contentSeo.twitter };
 }
 export function contentMetadata(item: PublicSeoItem, kind: 'products' | 'blog'): Metadata {
   const seo = seoValues(item, contentPath(item, kind));
@@ -42,16 +47,26 @@ export function contentMetadata(item: PublicSeoItem, kind: 'products' | 'blog'):
 }
 export function contentJsonLd(item: PublicSeoItem, kind: 'products' | 'blog') {
   const seo = seoValues(item, contentPath(item, kind));
-  const entity = { '@context': 'https://schema.org', '@type': kind === 'products' ? 'Product' : 'BlogPosting', name: item.name || item.title, ...(kind === 'blog' ? { headline: item.title, datePublished: item.createdAt } : { sku: item.sku, ...(item.brand ? { brand: { '@type': 'Brand', name: item.brand } } : {}) }), description: seo.description, url: seo.canonical, ...((item.imageUrl || item.seo?.imageUrl) ? { image: item.imageUrl || item.seo?.imageUrl } : {}), keywords: seo.keywords.join(', ') };
-  return JSON.stringify([entity, { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: siteUrl },
-    { '@type': 'ListItem', position: 2, name: kind === 'products' ? 'Sản phẩm' : 'Bài viết', item: `${siteUrl}/${kind}` },
-    { '@type': 'ListItem', position: 3, name: item.name || item.title, item: seo.canonical },
-  ] }]).replace(/</g, '\\u003c');
+  const entity = { '@context': 'https://schema.org', '@type': kind === 'products' ? 'Product' : 'BlogPosting', name: item.name || item.title, ...(kind === 'blog' ? { headline: item.title, datePublished: item.createdAt, mainEntityOfPage: { '@type': 'WebPage', '@id': seo.canonical } } : { sku: item.sku, ...(typeof item.sellingPrice === 'number' && item.sellingPrice > 0 ? { offers: { '@type': 'Offer', price: item.sellingPrice, priceCurrency: 'VND', url: seo.canonical } } : {}), ...(item.brand ? { brand: { '@type': 'Brand', name: item.brand } } : {}) }), description: seo.description, url: seo.canonical, ...((item.imageUrl || item.seo?.imageUrl) ? { image: item.imageUrl || item.seo?.imageUrl } : {}), keywords: seo.keywords.join(', ') };
+  return jsonLd([entity, breadcrumbSchema(contentBreadcrumbs(item, kind))]);
 }
 
 export async function getPublicCollection(type: 'products' | 'posts'): Promise<PublicSeoItem[]> {
   const response = await fetch(`${apiUrl}/${type}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Không thể tải danh mục. Vui lòng thử lại.');
+  return response.json();
+}
+
+export function contentBreadcrumbs(item: PublicSeoItem, kind: 'products' | 'blog'): Crumb[] {
+  const result: Crumb[] = [{ name: 'Trang chủ', path: '/' }];
+  if (kind === 'products' && item.type === 'TIRE') {
+    result.push({ name: 'Vỏ xe nâng', path: '/vo-xe-nang' });
+    if (item.tireType === 'SOLID') result.push({ name: 'Vỏ đặc xe nâng', path: '/lop-dac-xe-nang' });
+  } else result.push({ name: kind === 'products' ? 'Sản phẩm' : 'Bài viết', path: `/${kind}` });
+  return [...result, { name: item.name || item.title || 'Chi tiết', path: contentPath(item, kind) }];
+}
+export async function getPublicRims(): Promise<PublicRim[]> {
+  const response = await fetch(`${apiUrl}/wheel-rims`, { cache: 'no-store' });
+  if (!response.ok) throw new Error('Không thể tải danh mục mâm.');
   return response.json();
 }

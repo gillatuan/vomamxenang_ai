@@ -53,12 +53,12 @@ export default function HomePage() {
         <Container maxWidth={false} sx={{ maxWidth: 1440, width: "100%", py: { xs: 7, md: 10 }, position: "relative", zIndex: 1 }}>
           <Typography sx={{ fontSize: ".7rem", letterSpacing: ".18em", fontWeight: 800, mb: 2, color: "#dec19e" }}>VÕ MÂM XE NÂNG · INDUSTRIAL MOBILITY</Typography>
           <Typography component="h1" variant="h1" sx={{ maxWidth: 860, textTransform: "uppercase" }}>
-            Vận hành bền bỉ.<br />Hiệu suất dài lâu.
+            Vỏ mâm xe nâng.<br />Chọn đúng cho đội xe.
           </Typography>
           <Typography sx={{ maxWidth: 570, mt: 3, mb: 4, fontSize: { xs: "1rem", md: "1.16rem" }, lineHeight: 1.7, color: "rgba(255,255,255,.78)" }}>
-            Chuyên cung cấp lốp, mâm và giải pháp bảo dưỡng xe nâng cho đội xe làm việc trong điều kiện khắc nghiệt nhất.
+            Tìm hiểu vỏ xe nâng, lốp đặc, lốp hơi và mâm bánh xe nâng. Đối chiếu kích thước, cấu hình mâm và điều kiện kho xưởng trước khi lựa chọn.
           </Typography>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button component={NextLink} href="/products" sx={{ bgcolor: "#fff", color: "#1a1a1a", "&:hover": { bgcolor: "#dec19e" } }}>Khám phá sản phẩm</Button><Button component={NextLink} href="/about" variant="outlined" sx={{ borderColor: "rgba(255,255,255,.7)", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.12)" } }}>Về chúng tôi</Button></Stack>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button component={NextLink} href="/vo-xe-nang" sx={{ bgcolor: "#fff", color: "#1a1a1a", "&:hover": { bgcolor: "#dec19e" } }}>Xem vỏ xe nâng</Button><Button component={NextLink} href="/about" variant="outlined" sx={{ borderColor: "rgba(255,255,255,.7)", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.12)" } }}>Về chúng tôi</Button><Button component={NextLink} href="/mam-xe-nang" sx={{ color: "#fff" }}>Tìm mâm xe nâng</Button></Stack>
         </Container>
       </Box>
       <Container component="section" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 7, md: 12 } }}>

@@ -1,0 +1,12 @@
+import { TopicLandingPage } from '@/components/TopicLandingPage';
+import { topicMetadata, topicProducts } from '@/lib/seo/category-seo';
+import { hasFilters } from '@/lib/seo/keyword-utils';
+import { getPublicCollection, getPublicRims } from '@/lib/public-seo';
+import type { Product } from '@/lib/api-client';
+type Props = { searchParams: Record<string, string | string[] | undefined> };
+export async function generateMetadata({ searchParams }: Props) {
+  const products = topicProducts('mam-xe-nang', await getPublicCollection('products') as Product[]);
+  const rims = await getPublicRims();
+  return topicMetadata('mam-xe-nang', hasFilters(searchParams) || !products.length && !rims.length);
+}
+export default function Page() { return <TopicLandingPage slug="mam-xe-nang" />; }

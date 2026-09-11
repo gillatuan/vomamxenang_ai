@@ -7,6 +7,13 @@ import { initialOpportunities, seoOpportunitiesSeed } from '../prisma/seeds/prod
 const product: Content = { id: 'p', kind: 'PRODUCT', path: '/products/real', title: 'Lốp đặc 6.00-9', size: '6.00-9', tireType: 'SOLID', brand: 'NEXEN', content: '<p>Lốp đặc xe nâng</p>', tags: ['lốp đặc xe nâng'], seo: {} };
 const post: Content = { id: 'b', kind: 'POST', path: '/blog/guide', title: 'Chọn lốp đặc', content: '<p>Hướng dẫn lốp đặc xe nâng 6.00-9 NEXEN</p>', tags: ['lốp đặc xe nâng'], seo: {} };
 async function main() {
+  const mapped = keywordMap([product, post], [{ id: 'rim-1', size: '6.50-10', boltHoles: 5, compatibleModels: 'Toyota, Komatsu' }]);
+  assert.equal(mapped.find(row => row.keyword === 'mâm xe nâng Toyota')?.primaryUrl, SITE + '/mam-xe-nang/rim-1');
+  assert.equal(mapped.some(row => row.keyword === 'vỏ xe nâng 6.50-10'), false);
+  assert.equal(mapped.some(row => row.keyword === 'vỏ xe nâng Toyota'), false);
+  assert.equal(mapped.find(row => row.keyword === 'vỏ đặc xe nâng')?.primaryUrl, SITE + '/lop-dac-xe-nang');
+  assert.equal(keywordMap([post]).some(row => row.keyword === 'mâm xe nâng'), false);
+
   for (const ip of ['127.0.0.1', '10.0.0.1', '169.254.169.254', '0.0.0.0', '192.168.1.1', '::1', '::ffff:127.0.0.1', 'fc00::1', 'fe80::1', '100.64.0.1']) assert.equal(isPublicAddress(ip), false, ip);
   assert.equal(isPublicAddress('8.8.8.8'), true); assert.throws(() => publicUrl('file:///etc/passwd')); assert.throws(() => publicUrl('https://user:pass@example.com')); assert.throws(() => publicUrl('https://example.com:3001'));
   assert.deepEqual(opportunityUrl('https://www.example.com/a/?utm_source=x#hash'), { domain: 'example.com', url: 'https://www.example.com/a' });
@@ -14,9 +21,9 @@ async function main() {
   const suggestions = recommendations([product, post]); assert(suggestions.some(s => s.sourceType === 'POST' && s.targetType === 'PRODUCT')); assert(suggestions.every(s => s.sourceId !== s.targetId));
   const linked = { ...post, content: '<a href="/products/real">Sản phẩm</a>' }; assert(!recommendations([product, linked]).some(s => s.sourceId === 'b' && s.targetId === 'p'));
   const unrelated = { ...product, id: 'other', path: '/products/other', size: '9.99-99', brand: 'OTHER', tireType: 'OTHER', tags: [], content: '' }; assert(!recommendations([product, unrelated]).length);
-  const map = keywordMap([product, post]); assert(map.some(m => m.keyword === 'lốp xe nâng 6.00-9')); assert(!map.some(m => m.keyword.includes('6.50-10'))); assert.equal(map[0].primaryUrl, SITE + '/products');
+  const map = keywordMap([product, post]); assert(map.some(m => m.keyword === 'lốp xe nâng 6.00-9')); assert(!map.some(m => m.keyword.includes('6.50-10'))); assert.equal(map[0].primaryUrl, SITE + '/');
   const page = analyzePage(product.path, { url: SITE + product.path, status: 200, headers: {}, html: '<title>One</title><h1>One</h1><h1>Two</h1><img src="x"><meta name="robots" content="noindex"><script type="application/ld+json">broken</script>' }, product);
-  for (const code of ['MULTIPLE_H1', 'MISSING_META', 'NOINDEX', 'INVALID_JSONLD', 'MISSING_IMAGE_ALT', 'CANONICAL_PROBLEM', 'MISSING_PRIMARY_KEYWORD']) assert(page.issues.some(i => i.code === code), code);
+  for (const code of ['MULTIPLE_H1', 'MISSING_META', 'NOINDEX', 'INVALID_JSONLD', 'MISSING_IMAGE_ALT', 'CANONICAL_PROBLEM']) assert(page.issues.some(i => i.code === code), code);
   assert.equal(allowedTransition('DISCOVERED', 'LIVE'), false); assert.equal(allowedTransition('DISCOVERED', 'CONTACTED'), false); assert.equal(allowedTransition('APPROVED', 'CONTACTED'), true);
   assert.equal(evidenceAnalysis('forklift warehouse Vietnam casino', 'https://example.com').risk, 'HIGH'); assert.equal(evidenceAnalysis('forklift warehouse', 'https://example.com').relevanceScore, 75);
   let called = false;

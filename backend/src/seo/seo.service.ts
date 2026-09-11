@@ -12,11 +12,13 @@ export class SeoService {
     return [...products.map(p => ({ id: p.id, kind: 'PRODUCT' as const, title: p.name, path: `/products/${p.slug || p.id}`, content: p.description || '', seo: (p.seo || {}) as Record<string, unknown>, tags: p.tags, size: p.size, brand: p.brand, tireType: p.tireType })), ...posts.map(p => ({ id: p.id, kind: 'POST' as const, title: p.title, path: `/blog/${p.slug || p.id}`, content: p.content, seo: (p.seo || {}) as Record<string, unknown>, tags: p.tags }))];
   }
   async overview() {
-    const [audit, opportunities, suggestions, live, catalog] = await Promise.all([this.db.seoAudit.findFirst({ orderBy: { createdAt: 'desc' } }), this.db.backlinkOpportunity.count(), this.db.internalLinkSuggestion.count({ where: { status: 'PENDING' } }), this.db.backlink.count({ where: { isLive: true } }), this.catalog()]);
-    return { audit, opportunities, suggestions, live, searchConsole: { connected: false, message: 'Chưa kết nối API; không có dữ liệu clicks, impressions hoặc thứ hạng.' }, keywordMap: keywordMap(catalog), categories: 'Category là danh mục kho; chưa có landing page công khai.' };
+    const [audit, opportunities, suggestions, live, catalog, rims] = await Promise.all([this.db.seoAudit.findFirst({ orderBy: { createdAt: 'desc' } }), this.db.backlinkOpportunity.count(), this.db.internalLinkSuggestion.count({ where: { status: 'PENDING' } }), this.db.backlink.count({ where: { isLive: true } }), this.catalog(), this.db.wheelRim.findMany({ select: { id: true, size: true, boltHoles: true, brand: true, compatibleModels: true } })]);
+    return { audit, opportunities, suggestions, live, searchConsole: { connected: false, message: 'Chưa kết nối API; không có dữ liệu clicks, impressions hoặc thứ hạng.' }, keywordMap: keywordMap(catalog, rims), categories: 'Trang chủ đề: /vo-xe-nang, /lop-dac-xe-nang, /mam-xe-nang. Category vẫn là danh mục kho.' };
   }
   async audit() {
-    const catalog = await this.catalog(); const paths = ['/', '/products', '/blog', '/about', ...catalog.map(i => i.path)];
+    const catalog = await this.catalog();
+    const rims = await this.db.wheelRim.findMany({ select: { id: true, size: true, boltHoles: true, brand: true, compatibleModels: true } });
+    const paths = ['/', '/products', '/blog', '/about', '/vo-xe-nang', '/lop-dac-xe-nang', '/mam-xe-nang', ...rims.map(rim => `/mam-xe-nang/${encodeURIComponent(rim.id)}`), ...catalog.map(i => i.path)];
     const pages: ReturnType<typeof analyzePage>[] = []; const unchecked: Array<{ path: string; error: string }> = [];
     // Small concurrency; no external links are crawled by a site audit.
     for (let start = 0; start < paths.length; start += 3) {
@@ -59,7 +61,7 @@ export class SeoService {
     }
     const suggested = new InternalLinkRecommendationService().recommend(catalog);
     for (const { existing: _existing, ...data } of suggested) await this.db.internalLinkSuggestion.upsert({ where: { sourceType_sourceId_targetType_targetId: { sourceType: data.sourceType, sourceId: data.sourceId, targetType: data.targetType, targetId: data.targetId } }, create: data, update: { ...data } });
-    const report = { checkedAt: new Date().toISOString(), scope: 'Public server-rendered HTML + stored descriptions; external links excluded. Unknown fetches are not passes. No search-engine rankings.', pages: pages.sort((a, b) => a.path.localeCompare(b.path)), unchecked, keywordMap: keywordMap(catalog), suggestions: suggested.length, redirects, additionalLinksChecked: extraLinks.length, issues: Object.fromEntries(['Critical', 'High', 'Medium', 'Low'].map(s => [s, pages.reduce((n, p) => n + p.issues.filter(i => i.severity === s).length, 0)])) };
+    const report = { checkedAt: new Date().toISOString(), scope: 'Public server-rendered HTML + stored descriptions; external links excluded. Unknown fetches are not passes. No search-engine rankings.', pages: pages.sort((a, b) => a.path.localeCompare(b.path)), unchecked, keywordMap: keywordMap(catalog, rims), suggestions: suggested.length, redirects, additionalLinksChecked: extraLinks.length, issues: Object.fromEntries(['Critical', 'High', 'Medium', 'Low'].map(s => [s, pages.reduce((n, p) => n + p.issues.filter(i => i.severity === s).length, 0)])) };
     return this.db.seoAudit.create({ data: { report: json(report) } });
   }
   suggestions() { return this.db.internalLinkSuggestion.findMany({ orderBy: [{ status: 'asc' }, { score: 'desc' }] }); }

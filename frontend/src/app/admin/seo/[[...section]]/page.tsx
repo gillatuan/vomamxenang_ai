@@ -41,7 +41,7 @@ export default function SeoWorkbench({ params }: { params: { section?: string[] 
       <Stack direction="row" spacing={2}><Button disabled={busy} variant="contained" onClick={() => run(() => apiClient.post('/admin/seo/audit'), 'Đã audit HTML public và cập nhật gợi ý. Không sửa nội dung.')}>Chạy audit website</Button><Button component={Link} href="/admin/ai/seo">AI SEO · Xem trước và duyệt</Button></Stack>
       <Typography variant="body2">Audit gần nhất: {overview?.audit ? new Date(overview.audit.createdAt).toLocaleString('vi-VN') : 'Chưa chạy'}. Điểm là checklist kỹ thuật nội bộ, không phải thứ hạng Google.</Typography>
       {!section && <>
-        <Alert severity="info">Search Console API chưa kết nối. Chưa có dữ liệu clicks, impressions, CTR hoặc vị trí. Category hiện là danh mục kho; trang danh mục công khai là /products.</Alert>
+        <Alert severity="info">Search Console API chưa kết nối. Chưa có dữ liệu clicks, impressions, CTR hoặc vị trí. Các trang chủ đề công khai: /vo-xe-nang, /lop-dac-xe-nang và /mam-xe-nang.</Alert>
         <Stack direction="row" gap={1} flexWrap="wrap">{Object.entries(overview?.audit?.report.issues || {}).map(([severity, count]) => <Chip key={severity} label={`${severity}: ${count}`} />)}<Chip label={`Cơ hội: ${overview?.opportunities || 0}`} /><Chip label={`Backlink LIVE: ${overview?.live || 0}`} /><Chip label={`Gợi ý chờ duyệt: ${overview?.suggestions || 0}`} /></Stack>
       </>}
       {!!overview?.audit?.report.unchecked.length && <Alert severity="warning">Chưa kiểm tra được: {overview.audit.report.unchecked.map(x => `${x.path}: ${x.error}`).join('; ')}</Alert>}

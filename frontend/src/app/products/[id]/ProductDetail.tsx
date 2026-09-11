@@ -13,7 +13,7 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
 
-export default function ProductDetailPage({ product, related }: { product: Product; related?: React.ReactNode }) {
+export default function ProductDetailPage({ product, related, breadcrumbs }: { product: Product; related?: React.ReactNode; breadcrumbs?: React.ReactNode }) {
   const [favourite, setFavourite] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const watermark = useStoreWatermark();
@@ -25,8 +25,9 @@ export default function ProductDetailPage({ product, related }: { product: Produ
   return <>
     <PublicHeader />
     <Container sx={{ py: { xs: 3, md: 6 } }}>
+      {breadcrumbs}
       <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-        <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 2, overflow: "hidden" }}><ProductImage src={product.imageUrl || "/images/products/solid-warehouse.png"} alt={product.seo?.imageAlt || product.name} watermark={watermark} imageSx={{ height: { xs: 300, md: 420 } }} /></Box>
+        <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 2, overflow: "hidden" }}><ProductImage priority src={product.imageUrl || "/images/products/solid-warehouse.png"} alt={product.seo?.imageAlt || product.name} watermark={watermark} imageSx={{ height: { xs: 300, md: 420 } }} /></Box>
         <Box sx={{ flex: 1 }}>
           <Chip color={product.condition === "USED" ? "warning" : "success"} label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"} />
           <Typography component="h1" variant="h4" fontWeight={700} sx={{ mt: 1 }}>{product.name}</Typography>

@@ -47,6 +47,8 @@ export function PublicHeader() {
             <Button variant="text" color="inherit" component={NextLink} href="/" sx={navLinkSx}>Trang chủ</Button>
             <Button variant="text" color="inherit" component={NextLink} href="/about" sx={navLinkSx}>Giới thiệu</Button>
             <Button variant="text" color="inherit" component={NextLink} href="/blog" sx={navLinkSx}>Blog</Button>
+            <Button variant="text" color="inherit" component={NextLink} href="/vo-xe-nang" sx={navLinkSx}>Vỏ xe nâng</Button>
+            <Button variant="text" color="inherit" component={NextLink} href="/mam-xe-nang" sx={navLinkSx}>Mâm xe nâng</Button>
             <Button variant="text" color="inherit" component={NextLink} href="/products" sx={navLinkSx}>Sản phẩm</Button>
           </Box>
 

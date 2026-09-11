@@ -1,6 +1,7 @@
+import { SeoBreadcrumbs } from '@/components/SeoBreadcrumbs';
 import { RelatedContentNav } from "@/components/RelatedContentNav";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getPublicSeoItem, getRelatedCatalog, contentMetadata, contentJsonLd } from "@/lib/public-seo";
+import { getPublicSeoItem, getRelatedCatalog, contentMetadata, contentJsonLd, contentBreadcrumbs } from "@/lib/public-seo";
 import { contentPath, relatedContent } from "@/lib/content-seo";
 import type { Post } from "@/lib/api-client";
 import BlogDetail from "./BlogDetail";
@@ -17,5 +18,5 @@ export default async function Page({ params }: Props) {
   if (item.slug && params.id !== item.slug) permanentRedirect(contentPath(item, "blog"));
   const catalog = await getRelatedCatalog();
   const related = relatedContent({ ...item, kind: "blog" }, catalog);
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: contentJsonLd(item, "blog") }} /><BlogDetail post={item as Post} related={<RelatedContentNav items={related} />} /></>;
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: contentJsonLd(item, "blog") }} /><BlogDetail breadcrumbs={<SeoBreadcrumbs items={contentBreadcrumbs(item, "blog")} />} post={item as Post} related={<RelatedContentNav items={related} />} /></>;
 }

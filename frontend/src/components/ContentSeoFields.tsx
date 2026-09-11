@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { siteUrl } from '@/lib/site-config';
 import { useState } from 'react';
 import { postsAPI, productsAPI, SeoMetadata } from '@/lib/api-client';
 import { linkRelatedContent, RelatedContent, slugify } from '@/lib/content-seo';
@@ -38,6 +39,14 @@ export default function ContentSeoFields({ id = '', kind, title, content, slug, 
       {kind === 'blog' && <TextField fullWidth label="URL ảnh đại diện bài viết" value={seo.imageUrl || ''} onChange={event => updateSeo({ imageUrl: event.target.value })} helperText="Dùng ảnh thực tế mà bạn có quyền sử dụng." />}
       <TextField fullWidth label="Alt ảnh đại diện" value={seo.imageAlt || ''} onChange={event => updateSeo({ imageAlt: event.target.value })} helperText="Mô tả đúng hình ảnh; mặc định dùng tên sản phẩm." />
       <TextField fullWidth label="Từ khóa (phân cách bằng dấu phẩy)" value={(seo.keywords || []).join(',')} onChange={event => updateSeo({ keywords: event.target.value.split(',') })} helperText="Dùng cụm từ liên quan đến nội dung. Từ khóa cũng giúp gợi ý liên kết nội bộ." />
+      <TextField select fullWidth label="Hiển thị trên công cụ tìm kiếm" value={seo.robots || 'index,follow'} SelectProps={{ native: true }} onChange={event => updateSeo({ robots: event.target.value as SeoMetadata['robots'] })}><option value="index,follow">Cho phép index</option><option value="noindex,follow">Không index, vẫn theo liên kết</option><option value="noindex,nofollow">Không index, không theo liên kết</option></TextField>
+      <Box sx={{ p: 2, bgcolor: 'grey.50', overflowWrap: 'anywhere' }}>
+        <Typography variant="caption">Xem trước kết quả tìm kiếm (minh họa)</Typography>
+        <Typography color="primary" sx={{ fontSize: 20 }}>{seo.title || title}</Typography>
+        <Typography variant="body2">{siteUrl}/{kind}/{slugify(slug || title)}</Typography>
+        <Typography>{seo.description || richTextPlain(content).slice(0, 160)}</Typography>
+        {((seo.title || title).length > 70 || (seo.description || '').length > 170) && <Typography variant="caption" color="warning.main">Tiêu đề hoặc mô tả có thể bị rút gọn. Đây là gợi ý biên tập, không phải giới hạn cố định của Google.</Typography>}
+      </Box>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
         <Button variant="outlined" onClick={() => updateSeo({ title: seo.title || title, description: seo.description || richTextPlain(content).slice(0, 160), keywords: [...new Set([title, ...(seo.keywords || [])].map(word => word.trim()).filter(Boolean))] })}>Điền SEO từ nội dung</Button>
         <Button variant="outlined" disabled={busy || !content} onClick={optimize}>{busy ? 'Đang tìm liên kết...' : 'Chèn liên kết liên quan vào mô tả'}</Button>

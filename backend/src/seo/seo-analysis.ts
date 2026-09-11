@@ -26,7 +26,7 @@ export function analyzePage(path: string, page: PublicPage, content?: Content) {
   const missingAlt = $('img').toArray().filter(el => !$(el).attr('alt')?.trim()).length;
   if (missingAlt) add('MISSING_IMAGE_ALT', 'Medium', `${missingAlt} ảnh thiếu alt`);
   if (content && !$('img').length) add('MISSING_IMAGE', 'Low', 'Chưa có ảnh trong HTML');
-  if (content && !content.seo.primaryKeyword) add('MISSING_PRIMARY_KEYWORD', 'Medium', 'Chưa chọn từ khóa chính; xem keyword map');
+  if (content && !content.seo.primaryKeyword && !content.title.trim()) add('MISSING_PRIMARY_KEYWORD', 'Medium', 'Không có tiêu đề hoặc keyword để xác định chủ đề');
   const body = load(content?.content || page.html); body('script,style,nav,header,footer').remove();
   const wordCount = body.root().text().trim().split(/\s+/).filter(Boolean).length;
   if (content && wordCount < 150) add('THIN_CONTENT', 'Medium', `${wordCount} từ; ngưỡng sàng lọc, cần đánh giá thủ công`);
@@ -55,16 +55,43 @@ export function recommendations(items: Content[]) {
     return { sourceType: source.kind, sourceId: source.id, targetType: target.kind, targetId: target.id, sourceUrl: SITE + source.path, targetUrl: SITE + target.path, anchorText: target.title, reason: reason.join('; '), score: Math.min(score, 100), existing };
   }).filter(x => x.score >= 25 && !x.existing).sort((a, b) => b.score - a.score || a.targetUrl.localeCompare(b.targetUrl)).slice(0, 5));
 }
-export function keywordMap(items: Content[]) {
-  const products = items.filter(i => i.kind === 'PRODUCT'); const rows: Array<{ keyword: string; intent: string; primaryUrl: string; supportingUrls: string[]; competingPrimaryUrls: string[] }> = [];
-  const add = (keyword: string, intent: string, primary: string, related: Content[]) => rows.push({ keyword, intent, primaryUrl: SITE + primary, supportingUrls: related.filter(i => i.path !== primary).map(i => SITE + i.path), competingPrimaryUrls: items.filter(i => normalize(String(i.seo.primaryKeyword || '')) === normalize(keyword) && i.path !== primary).map(i => SITE + i.path) });
-  add('lốp xe nâng', 'COMMERCIAL', '/products', items);
-  for (const size of [...new Set(products.map(i => i.size).filter(Boolean))]) {
-    const related = products.filter(i => i.size === size).sort((a, b) => Number(!!a.brand) - Number(!!b.brand) || a.title.localeCompare(b.title));
-    add(`lốp xe nâng ${size}`, 'SIZE', related[0].path, related);
+export type RimKeywordRecord = { id: string; size: string; boltHoles: number; brand?: string | null; compatibleModels?: string | null };
+export function keywordMap(catalog: Content[], rims: RimKeywordRecord[] = []) {
+  const items = catalog.filter(item => !String(item.seo.robots || '').includes('noindex'));
+  const products = items.filter(i => i.kind === 'PRODUCT');
+  const tires = products.filter(i => i.size && i.tireType);
+  const rows: Array<{ keyword: string; intent: string; primaryUrl: string; secondaryKeywords: string[]; supportingUrls: string[]; competingPrimaryUrls: string[] }> = [];
+  const add = (keyword: string, intent: string, primary: string, related: Content[], secondaryKeywords: string[] = []) => rows.push({ keyword, intent, primaryUrl: SITE + primary, secondaryKeywords, supportingUrls: related.filter(i => i.path !== primary).map(i => SITE + i.path), competingPrimaryUrls: items.filter(i => normalize(String(i.seo.primaryKeyword || '')) === normalize(keyword) && i.path !== primary).map(i => SITE + i.path) });
+  add('vỏ mâm xe nâng', 'COMMERCIAL INVESTIGATION', '/', items, ['vỏ và mâm xe nâng', 'vỏ mâm bánh xe nâng']);
+  add('vomamxenang.com', 'NAVIGATIONAL', '/', [], ['Võ Mâm Xe Nâng chính thức']);
+  if (tires.length) {
+    add('vỏ xe nâng', 'TRANSACTIONAL', '/vo-xe-nang', tires, ['lốp xe nâng', 'vỏ lốp xe nâng', 'bánh xe nâng']);
+    add('lốp xe nâng', 'TRANSACTIONAL', '/vo-xe-nang', tires);
+    add('giá vỏ xe nâng', 'COMMERCIAL INVESTIGATION', '/vo-xe-nang', tires, ['mua vỏ xe nâng', 'nhà cung cấp vỏ xe nâng']);
   }
-  for (const brand of [...new Set(products.map(i => i.brand).filter(Boolean))]) { const related = products.filter(i => i.brand === brand); add(`lốp xe nâng ${brand}`, 'BRAND', related[0].path, related); }
-  for (const item of items) add(String(item.seo.primaryKeyword || item.title), item.kind === 'POST' ? 'INFORMATIONAL' : 'COMMERCIAL', item.path, items.filter(i => i.tags.some(t => item.tags.includes(t))));
+  const solid = tires.filter(i => i.tireType === 'SOLID');
+  if (solid.length) add('vỏ đặc xe nâng', 'TRANSACTIONAL', '/lop-dac-xe-nang', solid, ['lốp đặc xe nâng', 'vỏ xe nâng đặc']);
+  const pneumatic = tires.filter(i => i.tireType === 'PNEUMATIC').sort((a, b) => Number(!!a.brand) - Number(!!b.brand));
+  if (pneumatic.length) add('vỏ hơi xe nâng', 'TRANSACTIONAL', pneumatic[0].path, pneumatic, ['lốp hơi xe nâng', 'vỏ xe nâng hơi']);
+  if (rims.length) {
+    add('mâm xe nâng', 'TRANSACTIONAL', '/mam-xe-nang', items.filter(i => /mam/.test(normalize(i.title))), ['mâm bánh xe nâng', 'mâm lốp xe nâng']);
+    for (const rim of rims) {
+      const path = `/mam-xe-nang/${encodeURIComponent(rim.id)}`;
+      add(`mâm xe nâng ${rim.size} ${rim.boltHoles} lỗ`, 'TRANSACTIONAL', path, [], [`mâm xe nâng ${rim.boltHoles} lỗ`]);
+      // Machine names describe only the rim record, never tire compatibility.
+      for (const model of (rim.compatibleModels || '').split(',').map(x => x.trim()).filter(Boolean)) add(`mâm xe nâng ${model}`, 'COMMERCIAL INVESTIGATION', path, [], ['cần đối chiếu model và cấu hình lắp thực tế']);
+    }
+  }
+  for (const size of [...new Set(tires.map(i => i.size).filter(Boolean))]) {
+    const related = tires.filter(i => i.size === size).sort((a, b) => Number(!!a.brand) - Number(!!b.brand) || a.title.localeCompare(b.title));
+    add(`vỏ xe nâng ${size}`, 'TRANSACTIONAL', related[0].path, related, [`lốp xe nâng ${size}`]);
+    add(`lốp xe nâng ${size}`, 'TRANSACTIONAL', related[0].path, related);
+  }
+  for (const brand of [...new Set(tires.map(i => i.brand).filter(Boolean))]) {
+    const related = tires.filter(i => i.brand === brand);
+    add(`vỏ xe nâng ${brand}`, 'COMMERCIAL INVESTIGATION', related[0].path, related, [`lốp xe nâng ${brand}`]);
+  }
+  for (const item of items) add(String(item.seo.primaryKeyword || item.title), item.kind === 'POST' ? 'INFORMATIONAL' : 'TRANSACTIONAL', item.path, items.filter(i => i.tags.some(t => item.tags.includes(t))));
   return rows.filter((row, index) => rows.findIndex(r => normalize(r.keyword) === normalize(row.keyword)) === index);
 }
 
