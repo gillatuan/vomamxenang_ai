@@ -1,4 +1,5 @@
 "use client";
+import { ContentImage } from "@/components/ContentImage";
 import { richTextPlain } from "@/lib/rich-text";
 
 import { Box, Button, Card, CardContent, CircularProgress, Container, Grid, Typography } from "@mui/material";
@@ -40,6 +41,7 @@ export default function BlogPage({ initialPosts }: { initialPosts: Post[] }) {
           {posts.map((post) => (
             <Grid item xs={12} sm={6} md={4} key={post.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent" }}>
+                <ContentImage src={post.seo?.imageUrl} alt={post.seo?.imageAlt || post.title} kind="post" sx={{ aspectRatio: "16 / 9" }} />
                 {post.videoUrl && (
                   <Box
                     sx={{

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { ContentImage } from './ContentImage';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { PublicHeader } from './PublicHeader';
 import { Footer } from './Footer';
@@ -24,7 +24,7 @@ export async function TopicLandingPage({ slug }: { slug: TopicSlug }) {
     <Typography sx={{ maxWidth: 850, lineHeight: 1.8, mb: 4 }}>{topic.intro}</Typography>
     <Typography component="h2" variant="h5" gutterBottom>{slug === 'mam-xe-nang' ? 'Mâm đang có trong danh mục' : 'Sản phẩm và thông số đang có'}</Typography>
     <Grid container spacing={3}>{entries.map(entry => <Grid item xs={12} sm={6} md={4} key={entry.path}><Box sx={{ border: '1px solid', borderColor: 'divider', p: 2, height: '100%' }}>
-      {entry.image && <Image src={entry.image} alt={entry.alt} width={360} height={240} sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw" unoptimized={!entry.image.startsWith('/')} style={{ width: '100%', height: 220, objectFit: 'cover' }} />}
+      <ContentImage src={entry.image} alt={entry.alt || entry.title} sx={{ height: 220 }} />
       <Typography component="h3" variant="h6" sx={{ mt: 2 }}><Link href={entry.path}>{entry.title}</Link></Typography><Typography sx={{ mt: 1 }}>{entry.facts}</Typography>
     </Box></Grid>)}</Grid>
     {!entries.length && <Typography>Danh mục đang cập nhật. Vui lòng xem hướng dẫn dưới đây và liên hệ để xác nhận sản phẩm.</Typography>}

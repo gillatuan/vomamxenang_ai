@@ -93,7 +93,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
-                <ProductImage src={product.imageUrl || "/images/products/solid-warehouse.png"} alt={product.name} watermark={watermark} imageSx={{ height: { xs: 260, md: 330 } }} />
+                <ProductImage src={product.imageUrl} alt={product.name} watermark={watermark} imageSx={{ height: { xs: 260, md: 330 } }} />
                 <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25, pb: 1 }}>
                   <Typography component="h2" variant="h6" sx={{ fontWeight: 600 }}>{product.name}</Typography>
                   <Chip

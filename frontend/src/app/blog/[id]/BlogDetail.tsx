@@ -1,4 +1,5 @@
 "use client";
+import { ContentImage } from "@/components/ContentImage";
 import RichTextContent from "@/components/RichTextContent";
 
 import { Box, Container, Typography } from "@mui/material";
@@ -13,7 +14,7 @@ export default function BlogDetailPage({ post, related, breadcrumbs }: { post: P
     <Typography component="h1" variant="h3" fontWeight={700}>{post.title}</Typography>
     <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>Chia sẻ kiến thức về lốp và mâm xe nâng</Typography>
     {embedUrl && <Box sx={{ position: "relative", pt: "56.25%", mb: 4, borderRadius: 2, overflow: "hidden" }}><Box component="iframe" src={embedUrl} title={post.title} allowFullScreen sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }} /></Box>}
-    {post.seo?.imageUrl && <Box component="img" src={post.seo.imageUrl} alt={post.seo.imageAlt || post.title} sx={{ width: "100%", height: "auto", mb: 3, borderRadius: 2 }} />}
+    <ContentImage src={post.seo?.imageUrl} alt={post.seo?.imageAlt || post.title} kind="post" priority sx={{ aspectRatio: "16 / 9", mb: 3, borderRadius: 2 }} />
     <RichTextContent value={post.content} />
     {related}
   </Container><Footer /></>;
