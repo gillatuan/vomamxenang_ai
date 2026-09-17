@@ -58,22 +58,56 @@ enum ContentStatus {
   PUBLISHED
 }
 
+enum SeoKeywordType {
+  PRIMARY
+  SECONDARY
+  SUPPORTING
+  BRANDED
+  LOCAL
+}
+
+enum SeoKeywordIntent {
+  INFORMATIONAL
+  NAVIGATIONAL
+  COMMERCIAL
+  TRANSACTIONAL
+}
+
+enum SeoKeywordStatus {
+  PLANNED
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum SeoAuditScope {
+  SITE
+  PRODUCT
+  POST
+}
+
+enum SeoAuditStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 enum TransactionType {
-  IMPORT        // Nhập kho thông thường
-  EXPORT        // Xuất kho bán hàng
-  ASSEMBLY_OUT  // Xuất vỏ/mâm để mang đi ép thành bộ
-  ASSEMBLY_IN   // Nhập bộ vỏ mâm hoàn chỉnh sau khi ép (hoặc rã bánh)
+  IMPORT // Nhập kho thông thường
+  EXPORT // Xuất kho bán hàng
+  ASSEMBLY_OUT // Xuất vỏ/mâm để mang đi ép thành bộ
+  ASSEMBLY_IN // Nhập bộ vỏ mâm hoàn chỉnh sau khi ép (hoặc rã bánh)
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(STOREKEEPER)
-  createdAt DateTime @default(now())
-  productComments ProductComment[]
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String
+  role              Role               @default(STOREKEEPER)
+  createdAt         DateTime           @default(now())
+  productComments   ProductComment[]
   favouriteProducts FavouriteProduct[]
-  postComments PostComment[]
+  postComments      PostComment[]
 }
 
 model Client {
@@ -130,81 +164,83 @@ model AboutPage {
 // Tracks immutable, versioned data releases independently for each database.
 // A seed is recorded only after its transaction has completed successfully.
 model SeedHistory {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  name        String
-  executedAt  DateTime @default(now())
+  id         String   @id @default(cuid())
+  key        String   @unique
+  name       String
+  executedAt DateTime @default(now())
 }
 
 model Category {
-  id            String    @id @default(uuid())
-  name          String
-  tireSize      String
-  brand         String
-  tireType      TireType
-  rimType       RimType
-  origin        String
-  condition     TireCondition
+  id             String        @id @default(uuid())
+  name           String
+  tireSize       String
+  brand          String
+  tireType       TireType
+  rimType        RimType
+  origin         String
+  condition      TireCondition
   specifications String?
-  createdAt     DateTime  @default(now())
-  stocks        Stock[]
+  createdAt      DateTime      @default(now())
+  stocks         Stock[]
 }
 
 model Product {
-  id              String        @id @default(uuid())
-  sku             String        @unique // Mã QR tổng sản phẩm
-  type            ProductType   @default(TIRE)
-  name            String        // Tên mô tả (Ví dụ: Vỏ đặc Casumina 6.00-9)
-  
+  id   String      @id @default(uuid())
+  sku  String      @unique // Mã QR tổng sản phẩm
+  type ProductType @default(TIRE)
+  name String // Tên mô tả (Ví dụ: Vỏ đặc Casumina 6.00-9)
+
   // Thuộc tính đặc thù lốp xe nâng
-  size            String?       // Thông số kích thước: 6.00-9, 7.00-12
-  brand           String?       // Bridgestone, Casumina, Michelin...
-  tireType        String?       // Solid (Đặc), Pneumatic (Hơi), NonMarking (Đặc trắng)
-  rimType         String?       // Lip/Click (Mâm gài), Standard (Mâm thường)
-  condition       String?       // NEW_100 (Mới), USED (Lướt)
-  
-  importPrice     Float
-  sellingPrice    Float?        // Giá bán lẻ mặc định
-  minStock        Int           @default(5)  // Định mức tồn tối thiểu để cảnh báo
-  maxStock        Int           @default(100) // Định mức tồn tối đa
-  imageUrl        String?
-  description     String?
-  slug            String?       @unique
-  aliases         String[]      @default([])
+  size      String? // Thông số kích thước: 6.00-9, 7.00-12
+  brand     String? // Bridgestone, Casumina, Michelin...
+  tireType  String? // Solid (Đặc), Pneumatic (Hơi), NonMarking (Đặc trắng)
+  rimType   String? // Lip/Click (Mâm gài), Standard (Mâm thường)
+  condition String? // NEW_100 (Mới), USED (Lướt)
+
+  importPrice      Float
+  sellingPrice     Float? // Giá bán lẻ mặc định
+  minStock         Int           @default(5) // Định mức tồn tối thiểu để cảnh báo
+  maxStock         Int           @default(100) // Định mức tồn tối đa
+  imageUrl         String?
+  description      String?
+  slug             String?       @unique
+  aliases          String[]      @default([])
   shortDescription String?
-  highlights      Json?
-  specifications  Json?
-  applications    Json?
-  seo             Json?
+  highlights       Json?
+  specifications   Json?
+  applications     Json?
+  seo              Json?
   tags             String[]      @default([])
   status           ContentStatus @default(PUBLISHED)
-  createdAt       DateTime      @default(now())
-  
+  createdAt        DateTime      @default(now())
+
   // Quan hệ
-  stocks          StockLocation[]
-  priceMatrix     PriceMatrix[]
-  txDetails       TransactionDetail[]
-  assemblyLogs    AssemblyLog[]
-  orderItems      OrderItem[]
-  productComments ProductComment[]
+  stocks            StockLocation[]
+  priceMatrix       PriceMatrix[]
+  txDetails         TransactionDetail[]
+  assemblyLogs      AssemblyLog[]
+  orderItems        OrderItem[]
+  productComments   ProductComment[]
   favouriteProducts FavouriteProduct[]
+  seoKeywords       SeoKeyword[]
+  seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
 }
 
 model WheelRim {
-  id               String        @id @default(uuid())
-  sku              String        @unique // Mã QR mâm
-  size             String        // Kích thước mâm tương ứng lốp
-  boltHoles        Int           // Số lỗ bu-lông: 4, 5, 6, 8 lỗ
-  compatibleModels String?       // Tương thích dòng xe nâng (Toyota, Komatsu...)
+  id               String   @id @default(uuid())
+  sku              String   @unique // Mã QR mâm
+  size             String // Kích thước mâm tương ứng lốp
+  boltHoles        Int // Số lỗ bu-lông: 4, 5, 6, 8 lỗ
+  compatibleModels String? // Tương thích dòng xe nâng (Toyota, Komatsu...)
   brand            String?
   importPrice      Float
   sellingPrice     Float?
-  createdAt        DateTime      @default(now())
-  
-  stocks           StockLocation[]
-  txDetails        TransactionDetail[]
-  assemblyLogs     AssemblyLog[]
-  orderItems       OrderItem[]
+  createdAt        DateTime @default(now())
+
+  stocks       StockLocation[]
+  txDetails    TransactionDetail[]
+  assemblyLogs AssemblyLog[]
+  orderItems   OrderItem[]
 }
 
 model Warehouse {
@@ -216,16 +252,16 @@ model Warehouse {
 }
 
 model Location {
-  id           String          @id @default(uuid())
+  id           String    @id @default(uuid())
   warehouseId  String
-  warehouse    Warehouse       @relation(fields: [warehouseId], references: [id])
-  zone         String          // Dãy/Khu vực: A, B, C
-  rack         String          // Kệ/Hàng: 01, 02
-  slot         String          // Cột/Ô trống: 01, 02
-  locationCode String          @unique // Mã QR vị trí: K1-ZA-R01-S02
-  capacity     Int             @default(50) // Sức chứa tối đa (chiều cao lốp)
-  createdAt    DateTime        @default(now())
-  
+  warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
+  zone         String // Dãy/Khu vực: A, B, C
+  rack         String // Kệ/Hàng: 01, 02
+  slot         String // Cột/Ô trống: 01, 02
+  locationCode String    @unique // Mã QR vị trí: K1-ZA-R01-S02
+  capacity     Int       @default(50) // Sức chứa tối đa (chiều cao lốp)
+  createdAt    DateTime  @default(now())
+
   stocks       StockLocation[]
   stockRecords Stock[]
   txDetails    TransactionDetail[]
@@ -248,103 +284,106 @@ model StockLocation {
 
 // Ma trận giá linh hoạt dành cho các tầng đại lý B2B
 model PriceMatrix {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   productId    String
-  product      Product  @relation(fields: [productId], references: [id])
-  customerType String   // RETAIL, B2B_TIER1, B2B_TIER2
+  product      Product @relation(fields: [productId], references: [id])
+  customerType String // RETAIL, B2B_TIER1, B2B_TIER2
   price        Float
-  
+
   @@unique([productId, customerType])
 }
 
 model Order {
-  id              String              @id @default(uuid())
-  code            String              @unique @default(uuid())
+  id              String      @id @default(uuid())
+  code            String      @unique @default(uuid())
   clientId        String
-  client          Client              @relation(fields: [clientId], references: [id])
+  client          Client      @relation(fields: [clientId], references: [id])
   totalAmount     Float
-  status          OrderStatus         @default(PENDING)
-  stripeSessionId String?             @unique
-  createdAt       DateTime            @default(now())
+  status          OrderStatus @default(PENDING)
+  stripeSessionId String?     @unique
+  createdAt       DateTime    @default(now())
   items           OrderItem[]
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   orderId    String
-  order      Order    @relation(fields: [orderId], references: [id])
+  order      Order     @relation(fields: [orderId], references: [id])
   productId  String?
-  product    Product? @relation(fields: [productId], references: [id])
+  product    Product?  @relation(fields: [productId], references: [id])
   wheelRimId String?
   wheelRim   WheelRim? @relation(fields: [wheelRimId], references: [id])
   locationId String
-  location   Location @relation(fields: [locationId], references: [id])
+  location   Location  @relation(fields: [locationId], references: [id])
   quantity   Int
   price      Float
 }
 
 // Nhật ký chi tiết phiếu nhập/xuất kho gắn liền với vị trí
 model InventoryTransaction {
-  id           String              @id @default(uuid())
-  code         String              @unique // Số phiếu nhập/xuất tự sinh
-  type         TransactionType
-  partnerName  String?             // Tên nhà cung cấp hoặc khách mua lẻ
-  userId       String              // Người thực hiện giao dịch (Storekeeper/Admin)
-  createdAt    DateTime            @default(now())
-  details      TransactionDetail[]
+  id          String              @id @default(uuid())
+  code        String              @unique // Số phiếu nhập/xuất tự sinh
+  type        TransactionType
+  partnerName String? // Tên nhà cung cấp hoặc khách mua lẻ
+  userId      String // Người thực hiện giao dịch (Storekeeper/Admin)
+  createdAt   DateTime            @default(now())
+  details     TransactionDetail[]
 }
 
 model Stock {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   categoryId String
-  category   Category  @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
   locationId String
-  location   Location  @relation(fields: [locationId], references: [id])
-  quantity   Int       @default(0)
-  createdAt  DateTime  @default(now())
+  location   Location @relation(fields: [locationId], references: [id])
+  quantity   Int      @default(0)
+  createdAt  DateTime @default(now())
 }
 
 model TransactionDetail {
-  id            String               @id @default(uuid())
-  txId          String
-  transaction   InventoryTransaction @relation(fields: [txId], references: [id])
-  productId     String?
-  product       Product?             @relation(fields: [productId], references: [id])
-  wheelRimId    String?
-  wheelRim      WheelRim?            @relation(fields: [wheelRimId], references: [id])
-  locationId    String
-  location      Location             @relation(fields: [locationId], references: [id])
-  quantity      Int
-  price         Float                // Giá thực tế tại thời điểm nhập/xuất
+  id          String               @id @default(uuid())
+  txId        String
+  transaction InventoryTransaction @relation(fields: [txId], references: [id])
+  productId   String?
+  product     Product?             @relation(fields: [productId], references: [id])
+  wheelRimId  String?
+  wheelRim    WheelRim?            @relation(fields: [wheelRimId], references: [id])
+  locationId  String
+  location    Location             @relation(fields: [locationId], references: [id])
+  quantity    Int
+  price       Float // Giá thực tế tại thời điểm nhập/xuất
 }
 
 // Nhật ký quy trình Ép Mâm (Gộp lốp và mâm thành một combo hoàn chỉnh)
 model AssemblyLog {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   productId   String
-  product     Product   @relation(fields: [productId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
   wheelRimId  String
-  wheelRim    WheelRim  @relation(fields: [wheelRimId], references: [id])
-  quantity    Int       // Số lượng bộ lốp đã ép thành công
-  pressingFee Float     @default(0) // Chi phí công ép mâm
-  userId      String    // Storekeeper thực hiện ép
-  createdAt   DateTime  @default(now())
+  wheelRim    WheelRim @relation(fields: [wheelRimId], references: [id])
+  quantity    Int // Số lượng bộ lốp đã ép thành công
+  pressingFee Float    @default(0) // Chi phí công ép mâm
+  userId      String // Storekeeper thực hiện ép
+  createdAt   DateTime @default(now())
 }
 
 model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  videoUrl  String?
-  slug      String?       @unique
-  aliases   String[]      @default([])
-  excerpt   String?
+  id              String         @id @default(uuid())
+  title           String
+  content         String
+  videoUrl        String?
+  slug            String?        @unique
+  aliases         String[]       @default([])
+  excerpt         String?
   tableOfContents Json?
-  seo       Json?
-  tags      String[]      @default([])
-  status    ContentStatus @default(PUBLISHED)
-  createdAt DateTime @default(now())
-  postComments PostComment[]
+  seo             Json?
+  tags            String[]       @default([])
+  status          ContentStatus  @default(PUBLISHED)
+  createdAt       DateTime       @default(now())
+  postComments    PostComment[]
+  seoKeywords     SeoKeyword[]
+  seoAudits       SeoAudit[]     @relation("PostSeoAudits")
+  campaignPosts   CampaignPost[]
 }
 
 model AiGeneration {
@@ -412,6 +451,7 @@ enum BacklinkOpportunityType {
   LOCAL_CITATION
   RESOURCE_PAGE
 }
+
 enum BacklinkStatus {
   DISCOVERED
   REVIEWING
@@ -422,72 +462,154 @@ enum BacklinkStatus {
   REJECTED
   REMOVED
 }
+
 model SeoAudit {
-  id String @id @default(cuid())
-  report Json
-  createdAt DateTime @default(now())
+  id               String         @id @default(cuid())
+  scope            SeoAuditScope  @default(SITE)
+  status           SeoAuditStatus @default(COMPLETED)
+  productId        String?
+  product          Product?       @relation("ProductSeoAudits", fields: [productId], references: [id], onDelete: SetNull)
+  postId           String?
+  post             Post?          @relation("PostSeoAudits", fields: [postId], references: [id], onDelete: SetNull)
+  subjectUrl       String?
+  primaryKeyword   String?
+  metaTitle        String?
+  metaDescription  String?
+  canonical        String?
+  imageAlt         String?
+  headingStructure Json?
+  internalLinks    Json?
+  issues           Json?
+  score            Int?
+  report           Json
+  createdAt        DateTime       @default(now())
+
+  @@index([scope, createdAt])
+  @@index([productId, createdAt])
+  @@index([postId, createdAt])
 }
-model InternalLinkSuggestion {
-  id String @id @default(cuid())
-  sourceType String
-  sourceId String
-  targetType String
-  targetId String
-  sourceUrl String
+
+model SeoKeyword {
+  id        String           @id @default(cuid())
+  keyword   String           @unique
+  type      SeoKeywordType   @default(PRIMARY)
+  intent    SeoKeywordIntent @default(INFORMATIONAL)
+  priority  Int              @default(3)
+  cluster   String?
   targetUrl String
+  productId String?
+  product   Product?         @relation(fields: [productId], references: [id], onDelete: SetNull)
+  postId    String?
+  post      Post?            @relation(fields: [postId], references: [id], onDelete: SetNull)
+  status    SeoKeywordStatus @default(PLANNED)
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([cluster, status])
+  @@index([productId])
+  @@index([postId])
+  @@index([status, priority])
+}
+
+model InternalLinkSuggestion {
+  id         String   @id @default(cuid())
+  sourceType String
+  sourceId   String
+  targetType String
+  targetId   String
+  sourceUrl  String
+  targetUrl  String
   anchorText String
-  reason String
-  score Int
-  status String @default("PENDING")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  reason     String
+  score      Int
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@unique([sourceType, sourceId, targetType, targetId])
 }
+
 model BacklinkOpportunity {
-  id String @id @default(cuid())
-  domain String
-  url String
-  name String
-  type BacklinkOpportunityType
-  relevanceScore Int?
-  authorityScore Int?
-  spamRiskScore Int?
+  id                   String                  @id @default(cuid())
+  domain               String
+  url                  String
+  name                 String
+  type                 BacklinkOpportunityType
+  relevanceScore       Int?
+  authorityScore       Int?
+  spamRiskScore        Int?
   supportsRegistration Boolean?
-  supportsPosting Boolean?
-  supportsProfileLink Boolean?
-  supportsGuestPost Boolean?
-  contactUrl String?
-  contactEmail String?
-  status BacklinkStatus @default(DISCOVERED)
-  notes String?
-  evidence String
-  evidenceUrl String
-  details Json
-  suggestedTargetUrl String
+  supportsPosting      Boolean?
+  supportsProfileLink  Boolean?
+  supportsGuestPost    Boolean?
+  contactUrl           String?
+  contactEmail         String?
+  status               BacklinkStatus          @default(DISCOVERED)
+  notes                String?
+  evidence             String
+  evidenceUrl          String
+  details              Json
+  suggestedTargetUrl   String
   suggestedAnchorTexts String[]
-  suggestedApproach String
-  risk String @default("UNKNOWN")
-  requiresManualReview Boolean @default(true)
-  outreach Json?
-  discoveredAt DateTime @default(now())
-  lastCheckedAt DateTime?
-  updatedAt DateTime @updatedAt
-  backlinks Backlink[]
+  suggestedApproach    String
+  risk                 String                  @default("UNKNOWN")
+  requiresManualReview Boolean                 @default(true)
+  outreach             Json?
+  discoveredAt         DateTime                @default(now())
+  lastCheckedAt        DateTime?
+  updatedAt            DateTime                @updatedAt
+  backlinks            Backlink[]
+
   @@unique([domain, url])
   @@index([status, relevanceScore])
 }
+
 model Backlink {
-  id String @id @default(cuid())
-  opportunityId String
-  opportunity BacklinkOpportunity @relation(fields: [opportunityId], references: [id])
-  sourceUrl String
-  sourceDomain String
-  targetUrl String
-  anchorText String?
-  rel String?
-  firstSeenAt DateTime?
-  lastCheckedAt DateTime?
-  isLive Boolean @default(false)
+  id               String              @id @default(cuid())
+  opportunityId    String
+  opportunity      BacklinkOpportunity @relation(fields: [opportunityId], references: [id])
+  sourceUrl        String
+  sourceDomain     String
+  targetUrl        String
+  anchorText       String?
+  rel              String?
+  firstSeenAt      DateTime?
+  lastCheckedAt    DateTime?
+  isLive           Boolean             @default(false)
   verificationNote String?
+
   @@unique([sourceUrl, targetUrl])
+}
+
+model ContentCampaign {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?
+  goal        String?
+  status      ContentStatus  @default(DRAFT)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  posts       CampaignPost[]
+
+  @@index([status, startsAt])
+}
+
+model CampaignPost {
+  id         String          @id @default(cuid())
+  campaignId String
+  campaign   ContentCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  postId     String
+  post       Post            @relation(fields: [postId], references: [id], onDelete: Restrict)
+  sortOrder  Int             @default(0)
+  plannedAt  DateTime?
+  notes      String?
+  createdAt  DateTime        @default(now())
+
+  @@unique([campaignId, postId])
+  @@index([campaignId, sortOrder])
+  @@index([postId])
 }

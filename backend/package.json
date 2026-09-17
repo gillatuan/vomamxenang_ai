@@ -21,7 +21,7 @@
     "db:sync:production": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production",
     "test:production-seed": "ts-node --transpile-only test/production-seed-runner.spec.ts",
     "seo": "ts-node --transpile-only scripts/seo.ts",
-    "test:seo": "ts-node --transpile-only test/seo.spec.ts"
+    "test:seo": "ts-node --transpile-only test/seo.spec.ts && ts-node --transpile-only test/seo-v31.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
