@@ -4,7 +4,7 @@ import { ProductionSeed } from './types';
 
 // This is a versioned content release. It mirrors the nine local DRAFT posts
 // without publishing them, so editorial review remains required.
-const imageMetadata: Record<string, { imageUrl: string; imageAlt: string }> = {
+export const imageMetadata: Record<string, { imageUrl: string; imageAlt: string }> = {
   'ke-hoach-noi-dung-lop-dac-xe-nang-so-sanh': { imageUrl: '/images/campaigns/chuyen-kho-2026/day-1/goc-kho-01.png', imageAlt: 'Các chồng vỏ lốp xe nâng trong kho, dùng làm tư liệu minh họa' },
   'ke-hoach-noi-dung-vo-mam-xe-nang-tong-quan': { imageUrl: '/images/campaigns/chuyen-kho-2026/day-1/kho-chong-lop-01.png', imageAlt: 'Các chồng vỏ lốp xe nâng trong kho, dùng làm tư liệu minh họa' },
   'mam-xe-nang-va-banh-xe-nang-dinh-huong-lien-he': { imageUrl: '/images/campaigns/chuyen-kho-2026/day-1/kho-chong-lop-01.png', imageAlt: 'Các chồng vỏ lốp xe nâng trong kho, dùng làm tư liệu minh họa' },
