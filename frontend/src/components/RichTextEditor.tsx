@@ -3,10 +3,46 @@
 import { useEffect, useId, useState } from "react";
 import { Alert, Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { EditorContent, useEditor } from "@tiptap/react";
+import { mergeAttributes, Node } from "@tiptap/core";
 import { postsAPI, productsAPI } from "@/lib/api-client";
 import { contentPath, RelatedContent } from "@/lib/content-seo";
 import StarterKit from "@tiptap/starter-kit";
 import { richTextHtml, richTextStyles } from "@/lib/rich-text";
+
+// StarterKit does not include media nodes. Defining these nodes here keeps
+// existing <figure><img /><figcaption /></figure> HTML visible and intact when
+// an administrator reopens and saves a post.
+const EmbeddedImage = Node.create({
+  name: "embeddedImage",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      alt: { default: "" },
+      loading: { default: "lazy" },
+    };
+  },
+  parseHTML() { return [{ tag: "img[src]" }]; },
+  renderHTML({ HTMLAttributes }) { return ["img", mergeAttributes(HTMLAttributes)]; },
+});
+
+const FigureCaption = Node.create({
+  name: "figureCaption",
+  content: "inline*",
+  parseHTML() { return [{ tag: "figcaption" }]; },
+  renderHTML({ HTMLAttributes }) { return ["figcaption", mergeAttributes(HTMLAttributes), 0]; },
+});
+
+const EmbeddedFigure = Node.create({
+  name: "embeddedFigure",
+  group: "block",
+  content: "embeddedImage figureCaption?",
+  isolating: true,
+  parseHTML() { return [{ tag: "figure" }]; },
+  renderHTML({ HTMLAttributes }) { return ["figure", mergeAttributes(HTMLAttributes), 0]; },
+});
 
 export default function RichTextEditor({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   const id = useId();
@@ -17,7 +53,7 @@ export default function RichTextEditor({ label, value, onChange }: { label: stri
   const [url, setUrl] = useState("");
   const [linkError, setLinkError] = useState(false);
   const editor = useEditor({
-    extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false } })],
+    extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false } }), EmbeddedImage, FigureCaption, EmbeddedFigure],
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     content: richTextHtml(value),
