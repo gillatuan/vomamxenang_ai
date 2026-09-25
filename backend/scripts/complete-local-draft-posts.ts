@@ -17,13 +17,13 @@ type Draft = {
 const paragraph = (value: string) => `<p>${value}</p>`;
 const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-function contentFor(draft: Draft) {
+export function contentFor(draft: Draft) {
   const sections = draft.sections.map(({ title, body }) => `<h2 id="${slugify(title)}">${title}</h2>${body.split('\n\n').map(paragraph).join('')}`).join('');
   const checklist = draft.checklist?.length ? `<h2 id="danh-sach-can-chuan-bi">Danh sách cần chuẩn bị</h2><ul>${draft.checklist.map((item) => `<li>${item}</li>`).join('')}</ul>` : '';
   return `<p>${draft.excerpt} Bài viết này giúp bạn xác định thông tin cần xem xét trước khi chọn sản phẩm hoặc trao đổi với đơn vị kỹ thuật. Nội dung chỉ mang tính tham khảo; cấu hình cuối cùng cần được đối chiếu trên xe, bánh xe và điều kiện vận hành thực tế.</p>${sections}${checklist}<h2 id="buoc-tiep-theo">Bước tiếp theo</h2><p>Sau khi đã có thông tin ban đầu, bạn có thể xem nhóm <a href="/vo-xe-nang">vỏ xe nâng</a>, tham khảo <a href="/mam-xe-nang">mâm xe nâng</a> hoặc liên hệ để được đối chiếu cấu hình. Không nên đặt lốp hay mâm chỉ dựa vào ảnh minh họa hoặc tên gọi thông thường.</p>`;
 }
 
-const drafts: Draft[] = [
+export const drafts: Draft[] = [
   {
     slug: 'ke-hoach-noi-dung-lop-dac-xe-nang-so-sanh', title: 'Lốp đặc xe nâng: cách so sánh trước khi lựa chọn', keyword: 'lốp đặc xe nâng',
     excerpt: 'Hướng dẫn so sánh lốp đặc xe nâng theo điều kiện làm việc, cấu hình bánh và kế hoạch bảo trì thay vì chỉ nhìn vào giá hoặc tên thương hiệu.',
@@ -143,4 +143,6 @@ async function main() {
   console.log(JSON.stringify({ updated: results.length, slugs: results }));
 }
 
-main().catch((error: unknown) => { console.error(error); process.exitCode = 1; }).finally(() => db.$disconnect());
+if (require.main === module) {
+  main().catch((error: unknown) => { console.error(error); process.exitCode = 1; }).finally(() => db.$disconnect());
+}
