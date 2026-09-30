@@ -58,6 +58,21 @@ enum ContentStatus {
   PUBLISHED
 }
 
+enum DailyContentRunStatus {
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
+enum DailyContentPlanStatus {
+  PLANNED
+  GENERATING
+  DRAFT
+  PUBLISHED
+  FAILED
+}
+
 enum SeoKeywordType {
   PRIMARY
   SECONDARY
@@ -224,6 +239,7 @@ model Product {
   favouriteProducts FavouriteProduct[]
   seoKeywords       SeoKeyword[]
   seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
+  dailyContentPlans DailyContentPlan[]
 }
 
 model WheelRim {
@@ -384,6 +400,49 @@ model Post {
   seoKeywords     SeoKeyword[]
   seoAudits       SeoAudit[]     @relation("PostSeoAudits")
   campaignPosts   CampaignPost[]
+  dailyContentPlans DailyContentPlan[]
+}
+
+// A date-keyed, reviewable automation log. `runDate` is always an
+// Asia/Ho_Chi_Minh calendar date (YYYY-MM-DD), not a server timestamp.
+model DailyContentRun {
+  id        String                @id @default(cuid())
+  runDate   String                @unique
+  status    DailyContentRunStatus @default(RUNNING)
+  startedAt DateTime              @default(now())
+  finishedAt DateTime?
+  error     String?
+  summary   Json?
+  plans     DailyContentPlan[]
+}
+
+model DailyContentPlan {
+  id                String                 @id @default(cuid())
+  runId             String
+  run               DailyContentRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+  slot              Int
+  title             String
+  slug              String                 @unique
+  topic             String
+  primaryKeyword    String
+  secondaryKeywords String[]               @default([])
+  searchIntent      String
+  cluster           String
+  targetProductId   String?
+  targetProduct     Product?               @relation(fields: [targetProductId], references: [id], onDelete: SetNull)
+  postId            String?                @unique
+  post              Post?                  @relation(fields: [postId], references: [id], onDelete: SetNull)
+  status            DailyContentPlanStatus @default(PLANNED)
+  attempts          Int                    @default(0)
+  internalLinks     Json?
+  quality           Json?
+  failureReason     String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@unique([runId, slot])
+  @@index([status, createdAt])
+  @@index([cluster, createdAt])
 }
 
 model AiGeneration {
