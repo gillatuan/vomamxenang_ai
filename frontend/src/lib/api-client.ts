@@ -131,6 +131,13 @@ export const aiAPI = {
   applySeo:(payload:{sourceType:'PRODUCT'|'BLOG';sourceId:string;seo:GeneratedSeo})=>apiClient.post('/ai/apply/seo',payload),
 };
 
+export type DailyContentPlan = { id: string; slot: number; title: string; slug: string; primaryKeyword: string; secondaryKeywords: string[]; searchIntent: string; cluster: string; status: 'PLANNED'|'GENERATING'|'DRAFT'|'PUBLISHED'|'FAILED'; attempts: number; failureReason?: string | null; post?: { id: string; title: string; slug?: string | null; status: ContentStatus } | null; targetProduct?: { id: string; name: string; slug?: string | null } | null; quality?: { passed?: boolean; reasons?: string[]; wordCount?: number } | null; };
+export type DailyContentRun = { id: string; runDate: string; status: 'RUNNING'|'COMPLETED'|'PARTIAL'|'FAILED'; startedAt: string; finishedAt?: string | null; error?: string | null; plans: DailyContentPlan[]; };
+export const dailyContentAPI = {
+  current: () => apiClient.get<DailyContentRun | null>('/admin/daily-content'),
+  run: (runDate?: string) => apiClient.post<{ run: DailyContentRun; reused?: boolean; running?: boolean }>('/admin/daily-content/run', runDate ? { runDate } : {}),
+};
+
 export interface Order {
   id: string;
   code: string;

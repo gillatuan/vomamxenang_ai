@@ -7,5 +7,5 @@ import { OpenAiProvider } from './providers/openai.provider';
 import { ProductAiService } from './services/product-ai.service';
 import { BlogAiService } from './services/blog-ai.service';
 import { SeoAiService } from './services/seo-ai.service';
-@Module({imports:[ProductsModule,PostsModule],controllers:[AiController],providers:[AiService,OpenAiProvider,{provide:'AI_PROVIDER',useExisting:OpenAiProvider},ProductAiService,BlogAiService,SeoAiService],exports:[BlogAiService]})
+@Module({imports:[ProductsModule,PostsModule],controllers:[AiController],providers:[AiService,OpenAiProvider,{provide:'AI_PROVIDER',useExisting:OpenAiProvider},ProductAiService,BlogAiService,SeoAiService],exports:[BlogAiService,OpenAiProvider]})
 export class AiModule {}
