@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DailyContentPlanStatus, DailyContentRunStatus, Prisma } from '@prisma/client';
 import { BlogAiService } from '../ai/services/blog-ai.service';
+import { OpenAiProvider } from '../ai/providers/openai.provider';
 import type { GeneratedBlog } from '../ai/types/ai.types';
 import { PostsService } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,6 +30,9 @@ const candidates: Candidate[] = [
   { title: 'Bảo quản vỏ xe nâng trong kho: những điều chỉ nên kết luận khi có dữ liệu', topic: 'Nguyên tắc ghi nhận và bảo quản vỏ xe nâng trong kho một cách trung thực', primaryKeyword: 'bảo quản vỏ xe nâng', secondaryKeywords: ['kho vỏ lốp xe nâng', 'lốp xe nâng'], searchIntent: 'INFORMATIONAL', cluster: 'VỎ XE NÂNG', articleType: 'Supporting guide', productRelated: false },
 ];
 
+const plannerSchema = { type: 'object', additionalProperties: false, required: ['posts'], properties: { posts: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['title', 'topic', 'primaryKeyword', 'secondaryKeywords', 'searchIntent', 'cluster', 'articleType', 'productRelated'], properties: { title: { type: 'string' }, topic: { type: 'string' }, primaryKeyword: { type: 'string' }, secondaryKeywords: { type: 'array', items: { type: 'string' } }, searchIntent: { type: 'string', enum: ['COMMERCIAL', 'INFORMATIONAL', 'COMPARISON', 'PROBLEM_SOLUTION'] }, cluster: { type: 'string', enum: ['VỎ XE NÂNG', 'MÂM XE NÂNG', 'PHỤ TÙNG XE NÂNG'] }, articleType: { type: 'string' }, productRelated: { type: 'boolean' } } } } } };
+const PLANNER_PROMPT = 'Plan exactly two distinct Vietnamese blog posts for a forklift tyre/rim business. Return only the requested JSON. First must be product/commercial and productRelated=true; second must be informational/supporting and productRelated=false. Never invent product facts, statistics, case studies, prices, availability, brands, sizes, origin, ratings, or claims. Use the supplied existing titles/keywords as exclusions: do not repeat a title, slug, or primary keyword with the same intent. Pick clear topic-cluster roles.';
+
 const plain = (html: string) => html.replace(/<[^>]+>/gu, ' ').replace(/\s+/gu, ' ').trim();
 const wordCount = (html: string) => plain(html).match(/[\p{L}\p{N}]+/gu)?.length || 0;
 const linksFrom = (html: string) => [...html.matchAll(/<a\s+[^>]*href=["']([^"']+)["'][^>]*>/giu)].map((match) => match[1]);
@@ -41,7 +45,7 @@ const vnDate = (now = new Date()) => {
 @Injectable()
 export class DailyContentService {
   private readonly logger = new Logger(DailyContentService.name);
-  constructor(private readonly db: PrismaService, private readonly blogAi: BlogAiService, private readonly posts: PostsService) {}
+  constructor(private readonly db: PrismaService, private readonly blogAi: BlogAiService, private readonly posts: PostsService, private readonly ai: OpenAiProvider) {}
 
   async current() {
     return this.db.dailyContentRun.findFirst({ orderBy: { startedAt: 'desc' }, include: { plans: { include: { post: { select: { id: true, title: true, slug: true, status: true } }, targetProduct: { select: { id: true, name: true, slug: true } } }, orderBy: { slot: 'asc' } } } });
@@ -61,7 +65,7 @@ export class DailyContentService {
     try {
       if (!run.plans.length) await this.createPlans(run.id);
       const plans = await this.db.dailyContentPlan.findMany({ where: { runId: run.id }, orderBy: { slot: 'asc' } });
-      for (const plan of plans) if (!plan.postId && plan.status !== DailyContentPlanStatus.FAILED) await this.generatePlan(plan.id);
+      for (const plan of plans) if (!plan.postId && plan.attempts < MAX_ATTEMPTS) await this.generatePlan(plan.id);
       const complete = await this.db.dailyContentPlan.findMany({ where: { runId: run.id }, orderBy: { slot: 'asc' } });
       const successful = complete.filter((plan) => Boolean(plan.postId)).length;
       const failed = complete.filter((plan) => plan.status === DailyContentPlanStatus.FAILED).length;
@@ -84,11 +88,23 @@ export class DailyContentService {
     ]);
     const known = [...posts.map((post) => ({ title: post.title, slug: post.slug || '', primaryKeyword: typeof (post.seo as Record<string, unknown> | null)?.primaryKeyword === 'string' ? String((post.seo as Record<string, unknown>).primaryKeyword) : '', searchIntent: '' })), ...existingPlans];
     const available = candidates.filter((candidate) => !this.collides(candidate, known));
-    const first = available.find((candidate) => candidate.productRelated) || available[0];
-    const second = available.find((candidate) => candidate !== first && !candidate.productRelated && candidate.cluster !== first?.cluster) || available.find((candidate) => candidate !== first);
+    const generated = available.length >= 2 ? [] : await this.planWithAi(known, products);
+    const eligible = [...available, ...generated.filter((candidate) => !this.collides(candidate, known))];
+    const first = eligible.find((candidate) => candidate.productRelated) || eligible[0];
+    const second = eligible.find((candidate) => candidate !== first && !candidate.productRelated && candidate.cluster !== first?.cluster) || eligible.find((candidate) => candidate !== first);
     if (!first || !second || products.length === 0) throw new Error('Không đủ chủ đề hoặc sản phẩm thật để lập 2 bài không trùng cho ngày này.');
     const selected = [first, second];
     await this.db.dailyContentPlan.createMany({ data: selected.map((candidate, index) => ({ runId, slot: index + 1, title: candidate.title, slug: slugify(candidate.title), topic: candidate.topic, primaryKeyword: candidate.primaryKeyword, secondaryKeywords: candidate.secondaryKeywords, searchIntent: candidate.searchIntent, cluster: candidate.cluster, targetProductId: candidate.productRelated ? products[index % products.length].id : null, status: DailyContentPlanStatus.PLANNED })) });
+  }
+
+  private async planWithAi(known: Array<{ title: string; slug: string | null; primaryKeyword: string; searchIntent: string }>, products: Array<{ id: string; name: string; slug: string | null; shortDescription: string | null; description: string | null; size: string | null; brand: string | null; tireType: string | null; rimType: string | null; condition: string | null; imageUrl: string | null; seo: Prisma.JsonValue }>) {
+    const exclusions = known.slice(0, 120).map((item) => ({ title: item.title, slug: item.slug, primaryKeyword: item.primaryKeyword, searchIntent: item.searchIntent }));
+    const catalog = products.map(({ id, name, slug, shortDescription, size, brand, tireType, rimType, condition }) => ({ id, name, slug, shortDescription, size, brand, tireType, rimType, condition }));
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const result = await this.ai.generateStructuredOutput<{ posts: Candidate[] }>(PLANNER_PROMPT, { existingContent: exclusions, verifiedProducts: catalog, requiredRoles: ['COMMERCIAL productRelated=true', 'INFORMATIONAL productRelated=false'] }, plannerSchema);
+      if (result.posts.length === 2 && result.posts.some((candidate) => candidate.productRelated) && result.posts.some((candidate) => !candidate.productRelated)) return result.posts;
+    }
+    throw new Error('AI planner không tạo được hai chủ đề hợp lệ sau khi thử lại.');
   }
 
   private collides(candidate: Candidate, known: Array<{ title: string; slug: string | null; primaryKeyword: string; searchIntent: string }>) {
@@ -127,8 +143,11 @@ export class DailyContentService {
       return;
     }
     const content = this.appendLinks(output.content, links);
-    const quality = this.qualityGate({ ...output, content }, plan, links);
-    const post = await this.posts.create({ title: output.title, slug: output.slug, excerpt: output.excerpt, content, tableOfContents: output.tableOfContents, seo: { ...output.seo, keywords: [plan.primaryKeyword, ...plan.secondaryKeywords], primaryKeyword: plan.primaryKeyword, secondaryKeywords: plan.secondaryKeywords, robots: 'noindex,follow' }, tags: [...new Set([plan.cluster.toLowerCase(), plan.primaryKeyword, ...output.tags])], status: 'DRAFT' });
+    // The plan owns title and slug so an AI variation cannot bypass the plan's
+    // duplicate check or turn a retry into a different article.
+    const plannedOutput = { ...output, title: plan.title, slug: plan.slug, content };
+    const quality = this.qualityGate(plannedOutput, plan, links);
+    const post = await this.posts.create({ title: plannedOutput.title, slug: plannedOutput.slug, excerpt: plannedOutput.excerpt, content: plannedOutput.content, tableOfContents: plannedOutput.tableOfContents, seo: { ...plannedOutput.seo, keywords: [plan.primaryKeyword, ...plan.secondaryKeywords], primaryKeyword: plan.primaryKeyword, secondaryKeywords: plan.secondaryKeywords, robots: 'noindex,follow' }, tags: [...new Set([plan.cluster.toLowerCase(), plan.primaryKeyword, ...plannedOutput.tags])], status: 'DRAFT' });
     await this.db.dailyContentPlan.update({ where: { id: plan.id }, data: { postId: post.id, status: DailyContentPlanStatus.DRAFT, quality: json(quality), failureReason: quality.passed ? null : quality.reasons.join(' | ') } });
   }
 
