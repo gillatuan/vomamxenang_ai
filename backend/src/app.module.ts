@@ -19,6 +19,7 @@ import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
 import { AiModule } from "./ai/ai.module"
 import { StoreInfoModule } from "./store-info/store-info.module"
 import { AboutModule } from "./about/about.module"
+import { DailyContentModule } from "./daily-content/daily-content.module"
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { AboutModule } from "./about/about.module"
     StoreInfoModule,
     AboutModule,
     SeoModule,
+    DailyContentModule,
   ],
   providers: [
     {

@@ -2,5 +2,8 @@
   "buildCommand": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production && yarn build",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" }
+  ],
+  "crons": [
+    { "path": "/api/v1/internal/daily-content/run", "schedule": "0 23 * * *" }
   ]
 }
