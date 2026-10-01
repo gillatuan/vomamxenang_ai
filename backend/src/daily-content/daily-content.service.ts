@@ -6,6 +6,7 @@ import type { GeneratedBlog } from '../ai/types/ai.types';
 import { PostsService } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { slugify } from '../content/content-alias';
+import { SeoService } from '../seo/seo.service';
 
 const TZ = 'Asia/Ho_Chi_Minh';
 const MAX_ATTEMPTS = 3; // Initial attempt plus at most two safe retries.
@@ -45,13 +46,14 @@ const vnDate = (now = new Date()) => {
 @Injectable()
 export class DailyContentService {
   private readonly logger = new Logger(DailyContentService.name);
-  constructor(private readonly db: PrismaService, private readonly blogAi: BlogAiService, private readonly posts: PostsService, private readonly ai: OpenAiProvider) {}
+  constructor(private readonly db: PrismaService, private readonly blogAi: BlogAiService, private readonly posts: PostsService, private readonly ai: OpenAiProvider, private readonly seo: SeoService) {}
 
   async current() {
     return this.db.dailyContentRun.findFirst({ orderBy: { startedAt: 'desc' }, include: { plans: { include: { post: { select: { id: true, title: true, slug: true, status: true } }, targetProduct: { select: { id: true, name: true, slug: true } } }, orderBy: { slot: 'asc' } } } });
   }
 
   async run(runDate = vnDate()) {
+    if (process.env.SEO_AUTOMATION_ENABLED === 'false') return { disabled: true, run: null };
     let run = await this.db.dailyContentRun.findUnique({ where: { runDate }, include: { plans: true } });
     if (run?.status === DailyContentRunStatus.COMPLETED) return { run, reused: true };
     if (run?.status === DailyContentRunStatus.RUNNING) return { run, reused: true, running: true };
@@ -63,6 +65,11 @@ export class DailyContentService {
     }
 
     try {
+      let audit: { id: string } | null = null; let auditError: string | null = null;
+      if (process.env.SEO_AUTOMATION_AUDIT_ENABLED !== 'false') {
+        try { audit = await this.seo.audit(); }
+        catch (error) { auditError = error instanceof Error ? error.message : 'SEO health audit failed.'; this.logger.warn({ runDate, auditError }); }
+      }
       if (!run.plans.length) await this.createPlans(run.id);
       const plans = await this.db.dailyContentPlan.findMany({ where: { runId: run.id }, orderBy: { slot: 'asc' } });
       for (const plan of plans) if (!plan.postId && plan.attempts < MAX_ATTEMPTS) await this.generatePlan(plan.id);
@@ -70,7 +77,7 @@ export class DailyContentService {
       const successful = complete.filter((plan) => Boolean(plan.postId)).length;
       const failed = complete.filter((plan) => plan.status === DailyContentPlanStatus.FAILED).length;
       const status = successful === 2 && failed === 0 ? DailyContentRunStatus.COMPLETED : successful ? DailyContentRunStatus.PARTIAL : DailyContentRunStatus.FAILED;
-      const updated = await this.db.dailyContentRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), summary: json({ planned: complete.length, savedDrafts: successful, failed, timezone: TZ }) }, include: { plans: { include: { post: true }, orderBy: { slot: 'asc' } } } });
+      const updated = await this.db.dailyContentRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), summary: json({ planned: complete.length, savedDrafts: successful, failed, timezone: TZ, seoAuditId: audit?.id || null, seoAuditStatus: auditError ? 'FAILED' : audit ? 'COMPLETED' : 'DISABLED', searchConsole: 'UNAVAILABLE_CONFIGURATION_REQUIRED', auditError }) }, include: { plans: { include: { post: true }, orderBy: { slot: 'asc' } } } });
       return { run: updated, reused: false };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Daily content job failed.';

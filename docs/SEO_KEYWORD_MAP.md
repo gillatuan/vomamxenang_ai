@@ -44,3 +44,9 @@ Nguồn: dữ liệu production đọc ngày 2026-09-11. Không có số search 
 - NAVIGATIONAL gồm tên website/doanh nghiệp, về `/` hoặc `/about`; không hứa “chính hãng”, “đại lý chính thức” khi chưa có bằng chứng.
 - Bộ lọc dùng canonical về trang sạch, noindex,follow; landing page có danh mục thực vẫn được index.
 - Keyword map runtime trong Admin được mở rộng; đây là chiến lược, không tự ghi lại seo hoặc mô tả trong DB.
+
+## Bổ sung keyword strategy (2026-10-01)
+
+Seed `012-expand-vo-mam-keyword-map` lưu các keyword có URL thật vào SEO workbench: homepage sở hữu **vỏ mâm xe nâng** và biến thể “vỏ và mâm xe nâng”; `/vo-xe-nang`, `/lop-dac-xe-nang` và `/mam-xe-nang` sở hữu các intent transaction tương ứng. Keyword “vỏ xe nâng cũ” chỉ trỏ tới sản phẩm cũ đang tồn tại; không tạo page theo thương hiệu, dòng xe, kích thước, thành phố hoặc giá khi không có dữ liệu xác minh.
+
+Search Console hiện chưa kết nối. Bản đồ là editorial mapping, không có search volume, keyword difficulty, ranking, traffic hay lời hứa indexation.
