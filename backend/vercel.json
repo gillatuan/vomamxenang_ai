@@ -4,6 +4,6 @@
     { "source": "/api/(.*)", "destination": "/api/index" }
   ],
   "crons": [
-    { "path": "/api/v1/internal/daily-content/run", "schedule": "0 23 * * *" }
+    { "path": "/api/v1/internal/daily-content/run", "schedule": "0 19 * * *" }
   ]
 }
