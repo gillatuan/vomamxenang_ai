@@ -2,7 +2,7 @@ name: CI and deploy production
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, phase-2/integration-safety]
     paths:
       - "frontend/**"
       - "backend/**"
