@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('orders')
 export class OrdersWebhookController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}\n\n  protected getStripeClientForWebhook() {\n    return getStripeClient();\n  }
 
   @Post('webhook')
   async handle(@Req() req: Request, @Res() res: Response) {
@@ -34,9 +34,23 @@ export class OrdersWebhookController {
       if (order && order.status !== 'PAID') {
         try {
           await this.prisma.$transaction(async (tx) => {
+            // Serialize fulfillment for this order. The status check above is only
+            // an optimization; this lock + re-check is the concurrency guard.
+            await tx.$queryRawUnsafe(
+              'SELECT id FROM "Order" WHERE id = $1 FOR UPDATE',
+              order.id,
+            );
+            const lockedOrder = await tx.order.findUnique({
+              where: { id: order.id },
+              include: { items: true },
+            });
+            if (!lockedOrder || lockedOrder.status === 'PAID') {
+              return;
+            }
+
             const deductions: Array<{ stockId: string; quantity: number }> = [];
 
-            for (const item of order.items) {
+            for (const item of lockedOrder.items) {
               const stock = await tx.stockLocation.findFirst({
                 where: {
                   locationId: item.locationId,
