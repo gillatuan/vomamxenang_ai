@@ -64,6 +64,8 @@ jobs:
         run: yarn tsc --noEmit -p tsconfig.build.json
       - name: Run backend verification suite
         run: yarn test:ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vomamxenang_ci
       - run: yarn build
 
   deploy-production:
