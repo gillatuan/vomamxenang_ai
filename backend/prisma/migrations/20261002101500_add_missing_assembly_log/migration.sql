@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "AssemblyLog" (
   "productId" TEXT NOT NULL,
   "wheelRimId" TEXT NOT NULL,
   "quantity" INTEGER NOT NULL,
-  "pressingFee" DOUBLE PRECISION NOT NULL,
+  "pressingFee" DOUBLE PRECISION NOT NULL DEFAULT 0,
   "userId" TEXT NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "AssemblyLog_pkey" PRIMARY KEY ("id")
