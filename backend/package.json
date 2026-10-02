@@ -26,7 +26,8 @@
     "test:warehouse": "ts-node --transpile-only test/day2-warehouse-cleanup-draft.spec.ts",
     "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
     "test:critical": "ts-node --transpile-only test/auth-critical.spec.ts && ts-node --transpile-only test/inventory-critical.spec.ts && ts-node --transpile-only test/orders-critical.spec.ts && ts-node --transpile-only test/webhook-critical.spec.ts",
-    "test:integration:critical": "ts-node --transpile-only test/postgres-critical.integration.spec.ts"
+    "test:integration:critical": "ts-node --transpile-only test/postgres-critical.integration.spec.ts",
+    "prisma:migrate:drift-check": "prisma migrate diff --from-url \"$DATABASE_URL\" --to-schema-datamodel prisma/schema.prisma --exit-code"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
