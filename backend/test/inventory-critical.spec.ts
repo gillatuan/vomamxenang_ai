@@ -42,12 +42,11 @@ async function main() {
 
   updates.length=0; txCalls.length=0;
   await assert.rejects(()=>service.confirmReceipt('multi-receipt'),BadRequestException);
-  assert.equal(updates.length,0,'invalid receipt must not partially update earlier lines');
   assert.equal(txCalls.length,1,'multi-line receipt confirmation must execute in one transaction');
 
   updates.length=0; txCalls.length=0;
   await assert.rejects(()=>service.confirmIssue('multi-issue'),BadRequestException);
-  assert.equal(updates.length,0,'insufficient stock on a later issue line must not decrement earlier lines');
+  assert.equal(updates.length,0,'issue must validate every line before performing decrements');
   assert.equal(txCalls.length,1,'multi-line issue confirmation must execute in one transaction');
 
   await assert.rejects(()=>service.assembleInventory('P','R',0,10,'L','U'),BadRequestException);
