@@ -1,0 +1,73 @@
+{
+  "taskId": "TASK-0004",
+  "title": "Agent orchestration",
+  "status": "human_approval",
+  "owner": "human",
+  "risk": {
+    "database": false,
+    "destructiveDatabase": false,
+    "security": false,
+    "payment": false,
+    "inventory": false,
+    "pricing": false,
+    "production": false
+  },
+  "artifacts": {
+    "requirement": ".ai/tasks/TASK-0004/requirement.md",
+    "plan": ".ai/tasks/TASK-0004/plan.md",
+    "architecture": ".ai/tasks/TASK-0004/architecture.md",
+    "review": ".ai/tasks/TASK-0004/review.md",
+    "qa": ".ai/tasks/TASK-0004/qa.md",
+    "release": ".ai/tasks/TASK-0004/release.md"
+  },
+  "history": [
+    {
+      "from": null,
+      "to": "requirement",
+      "by": "planner",
+      "evidence": "requirement.md"
+    },
+    {
+      "from": "requirement",
+      "to": "planning",
+      "by": "planner",
+      "evidence": "plan.md"
+    },
+    {
+      "from": "planning",
+      "to": "architecture",
+      "by": "architect",
+      "evidence": "architecture.md"
+    },
+    {
+      "from": "architecture",
+      "to": "development",
+      "by": "developer",
+      "evidence": "orchestration contract + validator + CI implemented"
+    },
+    {
+      "from": "development",
+      "to": "review",
+      "by": "reviewer",
+      "evidence": ".ai/tasks/TASK-0004/review.md"
+    },
+    {
+      "from": "review",
+      "to": "qa",
+      "by": "qa",
+      "evidence": ".ai/tasks/TASK-0004/qa.md; Actions #91"
+    },
+    {
+      "from": "qa",
+      "to": "release_ready",
+      "by": "devops",
+      "evidence": ".ai/tasks/TASK-0004/release.md"
+    },
+    {
+      "from": "release_ready",
+      "to": "human_approval",
+      "by": "human",
+      "evidence": "Awaiting explicit human merge approval; no production deployment today"
+    }
+  ]
+}
