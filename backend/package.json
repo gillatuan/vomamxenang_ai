@@ -21,7 +21,11 @@
     "db:sync:production": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production",
     "test:production-seed": "ts-node --transpile-only test/production-seed-runner.spec.ts",
     "seo": "ts-node --transpile-only scripts/seo.ts",
-    "test:seo": "ts-node --transpile-only test/seo.spec.ts && ts-node --transpile-only test/seo-v31.spec.ts"
+    "test:seo": "ts-node --transpile-only test/seo.spec.ts && ts-node --transpile-only test/seo-v31.spec.ts",
+    "test:content": "ts-node --transpile-only test/content-alias.spec.ts",
+    "test:warehouse": "ts-node --transpile-only test/day2-warehouse-cleanup-draft.spec.ts",
+    "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:warehouse && yarn test:critical",
+    "test:critical": "ts-node --transpile-only test/auth-critical.spec.ts && ts-node --transpile-only test/inventory-critical.spec.ts && ts-node --transpile-only test/orders-critical.spec.ts && ts-node --transpile-only test/webhook-critical.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
