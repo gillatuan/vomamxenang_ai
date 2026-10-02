@@ -1,0 +1,41 @@
+name: Production DB read-only preflight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Production read-only preflight
+        run: |
+          set -euo pipefail
+
+          {
+            echo 'BEGIN;'
+            echo 'SET TRANSACTION READ ONLY;'
+            cat .ai/tasks/TASK-0003/production-preflight.sql
+            echo 'ROLLBACK;'
+          } > /tmp/preflight.sql
+
+          psql "$DATABASE_URL" \
+            -v ON_ERROR_STOP=1 \
+            -f /tmp/preflight.sql
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/preflight.sql
