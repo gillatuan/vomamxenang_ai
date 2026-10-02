@@ -5,7 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('orders')
 export class OrdersWebhookController {
-  constructor(private prisma: PrismaService) {}\n\n  protected getStripeClientForWebhook() {\n    return getStripeClient();\n  }
+  constructor(private prisma: PrismaService) {}
+
+  protected getStripeClientForWebhook() {
+    return getStripeClient();
+  }
 
   @Post('webhook')
   async handle(@Req() req: Request, @Res() res: Response) {
