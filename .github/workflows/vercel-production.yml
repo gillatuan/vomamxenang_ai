@@ -48,6 +48,22 @@ jobs:
   verify-backend:
     name: Verify backend
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vomamxenang_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d vomamxenang_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vomamxenang_ci
     defaults:
       run:
         working-directory: backend
@@ -62,9 +78,10 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Typecheck backend
         run: yarn tsc --noEmit -p tsconfig.build.json
-      - run: yarn test:seo
-      - name: Test production seed runner
-        run: yarn test:production-seed
+      - name: Apply test database migrations
+        run: yarn prisma:migrate
+      - name: Run backend verification suite
+        run: yarn test:ci
       - run: yarn build
 
   deploy-production:
