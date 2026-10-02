@@ -19,7 +19,7 @@ async function main(){
     },
     $transaction:async(arg:any)=>typeof arg==='function'?arg(prisma):Promise.all(arg)
   };
-  const controller=new OrdersWebhookController(prisma, stripe as any);
+  const controller=new OrdersWebhookController(prisma);\n  (controller as any).getStripeClientForWebhook=()=>stripe;
   const req:any={headers:{'stripe-signature':'sig'},rawBody:Buffer.from('{}')};
 
   let res=response(); await controller.handle(req,res);
