@@ -30,6 +30,24 @@ async function main(){
   assert.equal(stockQty,3,'duplicate Stripe delivery must not decrement stock twice');
   assert.equal(decrements,1,'duplicate Stripe delivery must be idempotent');
 
+  // Simulate two concurrent deliveries that both observed PENDING before entering
+  // the transaction. The row lock must make the second transaction re-check PAID.
+  order={id:'O-concurrent',stripeSessionId:'cs_test',status:'PENDING',items:[{locationId:'L1',productId:'P1',wheelRimId:null,quantity:2}]};
+  stockQty=5; decrements=0; paidUpdates=0;
+  let releaseLock:()=>void=()=>{}; let lockHeld=false;
+  const originalTx=prisma.$transaction;
+  prisma.$transaction=async(fn:any)=>{
+    while(lockHeld) await new Promise(r=>setTimeout(r,1));
+    lockHeld=true;
+    try { return await fn(prisma); } finally { lockHeld=false; releaseLock(); }
+  };
+  const concurrentReq=()=>controller.handle(req,response());
+  await Promise.all([concurrentReq(),concurrentReq()]);
+  assert.equal(stockQty,3,'concurrent duplicate deliveries must decrement stock once');
+  assert.equal(decrements,1,'row lock + status re-check must serialize fulfillment');
+  assert.equal(paidUpdates,1);
+  prisma.$transaction=originalTx;
+
   order={id:'O2',stripeSessionId:'cs_test',status:'PENDING',items:[{locationId:'L1',productId:'P1',wheelRimId:null,quantity:4}]};
   stockQty=1; decrements=0; paidUpdates=0;
   res=response(); await controller.handle(req,res);
