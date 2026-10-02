@@ -1,0 +1,40 @@
+{
+  "taskId": "TASK-0004",
+  "title": "Agent orchestration",
+  "status": "architecture",
+  "owner": "architect",
+  "risk": {
+    "database": false,
+    "destructiveDatabase": false,
+    "security": false,
+    "payment": false,
+    "inventory": false,
+    "pricing": false,
+    "production": false
+  },
+  "artifacts": {
+    "requirement": ".ai/tasks/TASK-0004/requirement.md",
+    "plan": ".ai/tasks/TASK-0004/plan.md",
+    "architecture": ".ai/tasks/TASK-0004/architecture.md"
+  },
+  "history": [
+    {
+      "from": null,
+      "to": "requirement",
+      "by": "planner",
+      "evidence": "requirement.md"
+    },
+    {
+      "from": "requirement",
+      "to": "planning",
+      "by": "planner",
+      "evidence": "plan.md"
+    },
+    {
+      "from": "planning",
+      "to": "architecture",
+      "by": "architect",
+      "evidence": "architecture.md"
+    }
+  ]
+}
