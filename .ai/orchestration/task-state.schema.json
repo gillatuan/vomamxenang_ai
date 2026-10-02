@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "taskId",
+    "title",
+    "status",
+    "owner",
+    "risk",
+    "artifacts",
+    "history"
+  ],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "requirement",
+        "planning",
+        "architecture",
+        "development",
+        "review",
+        "qa",
+        "release_ready",
+        "human_approval",
+        "done"
+      ]
+    },
+    "owner": {
+      "enum": [
+        "planner",
+        "architect",
+        "developer",
+        "reviewer",
+        "qa",
+        "devops",
+        "human"
+      ]
+    },
+    "risk": {
+      "type": "object"
+    },
+    "artifacts": {
+      "type": "object"
+    },
+    "history": {
+      "type": "array"
+    }
+  }
+}
