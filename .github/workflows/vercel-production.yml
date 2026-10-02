@@ -62,9 +62,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Typecheck backend
         run: yarn tsc --noEmit -p tsconfig.build.json
-      - run: yarn test:seo
-      - name: Test production seed runner
-        run: yarn test:production-seed
+      - name: Run backend verification suite
+        run: yarn test:ci
       - run: yarn build
 
   deploy-production:
