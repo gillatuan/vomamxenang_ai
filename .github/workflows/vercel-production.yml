@@ -88,6 +88,7 @@ jobs:
     name: Deploy production to Vercel
     needs: [verify-frontend, verify-backend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: Production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
