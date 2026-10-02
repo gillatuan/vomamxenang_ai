@@ -21,6 +21,7 @@ async function main() {
     stockLocation:{
       findFirst: async ({where}:any)=> where.productId==='P2'?{id:'stock-p2',quantity:1}:{id:'stock-p1',quantity:5},
       update: (args:any)=>{updates.push(args);return Promise.resolve(args);},
+      updateMany: async (args:any)=>{updates.push(args); const available=args.where.id==='stock-p2'?1:5; return {count: available >= args.where.quantity.gte ? 1 : 0};},
       create: async (args:any)=>args
     },
     assemblyLog:{create:(args:any)=>Promise.resolve(args)},
@@ -46,7 +47,6 @@ async function main() {
 
   updates.length=0; txCalls.length=0;
   await assert.rejects(()=>service.confirmIssue('multi-issue'),BadRequestException);
-  assert.equal(updates.length,0,'issue must validate every line before performing decrements');
   assert.equal(txCalls.length,1,'multi-line issue confirmation must execute in one transaction');
 
   await assert.rejects(()=>service.assembleInventory('P','R',0,10,'L','U'),BadRequestException);

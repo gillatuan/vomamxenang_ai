@@ -148,7 +148,7 @@ export class InventoryService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      const stockUpdates: Array<{ stockId: string; quantity: number }> = [];
+      const stockUpdates = new Map<string, number>();
 
       for (const detail of transaction.details) {
         if (!detail.locationId) {
@@ -163,18 +163,24 @@ export class InventoryService {
           },
         });
 
-        if (!stock || stock.quantity < detail.quantity) {
+        if (!stock) {
           throw new BadRequestException('Insufficient stock for the chosen location');
         }
 
-        stockUpdates.push({ stockId: stock.id, quantity: detail.quantity });
+        stockUpdates.set(
+          stock.id,
+          (stockUpdates.get(stock.id) ?? 0) + detail.quantity,
+        );
       }
 
-      for (const update of stockUpdates) {
-        await tx.stockLocation.update({
-          where: { id: update.stockId },
-          data: { quantity: { decrement: update.quantity } },
+      for (const [stockId, quantity] of stockUpdates) {
+        const updated = await tx.stockLocation.updateMany({
+          where: { id: stockId, quantity: { gte: quantity } },
+          data: { quantity: { decrement: quantity } },
         });
+        if (updated.count !== 1) {
+          throw new BadRequestException('Insufficient stock for the chosen location');
+        }
       }
     });
 
