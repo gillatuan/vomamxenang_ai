@@ -4,8 +4,8 @@ import { marked } from "marked";
 // Accept existing plain text/Markdown as well as HTML saved by the editor.
 export function richTextHtml(value: string = "") {
   return sanitizeHtml(marked.parse(value, { async: false, breaks: true }), {
-    allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "h2", "h3", "h4", "ul", "ol", "li", "blockquote", "pre", "code", "hr", "a", "figure", "figcaption", "img"],
-    allowedAttributes: { a: ["href", "title", "rel"], ol: ["start"], img: ["src", "alt", "loading"] },
+    allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "h2", "h3", "h4", "ul", "ol", "li", "blockquote", "pre", "code", "hr", "a"],
+    allowedAttributes: { a: ["href", "title", "rel"], ol: ["start"] },
     allowedSchemes: ["http", "https", "mailto", "tel"],
     allowProtocolRelative: false,
     transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }) },
