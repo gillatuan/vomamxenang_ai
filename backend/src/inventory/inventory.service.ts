@@ -60,13 +60,13 @@ export class InventoryService {
       throw new NotFoundException('Receipt transaction not found');
     }
 
-    await Promise.all(
-      transaction.details.map(async (detail) => {
+    await this.prisma.$transaction(async (tx) => {
+      for (const detail of transaction.details) {
         if (!detail.locationId) {
           throw new BadRequestException('Receipt detail requires locationId');
         }
 
-        const existingStock = await this.prisma.stockLocation.findFirst({
+        const existingStock = await tx.stockLocation.findFirst({
           where: {
             locationId: detail.locationId,
             productId: detail.productId ?? undefined,
@@ -75,12 +75,12 @@ export class InventoryService {
         });
 
         if (existingStock) {
-          await this.prisma.stockLocation.update({
+          await tx.stockLocation.update({
             where: { id: existingStock.id },
             data: { quantity: { increment: detail.quantity } },
           });
         } else {
-          await this.prisma.stockLocation.create({
+          await tx.stockLocation.create({
             data: {
               locationId: detail.locationId,
               productId: detail.productId,
@@ -89,8 +89,8 @@ export class InventoryService {
             },
           });
         }
-      }),
-    );
+      }
+    });
 
     return this.findReceiptById(id);
   }
@@ -147,13 +147,15 @@ export class InventoryService {
       throw new NotFoundException('Issue transaction not found');
     }
 
-    await Promise.all(
-      transaction.details.map(async (detail) => {
+    await this.prisma.$transaction(async (tx) => {
+      const stockUpdates: Array<{ stockId: string; quantity: number }> = [];
+
+      for (const detail of transaction.details) {
         if (!detail.locationId) {
           throw new BadRequestException('Issue detail requires locationId');
         }
 
-        const stock = await this.prisma.stockLocation.findFirst({
+        const stock = await tx.stockLocation.findFirst({
           where: {
             locationId: detail.locationId,
             productId: detail.productId ?? undefined,
@@ -165,12 +167,16 @@ export class InventoryService {
           throw new BadRequestException('Insufficient stock for the chosen location');
         }
 
-        await this.prisma.stockLocation.update({
-          where: { id: stock.id },
-          data: { quantity: { decrement: detail.quantity } },
+        stockUpdates.push({ stockId: stock.id, quantity: detail.quantity });
+      }
+
+      for (const update of stockUpdates) {
+        await tx.stockLocation.update({
+          where: { id: update.stockId },
+          data: { quantity: { decrement: update.quantity } },
         });
-      }),
-    );
+      }
+    });
 
     return this.findIssueById(id);
   }
