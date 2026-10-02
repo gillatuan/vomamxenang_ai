@@ -80,6 +80,8 @@ jobs:
         run: yarn tsc --noEmit -p tsconfig.build.json
       - name: Apply test database migrations
         run: yarn prisma:migrate
+      - name: Audit fresh database against Prisma schema
+        run: yarn prisma:migrate:drift-check
       - name: Run backend verification suite
         run: yarn test:ci
       - run: yarn build
