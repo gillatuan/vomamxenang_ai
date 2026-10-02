@@ -15,7 +15,7 @@ export class OrdersWebhookController {
       return res.status(400).json({ error: 'Missing signature or raw body' });
     }
 
-    const stripe = getStripeClient();
+    const stripe = this.getStripeClientForWebhook();
     let event: any;
     try {
       event = stripe.webhooks.constructEvent(raw, sig, process.env.STRIPE_WEBHOOK_SECRET ?? '');
@@ -31,22 +31,45 @@ export class OrdersWebhookController {
         include: { items: true },
       });
 
-      if (order) {
-        await this.prisma.$transaction([
-          this.prisma.order.update({ where: { id: order.id }, data: { status: 'PAID' } }),
-          ...order.items.map((item) =>
-            this.prisma.stockLocation.updateMany({
-              where: {
-                locationId: item.locationId,
-                productId: item.productId ?? undefined,
-                wheelRimId: item.wheelRimId ?? undefined,
-              },
-              data: {
-                quantity: { decrement: item.quantity },
-              },
-            }),
-          ),
-        ]);
+      if (order && order.status !== 'PAID') {
+        try {
+          await this.prisma.$transaction(async (tx) => {
+            const deductions: Array<{ stockId: string; quantity: number }> = [];
+
+            for (const item of order.items) {
+              const stock = await tx.stockLocation.findFirst({
+                where: {
+                  locationId: item.locationId,
+                  productId: item.productId ?? undefined,
+                  wheelRimId: item.wheelRimId ?? undefined,
+                },
+              });
+
+              if (!stock || stock.quantity < item.quantity) {
+                throw new Error('INSUFFICIENT_STOCK');
+              }
+
+              deductions.push({ stockId: stock.id, quantity: item.quantity });
+            }
+
+            for (const deduction of deductions) {
+              await tx.stockLocation.update({
+                where: { id: deduction.stockId },
+                data: { quantity: { decrement: deduction.quantity } },
+              });
+            }
+
+            await tx.order.update({
+              where: { id: order.id },
+              data: { status: 'PAID' },
+            });
+          });
+        } catch (err) {
+          if (err instanceof Error && err.message === 'INSUFFICIENT_STOCK') {
+            return res.status(409).json({ error: 'Insufficient stock for order fulfillment' });
+          }
+          throw err;
+        }
       }
     }
 
