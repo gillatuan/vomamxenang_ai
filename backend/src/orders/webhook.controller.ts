@@ -52,7 +52,7 @@ export class OrdersWebhookController {
               return;
             }
 
-            const deductions: Array<{ stockId: string; quantity: number }> = [];
+            const deductions = new Map<string, number>();
 
             for (const item of lockedOrder.items) {
               const stock = await tx.stockLocation.findFirst({
@@ -63,18 +63,24 @@ export class OrdersWebhookController {
                 },
               });
 
-              if (!stock || stock.quantity < item.quantity) {
+              if (!stock) {
                 throw new Error('INSUFFICIENT_STOCK');
               }
 
-              deductions.push({ stockId: stock.id, quantity: item.quantity });
+              deductions.set(
+                stock.id,
+                (deductions.get(stock.id) ?? 0) + item.quantity,
+              );
             }
 
-            for (const deduction of deductions) {
-              await tx.stockLocation.update({
-                where: { id: deduction.stockId },
-                data: { quantity: { decrement: deduction.quantity } },
+            for (const [stockId, quantity] of deductions) {
+              const updated = await tx.stockLocation.updateMany({
+                where: { id: stockId, quantity: { gte: quantity } },
+                data: { quantity: { decrement: quantity } },
               });
+              if (updated.count !== 1) {
+                throw new Error('INSUFFICIENT_STOCK');
+              }
             }
 
             await tx.order.update({

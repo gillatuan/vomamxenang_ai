@@ -15,7 +15,7 @@ async function main(){
     stockLocation:{
       findFirst:async()=>({id:'S1',quantity:stockQty}),
       update:async({data}:any)=>{stockQty-=data.quantity.decrement;decrements++;return{id:'S1',quantity:stockQty};},
-      updateMany:async({data}:any)=>{stockQty-=data.quantity.decrement;decrements++;return{count:1};}
+      updateMany:async({data}:any)=>{if(stockQty<data.quantity.decrement)return{count:0};stockQty-=data.quantity.decrement;decrements++;return{count:1};}
     },
     $queryRawUnsafe:async()=>[{id:order.id}],
     $transaction:async(arg:any)=>typeof arg==='function'?arg(prisma):Promise.all(arg)
