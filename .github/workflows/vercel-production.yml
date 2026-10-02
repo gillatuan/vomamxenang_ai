@@ -105,7 +105,6 @@ jobs:
         run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
 
       - name: Deploy frontend
-        working-directory: frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
