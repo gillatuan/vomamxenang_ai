@@ -19,3 +19,6 @@ Reviewer/QA may return work to Developer. Compilation alone is not Definition of
 
 ## Task artifacts
 For non-trivial work use `.ai/tasks/TASK-xxxx/`: `requirement.md`, `plan.md`, optional `architecture.md`, `review.md`, `qa.md`.
+
+## Machine-readable orchestration
+Non-trivial new tasks also maintain `state.json` according to `.ai/orchestration/`. Agent handoffs must use legal transitions and attach evidence. Reviewer/QA failures return to Developer. DevOps prepares release readiness only; human approval remains required for merge and production.
