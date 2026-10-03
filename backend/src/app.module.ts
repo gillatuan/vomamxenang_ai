@@ -20,6 +20,7 @@ import { AiModule } from "./ai/ai.module"
 import { StoreInfoModule } from "./store-info/store-info.module"
 import { AboutModule } from "./about/about.module"
 import { DailyContentModule } from "./daily-content/daily-content.module"
+import { CustomerChatModule } from "./customer-chat/customer-chat.module"
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { DailyContentModule } from "./daily-content/daily-content.module"
     AboutModule,
     SeoModule,
     DailyContentModule,
+    CustomerChatModule,
   ],
   providers: [
     {
