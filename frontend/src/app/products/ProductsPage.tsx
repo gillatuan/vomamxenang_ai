@@ -1,5 +1,5 @@
 "use client";
-import { richTextPlain } from "@/lib/rich-text";
+import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
 
 import {
   Box,
@@ -84,7 +84,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
       <Box component="main"><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 6, md: 10 }, pb: { xs: 4, md: 6 } }}>
         <Typography sx={{ fontSize: ".68rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>DANH MỤC SẢN PHẨM</Typography>
         <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 570, lineHeight: 1.7, mb: 5 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
         {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
@@ -93,9 +93,9 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           {products.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
-                <ProductImage src={product.imageUrl} alt={product.name} watermark={watermark} imageSx={{ height: { xs: 260, md: 330 } }} />
+                <ProductImage src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 280, md: 350 } }} />
                 <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25, pb: 1 }}>
-                  <Typography component="h2" variant="h6" sx={{ fontWeight: 600 }}>{product.name}</Typography>
+                  <Typography component="h2" variant="h5">{product.name}</Typography>
                   <Chip
                     size="small"
                     sx={{ mt: 1 }}
@@ -103,7 +103,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
                     label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"}
                   />
                   <Typography variant="body2" color="textSecondary" sx={{ mt: 1, lineHeight: 1.6 }}>
-                    {richTextPlain(product.description || "")}
+                    {productSeoDescription(product)}
                   </Typography>
                   <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
                     {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}

@@ -8,10 +8,11 @@ const examples = {
   post: '/images/products/tire-rim-service.png',
 };
 
-export function ContentImage({ src, alt, kind = 'product', priority = false, sx }: {
+export function ContentImage({ src, alt, kind = 'product', fallbackSrc, priority = false, sx }: {
   src?: string | null;
   alt: string;
   kind?: keyof typeof examples;
+  fallbackSrc?: string;
   priority?: boolean;
   sx?: SxProps<Theme>;
 }) {
@@ -19,8 +20,8 @@ export function ContentImage({ src, alt, kind = 'product', priority = false, sx 
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const fallback = !source || failedSource === source;
   return <Box component="img"
-    src={fallback ? examples[kind] : source}
-    alt={fallback ? 'Ảnh minh họa vỏ và mâm xe nâng' : alt}
+    src={fallback ? (fallbackSrc || examples[kind]) : source}
+    alt={alt}
     loading={priority ? 'eager' : 'lazy'}
     {...{ fetchpriority: priority ? 'high' : 'auto' }}
     decoding="async"
