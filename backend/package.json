@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:dev": "prisma generate && nest start --watch",
-    "dev": "prisma generate && nest start --watch",
+    "start:dev": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/@nestjs/cli/bin/nest.js start --watch",
+    "dev": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start:prod": "node dist/main.js",
     "postinstall": "prisma generate",
