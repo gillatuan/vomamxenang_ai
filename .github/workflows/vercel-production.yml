@@ -13,6 +13,18 @@ on:
       - "frontend/**"
       - "backend/**"
       - ".github/workflows/vercel-production.yml"
+  workflow_dispatch:
+    inputs:
+      deploy_backend:
+        description: "Deploy backend"
+        required: true
+        type: boolean
+        default: true
+      deploy_frontend:
+        description: "Deploy frontend"
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -120,7 +132,7 @@ jobs:
   deploy-production:
     name: Deploy production to Vercel
     needs: [verify-frontend, verify-backend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     environment: Production
     runs-on: ubuntu-latest
     steps:
@@ -131,6 +143,7 @@ jobs:
       - run: npm install --global vercel@58.9.2
 
       - name: Deploy backend
+        if: inputs.deploy_backend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -138,6 +151,7 @@ jobs:
         run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
 
       - name: Deploy frontend
+        if: inputs.deploy_frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
