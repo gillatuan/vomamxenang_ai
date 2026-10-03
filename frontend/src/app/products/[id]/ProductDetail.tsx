@@ -1,6 +1,6 @@
 "use client";
 import RichTextContent from "@/components/RichTextContent";
-import { richTextPlain } from "@/lib/rich-text";
+import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
 
 import { Box, Button, Card, CardContent, Chip, Container, Grid, IconButton, Stack, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -27,11 +27,11 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
     <Container sx={{ py: { xs: 3, md: 6 } }}>
       {breadcrumbs}
       <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-        <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 2, overflow: "hidden" }}><ProductImage priority src={product.imageUrl} alt={product.seo?.imageAlt || product.name} watermark={watermark} imageSx={{ height: { xs: 300, md: 420 } }} /></Box>
+        <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 2, overflow: "hidden" }}><ProductImage priority src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 300, md: 420 } }} /></Box>
         <Box sx={{ flex: 1 }}>
           <Chip color={product.condition === "USED" ? "warning" : "success"} label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"} />
-          <Typography component="h1" variant="h4" fontWeight={700} sx={{ mt: 1 }}>{product.name}</Typography>
-          <Typography color="text.secondary" sx={{ mt: 2 }}>{product.shortDescription || richTextPlain(product.description || "") || "Thông tin sản phẩm đang được cập nhật."}</Typography>
+          <Typography component="h1" variant="h2" sx={{ mt: 1.5 }}>{product.name}</Typography>
+          <Typography color="text.secondary" sx={{ mt: 2 }}>{productSeoDescription(product)}</Typography>
           <Stack spacing={1} sx={{ my: 3 }}>
             {product.brand && <Typography>Thương hiệu: <b>{product.brand}</b></Typography>}
             {product.size && <Typography>Kích thước: <b>{product.size}</b></Typography>}
