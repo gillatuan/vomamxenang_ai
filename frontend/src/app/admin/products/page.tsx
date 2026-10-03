@@ -236,7 +236,7 @@ export default function ProductsPage() {
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
               <TableCell>Tên</TableCell>
               <TableCell>Loại</TableCell>
-              <TableCell>Mô tả</TableCell>
+              {/* <TableCell>Mô tả</TableCell> */}
               <TableCell>Giá nhập</TableCell>
               <TableCell>Giá bán</TableCell>
               <TableCell>Tồn kho</TableCell>
@@ -250,7 +250,7 @@ export default function ProductsPage() {
               <TableRow key={product.id}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.type}</TableCell>
-                <TableCell>{richTextPlain(product.description || "") || "-"}</TableCell>
+                {/* <TableCell>{richTextPlain(product.description || "") || "-"}</TableCell> */}
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>

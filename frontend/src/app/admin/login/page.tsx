@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api-client";
 import { useAuth } from "@/context/auth";
 import GoBackButton from "@/components/GoBackButton";
+import Link from "next/link";
 
 export default function LoginPage() {
   const theme = useTheme();
@@ -110,6 +111,11 @@ export default function LoginPage() {
             {loading ? <CircularProgress size={24} color="inherit" /> : "Đăng nhập"}
           </Button>
         </Box>
+        <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: 2, mr: "auto" }}>
+          <Link href="/" rel="noreferrer" color="inherit">
+            Quay lại trang chủ
+          </Link>
+        </Typography>
       </Box>
     </Container>
   );
