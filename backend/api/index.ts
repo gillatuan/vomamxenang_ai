@@ -1,3 +1,6 @@
+// Must be first: Vercel's Node dev runtime loads this handler directly,
+// before Nest has a chance to initialise decorator metadata.
+import 'reflect-metadata';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import express from 'express';

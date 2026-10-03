@@ -30,7 +30,7 @@ export class MediaController {
 
     try {
       const blob = await put(pathname, file.buffer, {
-        access: 'public',
+        access: 'private',
         contentType: file.mimetype,
         addRandomSuffix: true,
       });
