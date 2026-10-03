@@ -100,6 +100,7 @@ export interface Post {
   title: string;
   content: string;
   videoUrl?: string;
+  excerpt?: string;
   status?: ContentStatus;
   slug?: string;
   seo?: SeoMetadata;
