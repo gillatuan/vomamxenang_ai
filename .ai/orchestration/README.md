@@ -26,3 +26,9 @@ Human-gated or completed tasks are non-executable. Phase 5.2 deliberately does n
 `node .ai/orchestration/runtime-adapter.cjs <state.json> local` consumes the Phase 5.2 packet, safely loads declared repository context, and produces a versioned local runtime result. Repository path containment prevents context traversal outside the checkout.
 
 Only the deterministic `local` adapter is enabled. External model/provider adapters remain unsupported until a separately reviewed phase introduces credentials, network policy, output validation, cost limits, and mutation controls.
+
+## Phase 5.4 external runtime policy
+
+`external-runtime.cjs` defines the provider-neutral boundary for real model execution. External computation is treated as untrusted: output must match the advisory JSON contract and every proposed action is checked against packet capabilities and forbidden actions.
+
+Normal CI uses only a deterministic mock provider and requires no credential or network access. A live provider must be introduced only through a separately reviewed manual workflow/adapter. Model results cannot mutate the repository in Phase 5.4.
