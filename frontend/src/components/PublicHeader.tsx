@@ -222,7 +222,7 @@ const navLinkSx = {
   px: { md: 1.35 },
   py: 0.9,
   color: "#1a1a1a",
-  fontSize: "0.8rem",
+  fontSize: "1.1rem",
   letterSpacing: "0.1em",
   fontWeight: 800,
   whiteSpace: "nowrap",

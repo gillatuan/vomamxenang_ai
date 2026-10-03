@@ -6,7 +6,7 @@ import { storeInfoAPI, type PublicStoreInfo } from "@/lib/api-client";
 
 const fallbackStoreInfo = {
   name: "Võ Mâm Xe Nâng",
-  phone: "0905 123 456",
+  phone: "0913.600.210",
   email: "info@vomamxenang.com",
   notes: "Chuyên cung cấp lốp và phụ tùng xe nâng chất lượng cao từ các nhà sản xuất hàng đầu.",
 };
@@ -40,7 +40,7 @@ export function Footer() {
       }}
     >
       <Container maxWidth={false} sx={{ maxWidth: 1440 }}>
-        <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: ".76rem", mb: 5 }}>VÕ MÂM XE NÂNG</Typography>
+        <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: "1.1rem", mb: 5 }}>VÕ MÂM XE NÂNG</Typography>
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Về chúng tôi</Typography>
