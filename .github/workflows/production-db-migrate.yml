@@ -1,0 +1,61 @@
+name: Production DB migrate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-db-migrate
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Migrate production database
+    runs-on: ubuntu-latest
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: backend/yarn.lock
+
+      - run: corepack enable
+
+      - name: Install backend dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Require direct PostgreSQL connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${DATABASE_URL:-}" ]]; then
+            echo "DIRECT_DATABASE_URL is not configured in the Production environment"
+            exit 1
+          fi
+          case "$DATABASE_URL" in
+            postgresql://*|postgres://*) ;;
+            *)
+              echo "DIRECT_DATABASE_URL must be a direct PostgreSQL URL"
+              exit 1
+              ;;
+          esac
+          if [[ "$DATABASE_URL" == prisma+postgres://* ]] || [[ "$DATABASE_URL" == *"accelerate.prisma-data.net"* ]]; then
+            echo "Prisma Accelerate URL is not allowed for production migrations"
+            exit 1
+          fi
+
+      - name: Apply production migrations
+        run: yarn prisma:migrate
+
+      - name: Verify production schema drift
+        run: yarn prisma:migrate:drift-check
