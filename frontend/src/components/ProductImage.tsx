@@ -24,9 +24,9 @@ export function useStoreWatermark() {
   return storeName;
 }
 
-export function ProductImage({ src, alt, watermark, imageSx, priority = false }: { src?: string | null; alt: string; watermark: string; imageSx?: SxProps<Theme>; priority?: boolean }) {
+export function ProductImage({ src, alt, watermark, fallbackSrc, imageSx, priority = false }: { src?: string | null; alt: string; watermark: string; fallbackSrc?: string; imageSx?: SxProps<Theme>; priority?: boolean }) {
   return <Box sx={{ position: "relative", overflow: "hidden", bgcolor: "#e9e5dc" }}>
-    <ContentImage src={src} alt={alt} priority={priority} sx={{ transition: "transform .45s ease", ...imageSx }} />
+    <ContentImage src={src} alt={alt} fallbackSrc={fallbackSrc} priority={priority} sx={{ transition: "transform .45s ease", ...imageSx }} />
     <Box aria-hidden sx={{ position: "absolute", right: 10, bottom: 10, px: 1, py: .45, borderRadius: .5, bgcolor: "rgba(20,20,20,.62)", color: "white", fontSize: ".62rem", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", pointerEvents: "none", userSelect: "none" }}>
       © {watermark}
     </Box>
