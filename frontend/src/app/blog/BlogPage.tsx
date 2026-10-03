@@ -31,7 +31,7 @@ export default function BlogPage({ initialPosts }: { initialPosts: Post[] }) {
     <>
       <Header />
       <Container component="main" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 6, md: 10 } }}>
-        <Typography sx={{ fontSize: ".68rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>KIẾN THỨC VẬN HÀNH</Typography>
+        <Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>KIẾN THỨC VẬN HÀNH</Typography>
         <Typography component="h1" variant="h2" sx={{ mb: 5 }}>Câu chuyện từ xưởng và đội xe.</Typography>
 
         {loading && <CircularProgress />}

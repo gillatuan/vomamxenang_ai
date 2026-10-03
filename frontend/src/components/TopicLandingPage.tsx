@@ -21,7 +21,7 @@ export async function TopicLandingPage({ slug }: { slug: TopicSlug }) {
   const schema = [breadcrumbSchema(crumbs), { '@context': 'https://schema.org', '@type': 'CollectionPage', name: topic.heading, description: topic.description, url: `${siteUrl}/${slug}`, mainEntity: { '@type': 'ItemList', itemListElement: entries.map((entry, i) => ({ '@type': 'ListItem', position: i + 1, name: entry.title, url: siteUrl + entry.path })) } }];
   return <><PublicHeader /><Container component="main" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 6, md: 10 } }}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }} />
-    <SeoBreadcrumbs items={crumbs} /><Typography sx={{ mt: 3, mb: 1, fontSize: ".72rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main" }}>CHUYÊN MỤC SẢN PHẨM</Typography><Typography component="h1" variant="h2" gutterBottom>{topic.heading}</Typography>
+    <SeoBreadcrumbs items={crumbs} /><Typography sx={{ mt: 3, mb: 1, fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main" }}>CHUYÊN MỤC SẢN PHẨM</Typography><Typography component="h1" variant="h2" gutterBottom>{topic.heading}</Typography>
     <Typography sx={{ maxWidth: 900, fontSize: { xs: "1rem", md: "1.18rem" }, lineHeight: 1.8, mb: 6 }}>{topic.intro}</Typography>
     <Typography component="h2" variant="h3" sx={{ mb: 3 }}>{slug === 'mam-xe-nang' ? 'Mâm xe nâng đang có' : 'Sản phẩm theo nhu cầu vận hành'}</Typography>
     <Grid container spacing={3}>{entries.map(entry => <Grid item xs={12} sm={6} md={4} key={entry.path}><Box sx={{ border: '1px solid', borderColor: 'divider', p: 2, height: '100%' }}>
