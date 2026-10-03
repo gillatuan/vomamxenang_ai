@@ -44,6 +44,10 @@ jobs:
         run: node .ai/orchestration/task-runner.test.cjs
       - name: Dry-run task dispatch plan
         run: node .ai/orchestration/task-runner.cjs
+      - name: Test execution packet boundary
+        run: node .ai/orchestration/execution-packet.test.cjs
+      - name: Dry-run agent execution packet
+        run: node .ai/orchestration/execution-packet.cjs .ai/tasks/TASK-0006/state.json
 
   verify-frontend:
     name: Verify frontend
