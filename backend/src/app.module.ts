@@ -19,7 +19,8 @@ import { FinancialDataInterceptor } from "./auth/financial-data.interceptor"
 import { AiModule } from "./ai/ai.module"
 import { StoreInfoModule } from "./store-info/store-info.module"
 import { AboutModule } from "./about/about.module"
-import { DailyContentModule } from "./daily-content/daily-content.module"\nimport { CustomerChatModule } from "./customer-chat/customer-chat.module"
+import { DailyContentModule } from "./daily-content/daily-content.module"
+import { CustomerChatModule } from "./customer-chat/customer-chat.module"
 
 @Module({
   imports: [
@@ -65,7 +66,8 @@ import { DailyContentModule } from "./daily-content/daily-content.module"\nimpor
     StoreInfoModule,
     AboutModule,
     SeoModule,
-    DailyContentModule,\n    CustomerChatModule,
+    DailyContentModule,
+    CustomerChatModule,
   ],
   providers: [
     {
