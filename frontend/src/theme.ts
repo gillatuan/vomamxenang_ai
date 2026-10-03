@@ -24,7 +24,9 @@ const theme = createTheme({
     h1: { fontSize: "clamp(2.75rem, 6.2vw, 6.4rem)", fontWeight: 600, lineHeight: 0.98, letterSpacing: "-0.055em" },
     h2: { fontSize: "clamp(2.15rem, 4.2vw, 4.4rem)", fontWeight: 600, lineHeight: 1.03, letterSpacing: "-0.045em" },
     h3: { fontSize: "clamp(1.65rem, 3vw, 3.15rem)", fontWeight: 600, lineHeight: 1.08, letterSpacing: "-0.035em" },
-    h4: { fontSize: "clamp(1.4rem, 2.3vw, 2.2rem)", fontWeight: 600, lineHeight: 1.12, letterSpacing: "-0.03em" },\n    h5: { fontSize: "clamp(1.2rem, 1.8vw, 1.65rem)", fontWeight: 650, lineHeight: 1.2 },\n    h6: { fontSize: "clamp(1.05rem, 1.35vw, 1.3rem)", fontWeight: 700, lineHeight: 1.25 },
+    h4: { fontSize: "clamp(1.4rem, 2.3vw, 2.2rem)", fontWeight: 600, lineHeight: 1.12, letterSpacing: "-0.03em" },
+    h5: { fontSize: "clamp(1.2rem, 1.8vw, 1.65rem)", fontWeight: 650, lineHeight: 1.2 },
+    h6: { fontSize: "clamp(1.05rem, 1.35vw, 1.3rem)", fontWeight: 700, lineHeight: 1.25 },
     button: { fontWeight: 800, fontSize: "0.78rem", letterSpacing: "0.1em" },
   },
   components: {
