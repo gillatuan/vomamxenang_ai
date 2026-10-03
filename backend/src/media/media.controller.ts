@@ -42,9 +42,21 @@ export class MediaController {
         bytes: file.size,
         mimeType: file.mimetype,
       };
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown Vercel Blob error';
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      // Safe diagnostics: report presence only, never credential values.
+      console.error('[Vercel Blob upload failed]', {
+        oidcTokenPresent: Boolean(process.env.VERCEL_OIDC_TOKEN),
+        blobStoreIdPresent: Boolean(process.env.BLOB_STORE_ID),
+        error: message,
+      });
+
       throw new BadRequestException(
-        'Không thể lưu ảnh. Hãy kiểm tra Blob store đã được connect với Vercel project và OIDC đã được bật.',
+        isProduction
+          ? 'Không thể lưu ảnh. Vui lòng thử lại sau.'
+          : `Không thể lưu ảnh: ${message} (OIDC: ${process.env.VERCEL_OIDC_TOKEN ? 'present' : 'missing'}, Blob store: ${process.env.BLOB_STORE_ID ? 'present' : 'missing'})`,
       );
     }
   }
