@@ -20,3 +20,9 @@ Production deployment, merge to main, destructive DB operations and final `done`
 `node .ai/orchestration/execution-packet.cjs <state.json>` converts a validated dispatch into a versioned execution packet for a future agent runtime. The packet resolves the worker contract, repository context, capabilities, forbidden privileged actions, and mandatory risk context.
 
 Human-gated or completed tasks are non-executable. Phase 5.2 deliberately does not invoke an external model or grant network, secrets, production, merge, or deployment capabilities.
+
+## Phase 5.3 runtime adapter
+
+`node .ai/orchestration/runtime-adapter.cjs <state.json> local` consumes the Phase 5.2 packet, safely loads declared repository context, and produces a versioned local runtime result. Repository path containment prevents context traversal outside the checkout.
+
+Only the deterministic `local` adapter is enabled. External model/provider adapters remain unsupported until a separately reviewed phase introduces credentials, network policy, output validation, cost limits, and mutation controls.
