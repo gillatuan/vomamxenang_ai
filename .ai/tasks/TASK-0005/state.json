@@ -1,0 +1,46 @@
+{
+  "taskId": "TASK-0005",
+  "title": "Agent task runner",
+  "status": "development",
+  "owner": "developer",
+  "risk": {
+    "database": false,
+    "destructiveDatabase": false,
+    "security": false,
+    "payment": false,
+    "inventory": false,
+    "pricing": false,
+    "production": false
+  },
+  "artifacts": {
+    "requirement": ".ai/tasks/TASK-0005/requirement.md",
+    "plan": ".ai/tasks/TASK-0005/plan.md",
+    "architecture": ".ai/tasks/TASK-0005/architecture.md"
+  },
+  "history": [
+    {
+      "from": null,
+      "to": "requirement",
+      "by": "planner",
+      "evidence": "requirement.md"
+    },
+    {
+      "from": "requirement",
+      "to": "planning",
+      "by": "planner",
+      "evidence": "plan.md"
+    },
+    {
+      "from": "planning",
+      "to": "architecture",
+      "by": "architect",
+      "evidence": "architecture.md"
+    },
+    {
+      "from": "architecture",
+      "to": "development",
+      "by": "developer",
+      "evidence": "Implement deterministic task runner"
+    }
+  ]
+}
