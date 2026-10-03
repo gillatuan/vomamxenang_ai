@@ -52,6 +52,10 @@ jobs:
         run: node .ai/orchestration/runtime-adapter.test.cjs
       - name: Dry-run local agent runtime
         run: node .ai/orchestration/runtime-adapter.cjs .ai/tasks/TASK-0007/state.json local
+      - name: Test external runtime policy
+        run: node .ai/orchestration/external-runtime.test.cjs
+      - name: Dry-run external runtime with mock provider
+        run: node .ai/orchestration/external-runtime.cjs .ai/tasks/TASK-0008/state.json
 
   verify-frontend:
     name: Verify frontend
