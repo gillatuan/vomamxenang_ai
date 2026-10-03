@@ -1,0 +1,37 @@
+{
+  "taskId": "TASK-0009",
+  "title": "Product SEO content migration and admin image upload",
+  "status": "development",
+  "owner": "developer",
+  "risk": {
+    "security": true,
+    "payment": false,
+    "inventory": false,
+    "pricing": false,
+    "production": true,
+    "database": false
+  },
+  "artifacts": [
+    "requirement.md",
+    "plan.md",
+    "architecture.md"
+  ],
+  "history": [
+    {
+      "status": "requirement",
+      "owner": "planner"
+    },
+    {
+      "status": "planning",
+      "owner": "planner"
+    },
+    {
+      "status": "architecture",
+      "owner": "architect"
+    },
+    {
+      "status": "development",
+      "owner": "developer"
+    }
+  ]
+}
