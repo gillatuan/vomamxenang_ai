@@ -4,6 +4,7 @@ import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -93,6 +94,8 @@ export default function PostsAdminPage() {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
         <ContentSeoFields id={editing?.id} kind="blog" title={form.title} content={form.content} slug={form.slug} seo={form.seo} onChange={(data) => setForm(current => ({ ...current, ...data }))} onContentChange={(content) => setForm(current => ({ ...current, content }))} />
+        <ImageUploadField label="Ảnh đại diện bài viết" value={form.seo.imageUrl || ""} onChange={(imageUrl) => setForm(current => ({ ...current, seo: { ...current.seo, imageUrl } }))} />
+        <Box sx={{ mb: 2 }} />
         <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>
