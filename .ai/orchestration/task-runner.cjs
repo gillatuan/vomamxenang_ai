@@ -44,9 +44,10 @@ function validate(files) {
 
 function main() {
   const args = process.argv.slice(2);
-  const files = args.length ? args : fs.readdirSync(path.join(__dirname, "..", "tasks"), { withFileTypes: true })
-    .filter((e) => e.isDirectory() && /^TASK-\\d{4}$/.test(e.name))
-    .map((e) => path.join(".ai", "tasks", e.name, "state.json"))
+  const tasksDir = path.join(__dirname, "..", "tasks");
+  const files = args.length ? args : fs.readdirSync(tasksDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && /^TASK-\d{4}$/.test(e.name))
+    .map((e) => path.join(tasksDir, e.name, "state.json"))
     .filter(fs.existsSync);
   if (!files.length) throw new Error("No task state files found");
   validate(files);
