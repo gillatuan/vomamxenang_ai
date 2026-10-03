@@ -40,6 +40,10 @@ jobs:
             exit 1
           fi
           node .ai/orchestration/validate-state.cjs "${states[@]}"
+      - name: Test task runner routing
+        run: node .ai/orchestration/task-runner.test.cjs
+      - name: Dry-run task dispatch plan
+        run: node .ai/orchestration/task-runner.cjs
 
   verify-frontend:
     name: Verify frontend
