@@ -48,6 +48,10 @@ jobs:
         run: node .ai/orchestration/execution-packet.test.cjs
       - name: Dry-run agent execution packet
         run: node .ai/orchestration/execution-packet.cjs .ai/tasks/TASK-0006/state.json
+      - name: Test runtime adapter boundary
+        run: node .ai/orchestration/runtime-adapter.test.cjs
+      - name: Dry-run local agent runtime
+        run: node .ai/orchestration/runtime-adapter.cjs .ai/tasks/TASK-0007/state.json local
 
   verify-frontend:
     name: Verify frontend
