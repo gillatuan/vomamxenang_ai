@@ -24,12 +24,13 @@
     "test:seo": "ts-node --transpile-only test/seo.spec.ts && ts-node --transpile-only test/seo-v31.spec.ts",
     "test:content": "ts-node --transpile-only test/content-alias.spec.ts",
     "test:warehouse": "ts-node --transpile-only test/day2-warehouse-cleanup-draft.spec.ts",
-    "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
+    "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:product-seo-migration && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
     "test:critical": "ts-node --transpile-only test/auth-critical.spec.ts && ts-node --transpile-only test/inventory-critical.spec.ts && ts-node --transpile-only test/orders-critical.spec.ts && ts-node --transpile-only test/webhook-critical.spec.ts",
     "test:integration:critical": "ts-node --transpile-only test/postgres-critical.integration.spec.ts",
     "prisma:migrate:drift-check": "prisma migrate diff --from-url \"$DATABASE_URL\" --to-schema-datamodel prisma/schema.prisma --exit-code",
     "product:seo:migrate:dry": "ts-node --transpile-only scripts/product-seo-content-migration.ts",
-    "product:seo:migrate": "ts-node --transpile-only scripts/product-seo-content-migration.ts --apply"
+    "product:seo:migrate": "ts-node --transpile-only scripts/product-seo-content-migration.ts --apply",
+    "test:product-seo-migration": "ts-node --transpile-only test/product-seo-migration.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
