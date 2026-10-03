@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:dev": "prisma generate && nest start --watch",
-    "dev": "prisma generate && nest start --watch",
+    "start:dev": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/@nestjs/cli/bin/nest.js start --watch",
+    "dev": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start:prod": "node dist/main.js",
     "postinstall": "prisma generate",
@@ -24,10 +24,13 @@
     "test:seo": "ts-node --transpile-only test/seo.spec.ts && ts-node --transpile-only test/seo-v31.spec.ts",
     "test:content": "ts-node --transpile-only test/content-alias.spec.ts",
     "test:warehouse": "ts-node --transpile-only test/day2-warehouse-cleanup-draft.spec.ts",
-    "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
+    "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:product-seo-migration && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
     "test:critical": "ts-node --transpile-only test/auth-critical.spec.ts && ts-node --transpile-only test/inventory-critical.spec.ts && ts-node --transpile-only test/orders-critical.spec.ts && ts-node --transpile-only test/webhook-critical.spec.ts",
     "test:integration:critical": "ts-node --transpile-only test/postgres-critical.integration.spec.ts",
-    "prisma:migrate:drift-check": "prisma migrate diff --from-url \"$DATABASE_URL\" --to-schema-datamodel prisma/schema.prisma --exit-code"
+    "prisma:migrate:drift-check": "prisma migrate diff --from-url \"$DATABASE_URL\" --to-schema-datamodel prisma/schema.prisma --exit-code",
+    "product:seo:migrate:dry": "ts-node --transpile-only scripts/product-seo-content-migration.ts",
+    "product:seo:migrate": "ts-node --transpile-only scripts/product-seo-content-migration.ts --apply",
+    "test:product-seo-migration": "ts-node --transpile-only test/product-seo-migration.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -51,7 +54,8 @@
     "reflect-metadata": "^0.1.13",
     "robots-parser": "3.0.1",
     "rxjs": "^7.0.0",
-    "stripe": "^22.1.1"
+    "stripe": "^22.1.1",
+    "@vercel/blob": "^2.4.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -59,6 +63,7 @@
     "@nestjs/testing": "^10.0.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/cookie-parser": "^1.4.10",
+    "@types/multer": "^2.3.0",
     "@types/node": "^26.6.2",
     "@types/passport-jwt": "^3.0.9",
     "pino-pretty": "^13.1.3",
