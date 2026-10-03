@@ -4,6 +4,7 @@ import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 import {
   Box,
@@ -319,8 +320,9 @@ export default function ProductsPage() {
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Max Stock" type="number" value={formData.maxStock} onChange={(e) => setFormData({ ...formData, maxStock: Number(e.target.value) })} />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Link ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} />
+            <Grid item xs={12}>
+              <ImageUploadField value={formData.imageUrl} onChange={(imageUrl) => setFormData({ ...formData, imageUrl })} label="Ảnh sản phẩm" />
+              <TextField fullWidth label="Hoặc nhập URL ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} sx={{ mt: 1.5 }} />
             </Grid>
           </Grid>
 
