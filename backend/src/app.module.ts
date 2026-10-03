@@ -67,6 +67,7 @@ import { CustomerChatModule } from "./customer-chat/customer-chat.module"
     AboutModule,
     SeoModule,
     DailyContentModule,
+    MediaModule,
     CustomerChatModule,
   ],
   providers: [
