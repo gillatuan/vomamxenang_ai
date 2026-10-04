@@ -5,7 +5,6 @@ import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
 import { ImageUploadField, PendingImage } from "@/components/admin/ImageUploadField";
-import { ProductResearchPanel } from "@/components/admin/ProductResearchPanel";
 import apiClient from "@/lib/api";
 
 import {
@@ -342,9 +341,6 @@ export default function ProductsPage() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Max Stock" type="number" value={formData.maxStock} onChange={(e) => setFormData({ ...formData, maxStock: Number(e.target.value) })} />
-            </Grid>
-            <Grid item xs={12}>
-              <ProductResearchPanel productId={editingId || undefined} onApplied={loadProducts} />
             </Grid>
             <Grid item xs={12}>
               <ImageUploadField value={formData.imageUrl} onChange={setPendingImage} label="Ảnh sản phẩm" />
