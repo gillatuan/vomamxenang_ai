@@ -29,7 +29,6 @@ const navigation = [
   { label: "Trang chủ", href: "/" },
   { label: "Giới thiệu", href: "/about" },
   { label: "Blog", href: "/blog" },
-  { label: "Sản phẩm", href: "/products" },
 ];
 
 export function PublicHeader() {
@@ -40,7 +39,7 @@ export function PublicHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
-  const menuItems = [...navigation.slice(0, 3), ...categories.map(category => ({ label: category.name, href: `/products?category=${category.id}` })), ...navigation.slice(3)];
+  const menuItems = [...navigation, ...categories.map(category => ({ label: category.name, href: `/products?category=${category.id}` }))];
 
   const closeMenu = () => setMenuOpen(false);
   const isActive = (href: string) =>
@@ -157,7 +156,7 @@ export function PublicHeader() {
           </Box>
 
           <Box component="nav" aria-label="Điều hướng mobile" sx={{ px: 2.5, py: 2 }}>
-            {navigation.map((item, index) => {
+            {menuItems.map((item, index) => {
               const active = isActive(item.href);
               return (
                 <MuiLink
