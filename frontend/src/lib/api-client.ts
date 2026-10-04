@@ -26,6 +26,8 @@ export interface Product {
   sku: string;
   type: "TIRE" | "RIM" | "SERVICE";
   name: string;
+  categoryId?: string;
+  category?: { id: string; name: string };
   importPrice?: number;
   sellingPrice?: number;
   minStock?: number;
@@ -63,7 +65,7 @@ export interface SeoMetadata {
 }
 
 export const productsAPI = {
-  getAll: (condition?: string) => apiClient.get<Product[]>("/products", { params: condition ? { condition } : undefined }),
+  getAll: (params?: { condition?: string; categoryId?: string; q?: string; sort?: string; brand?: string; size?: string; tireType?: string; rimType?: string; minPrice?: number; maxPrice?: number }) => apiClient.get<Product[]>("/products", { params }),
   getOne: (id: string) => apiClient.get<Product>(`/products/${id}`),
 
   create: (data: Partial<Product>) => apiClient.post<Product>("/products", data),

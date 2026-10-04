@@ -28,8 +28,6 @@ const navigation = [
   { label: "Trang chủ", href: "/" },
   { label: "Giới thiệu", href: "/about" },
   { label: "Blog", href: "/blog" },
-  { label: "Vỏ xe nâng", href: "/vo-xe-nang" },
-  { label: "Mâm xe nâng", href: "/mam-xe-nang" },
   { label: "Sản phẩm", href: "/products" },
 ];
 

@@ -6,13 +6,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(condition?: string) {
-    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}) };
+  async findAll(filters: { condition?: string; categoryId?: string; q?: string; sort?: string; brand?: string; size?: string; tireType?: string; rimType?: string; minPrice?: number; maxPrice?: number }) {
+    const { condition, categoryId, q, sort, brand, size, tireType, rimType, minPrice, maxPrice } = filters;
+    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...(categoryId ? { categoryId } : {}), ...(brand ? { brand } : {}), ...(size ? { size } : {}), ...(tireType ? { tireType } : {}), ...(rimType ? { rimType } : {}), ...((minPrice != null || maxPrice != null) ? { sellingPrice: { ...(minPrice != null ? { gte: minPrice } : {}), ...(maxPrice != null ? { lte: maxPrice } : {}) } } : {}), ...(q ? { OR: [{ name: { contains: q, mode: 'insensitive' as const } }, { sku: { contains: q, mode: 'insensitive' as const } }, { brand: { contains: q, mode: 'insensitive' as const } }, { size: { contains: q, mode: 'insensitive' as const } }] } : {}) };
     return this.prisma.product.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
     });
   }
 
