@@ -9,8 +9,8 @@ export class ProductsController {
   constructor(private service: ProductsService) {}
 
   @Get()
-  findAll(@Query('condition') condition?: string, @Query('categoryId') categoryId?: string, @Query('q') q?: string, @Query('sort') sort?: string) {
-    return this.service.findAll({ condition, categoryId, q, sort });
+  findAll(@Query('condition') condition?: string, @Query('categoryId') categoryId?: string, @Query('q') q?: string, @Query('sort') sort?: string, @Query('brand') brand?: string, @Query('size') size?: string, @Query('tireType') tireType?: string, @Query('rimType') rimType?: string, @Query('minPrice') minPrice?: string, @Query('maxPrice') maxPrice?: string) {
+    return this.service.findAll({ condition, categoryId, q, sort, brand, size, tireType, rimType, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined });
   }
 
   @Get('reviews/featured')
