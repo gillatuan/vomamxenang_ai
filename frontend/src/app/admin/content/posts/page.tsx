@@ -74,7 +74,7 @@ export default function PostsAdminPage() {
 
   const columns: GridColDef<Post>[] = [
     { field: "title", headerName: "Tiêu đề", flex: 1.4 },
-    { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
+    // { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
     { field: "status", headerName: "Trạng thái", width: 130, renderCell: (params: GridRenderCellParams<Post>) => {
       const status = params.row.status ?? "PUBLISHED";
       return <Chip size="small" label={status === "PUBLISHED" ? "Đã publish" : "Nháp"} color={status === "PUBLISHED" ? "success" : "default"} />;

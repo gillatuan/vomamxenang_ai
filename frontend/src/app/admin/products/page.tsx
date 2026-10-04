@@ -40,6 +40,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useEffect, useMemo, useState } from "react";
 import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/api-client";
+import Image from "next/image";
 
 type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
 
@@ -252,7 +253,7 @@ export default function ProductsPage() {
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
               <TableCell>Tên</TableCell>
               <TableCell>Loại</TableCell>
-              {/* <TableCell>Mô tả</TableCell> */}
+              <TableCell>Image</TableCell>
               <TableCell>Giá nhập</TableCell>
               <TableCell>Giá bán</TableCell>
               <TableCell>Tồn kho</TableCell>
@@ -264,9 +265,15 @@ export default function ProductsPage() {
           <TableBody>
             {rows.map((product) => (
               <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
+                <TableCell sx={{ maxWidth: "210px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</TableCell>
                 <TableCell>{product.type}</TableCell>
-                {/* <TableCell>{richTextPlain(product.description || "") || "-"}</TableCell> */}
+                <TableCell>
+                  {product.imageUrl ? (
+                    <Image src={product.imageUrl} alt={product.name} width={80} height={80} />
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
