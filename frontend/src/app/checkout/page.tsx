@@ -4,6 +4,7 @@ import { Alert, Box, Button, CircularProgress, Container, Step, StepLabel, Stepp
 import { useState } from "react";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
+import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { ordersAPI } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
 
@@ -27,6 +28,7 @@ export default function CheckoutPage() {
     } catch (cause: any) { setError(cause.response?.data?.message || "Không thể tạo phiên thanh toán."); } finally { setLoading(false); }
   };
   return <><PublicHeader /><Container maxWidth="md" sx={{ py: 5 }}>
+    <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Sản phẩm", path: "/products" }, { name: "Thanh toán", path: "/checkout" }]} />
     <Typography variant="h4" fontWeight={700} gutterBottom>Thanh toán</Typography>
     <Stepper activeStep={activeStep} alternativeLabel sx={{ my: 4 }}>{steps.map((step) => <Step key={step}><StepLabel>{step}</StepLabel></Step>)}</Stepper>
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
