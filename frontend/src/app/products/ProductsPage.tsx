@@ -17,9 +17,14 @@ import {
   Chip,
   Tabs,
   Tab,
+  MenuItem,
+  Pagination,
+  InputAdornment,
+  Stack,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { Suspense, useEffect, useState } from "react";
+import SearchIcon from "@mui/icons-material/Search";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
@@ -32,6 +37,10 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [categoryId, setCategoryId] = useState("");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const pageSize = 9;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -59,6 +68,20 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         setLoading(false);
       });
   }, [condition, categoryId]);
+
+  const visibleProducts = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    const filtered = products.filter(product => !normalized || [product.name, product.sku, product.brand, product.size, product.category?.name].filter(Boolean).some(value => String(value).toLowerCase().includes(normalized)));
+    return [...filtered].sort((a,b) => {
+      if(sort==="price-asc") return (a.sellingPrice ?? Number.MAX_SAFE_INTEGER) - (b.sellingPrice ?? Number.MAX_SAFE_INTEGER);
+      if(sort==="price-desc") return (b.sellingPrice ?? -1) - (a.sellingPrice ?? -1);
+      if(sort==="name") return a.name.localeCompare(b.name, "vi");
+      return 0;
+    });
+  }, [products, query, sort]);
+  const pageCount = Math.max(1, Math.ceil(visibleProducts.length / pageSize));
+  const pagedProducts = visibleProducts.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => { setPage(1); }, [categoryId, query, sort]);
 
   const handleQuoteClick = (product: Product) => {
     setSelectedProduct(product);
@@ -94,15 +117,24 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
-        {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{mb:3}}>
-          <Tab value="" label="Tất cả" />
-          {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
-        </Tabs>}
-                {loading && <CircularProgress />}
+        <Box component="section" aria-label="Lọc danh mục sản phẩm" sx={{ mb: 4, borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider", py: 2 }}>
+          {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{mb:2}}>
+            <Tab value="" label="Tất cả" />
+            {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
+          </Tabs>}
+          <Stack direction={{xs:"column",md:"row"}} spacing={2} alignItems={{md:"center"}}>
+            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} label="Tìm sản phẩm" placeholder="Tên, SKU, thương hiệu, kích thước..." InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
+            <TextField select size="small" label="Sắp xếp" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:{md:220}}}>
+              <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
+            </TextField>
+          </Stack>
+          <Typography variant="body2" color="text.secondary" sx={{mt:1.5}}>{visibleProducts.length} sản phẩm phù hợp</Typography>
+        </Box>
+        {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
 
         <Grid container spacing={{ xs: 2, md: 3 }}>
-          {products.map((product) => (
+          {pagedProducts.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
                 <ProductImage src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 280, md: 350 } }} />
@@ -146,6 +178,8 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
             </Grid>
           ))}
         </Grid>
+        {!loading && visibleProducts.length === 0 && <Typography sx={{py:6,textAlign:"center"}}>Không tìm thấy sản phẩm phù hợp.</Typography>}
+        {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large"/></Box>}
       </Container></Box>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
