@@ -70,6 +70,11 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
   useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
   useEffect(() => { setConditionFilter(condition || ""); }, [condition]);
+  useEffect(() => {
+    if (categoryId === "category-tires") setRimTypeFilter("");
+    else if (categoryId === "category-rims") setTireTypeFilter("");
+    else { setTireTypeFilter(""); setRimTypeFilter(""); }
+  }, [categoryId]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
