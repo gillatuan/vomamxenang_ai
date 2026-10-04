@@ -121,8 +121,12 @@ export default function ProductsPage() {
     try {
       let imageUrl = formData.imageUrl;
       if (pendingImage) {
-        const body = new FormData(); body.append("file", pendingImage.file);
-        const upload = await apiClient.post<{url:string}>("/admin/media/image", body);
+        const body = new FormData();
+        body.append("file", pendingImage.file, pendingImage.file.name);
+        const upload = await apiClient.post<{url:string}>("/admin/media/image", body, {
+          headers: { "Content-Type": undefined },
+          transformRequest: [(data) => data],
+        });
         imageUrl = upload.data.url;
       }
     const payload = {
