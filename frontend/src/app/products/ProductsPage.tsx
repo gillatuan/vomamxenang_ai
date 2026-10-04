@@ -37,6 +37,7 @@ import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
+import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
 import { productsAPI, clientsAPI, categoriesAPI, Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
@@ -123,6 +124,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
     <>
       <PublicHeader />
       <Box component="main"><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 6, md: 10 }, pb: { xs: 4, md: 6 } }}>
+        <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Sản phẩm", path: "/products" }]} />
         <Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>DANH MỤC SẢN PHẨM</Typography>
         <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
