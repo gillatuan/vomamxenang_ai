@@ -22,3 +22,4 @@ backend/yarn.lock
 .vercel
 .env*
 backend/tsconfig.build.tsbuildinfo
+frontend/tsconfig.tsbuildinfo

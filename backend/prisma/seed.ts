@@ -75,8 +75,8 @@ async function main() {
   await prisma.aboutPage.upsert({ where: { id: aboutPage.id }, update: aboutPage, create: aboutPage });
 
   const categories = [
-    { id: 'category-solid-6009', name: 'Lốp đặc 6.00-9', tireSize: '6.00-9', brand: 'Casumina', tireType: TireType.SOLID, rimType: RimType.CLICK, origin: 'Việt Nam', condition: TireCondition.NEW, specifications: 'Lốp đặc chịu tải 2.5 tấn' },
-    { id: 'category-pneumatic-70012', name: 'Lốp hơi 7.00-12', tireSize: '7.00-12', brand: 'Bridgestone', tireType: TireType.PNEUMATIC, rimType: RimType.LIP, origin: 'Thái Lan', condition: TireCondition.NEW, specifications: 'Lốp hơi cho xe nâng địa hình' },
+    { id: 'category-tires', name: 'Vỏ xe nâng', tireSize: 'Nhiều kích thước', brand: 'Nhiều thương hiệu', tireType: TireType.SOLID, rimType: RimType.STANDARD, origin: 'Nhiều nguồn', condition: TireCondition.NEW, specifications: 'Danh mục vỏ/lốp xe nâng' },
+    { id: 'category-rims', name: 'Mâm xe nâng', tireSize: 'Nhiều kích thước', brand: 'OEM', tireType: TireType.SOLID, rimType: RimType.STANDARD, origin: 'Nhiều nguồn', condition: TireCondition.NEW, specifications: 'Danh mục mâm xe nâng' },
   ];
   for (const category of categories) await prisma.category.upsert({ where: { id: category.id }, update: category, create: category });
 
@@ -98,6 +98,17 @@ async function main() {
     const { id: _id, ...data } = product;
     await prisma.product.upsert({ where: { slug: product.slug }, update: data, create: product });
   }
+  const rimProducts = [
+    { id:'product-rim-600-9-click', sku:'SEED-RIM-600-9-CLICK', name:'Mâm xe nâng 6.00-9 kiểu CLICK', slug:'mam-xe-nang-6-00-9-click', type:'RIM' as const, categoryId:'category-rims', size:'6.00-9', brand:'OEM', tireType:null, rimType:'CLICK', condition:'NEW_100', importPrice:1250000, sellingPrice:1580000, minStock:3, maxStock:20, status:'PUBLISHED' as const },
+    { id:'product-rim-650-10-standard', sku:'SEED-RIM-650-10-STANDARD', name:'Mâm xe nâng 6.50-10 Standard', slug:'mam-xe-nang-6-50-10-standard', type:'RIM' as const, categoryId:'category-rims', size:'6.50-10', brand:'OEM', tireType:null, rimType:'STANDARD', condition:'NEW_100', importPrice:1450000, sellingPrice:1850000, minStock:3, maxStock:20, status:'PUBLISHED' as const },
+    { id:'product-rim-700-12-lip', sku:'SEED-RIM-700-12-LIP', name:'Mâm xe nâng 7.00-12 kiểu LIP', slug:'mam-xe-nang-7-00-12-lip', type:'RIM' as const, categoryId:'category-rims', size:'7.00-12', brand:'TOYOTA OEM', tireType:null, rimType:'LIP', condition:'NEW_100', importPrice:1750000, sellingPrice:2280000, minStock:2, maxStock:15, status:'PUBLISHED' as const },
+    { id:'product-rim-500-8-used', sku:'SEED-RIM-500-8-USED', name:'Mâm xe nâng 5.00-8 đã qua sử dụng', slug:'mam-xe-nang-5-00-8-da-qua-su-dung', type:'RIM' as const, categoryId:'category-rims', size:'5.00-8', brand:'OEM', tireType:null, rimType:'STANDARD', condition:'USED', importPrice:650000, sellingPrice:950000, minStock:2, maxStock:12, status:'PUBLISHED' as const },
+  ];
+  for (const product of rimProducts) {
+    const { id: _id, ...data } = product;
+    await prisma.product.upsert({ where: { slug: product.slug }, update: data, create: product });
+  }
+
   const rims = [
     { id: 'rim-1', sku: 'RIM-600-9-6H', size: '6.00-9', boltHoles: 6, compatibleModels: 'Toyota, Komatsu', brand: 'OEM', importPrice: 850000, sellingPrice: 980000 },
     { id: 'rim-2', sku: 'RIM-700-12-8H', size: '7.00-12', boltHoles: 8, compatibleModels: 'Mitsubishi, TCM', brand: 'OEM', importPrice: 1120000, sellingPrice: 1280000 },
@@ -115,7 +126,7 @@ async function main() {
     { id: 'stock-rim-1', locationId: 'location-a2', wheelRimId: 'rim-1', quantity: 18 }, { id: 'stock-rim-2', locationId: 'location-b1', wheelRimId: 'rim-2', quantity: 6 },
   ];
   for (const stock of stocks) await prisma.stockLocation.upsert({ where: { id: stock.id }, update: stock, create: stock });
-  for (const [categoryId, locationId, quantity] of [['category-solid-6009','location-a2',4],['category-pneumatic-70012','location-a1',28]] as const) await prisma.stock.upsert({ where: { id: `legacy-${categoryId}` }, update: { categoryId, locationId, quantity }, create: { id: `legacy-${categoryId}`, categoryId, locationId, quantity } });
+  for (const [categoryId, locationId, quantity] of [['category-tires','location-a2',4],['category-rims','location-a1',28]] as const) await prisma.stock.upsert({ where: { id: `legacy-${categoryId}` }, update: { categoryId, locationId, quantity }, create: { id: `legacy-${categoryId}`, categoryId, locationId, quantity } });
   const posts = [{ id: 'post-1', title: 'Cách chọn lốp xe nâng phù hợp với môi trường làm việc', content: 'Lốp đặc phù hợp kho hàng và tải nặng; lốp hơi phù hợp mặt bằng ngoài trời. Hãy chọn đúng kích thước, tải trọng và loại mâm để vận hành an toàn.', videoUrl: null }, { id: 'post-2', title: 'Quy trình tái chế vỏ xe nâng an toàn và hiệu quả', content: 'Vỏ xe nâng đã qua sử dụng được phân loại, làm sạch và tái chế theo quy trình giảm tác động môi trường. Việc thay lốp đúng lúc giúp xe vận hành ổn định.', videoUrl: null }, { id: 'post-3', title: 'Bảo dưỡng mâm xe nâng: 5 việc cần kiểm tra', content: 'Kiểm tra bu-lông, độ đồng tâm, vết nứt và tình trạng bề mặt mâm định kỳ để giảm rủi ro trong vận hành.', videoUrl: null }];
   for (const post of posts) await prisma.post.upsert({ where: { id: post.id }, update: post, create: post });
   await prisma.postComment.upsert({ where: { id: 'post-comment-1' }, update: { content: 'Bài viết rất hữu ích cho đội vận hành.' }, create: { id: 'post-comment-1', postId: 'post-1', userId: 'user-customer', content: 'Bài viết rất hữu ích cho đội vận hành.' } });
