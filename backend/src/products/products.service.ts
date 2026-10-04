@@ -6,13 +6,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(condition?: string) {
-    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}) };
+  async findAll(condition?: string, categoryId?: string) {
+    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...(categoryId ? { categoryId } : {}) };
     return this.prisma.product.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true, tireSize: true, brand: true, tireType: true, rimType: true, condition: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
     });
   }
 
@@ -20,7 +20,7 @@ export class ProductsService {
     return this.prisma.product.findFirst({
       where: { status: 'PUBLISHED', OR: [{ id }, { slug: id }, { aliases: { has: id } }] },
       select: {
-        id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true,
+        id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true, tireSize: true, brand: true, tireType: true, rimType: true, condition: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true,
         productComments: {
           include: { user: { select: { id: true, email: true } } },
         },
