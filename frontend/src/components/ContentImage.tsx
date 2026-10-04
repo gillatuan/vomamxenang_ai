@@ -23,7 +23,7 @@ export function ContentImage({ src, alt, kind = 'product', fallbackSrc, priority
     src={fallback ? (fallbackSrc || examples[kind]) : source}
     alt={alt}
     loading={priority ? 'eager' : 'lazy'}
-    {...{ fetchpriority: priority ? 'high' : 'auto' }}
+    {...{ fetchPriority: priority ? 'high' : 'auto' }}
     decoding="async"
     onError={() => { if (!fallback) setFailedSource(source); }}
     sx={{ display: 'block', width: '100%', objectFit: 'cover', bgcolor: '#e9e5dc', ...sx }}
