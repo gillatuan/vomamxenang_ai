@@ -51,7 +51,7 @@ export function Footer() {
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Liên hệ</Typography>
             {storeInfo.email && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>Email: {storeInfo.email}</Typography>}
-            {storeInfo.phone && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: .5 }}>Phone: {storeInfo.phone}</Typography>}
+            {storeInfo.phone && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: .5 }}>Phone: <Typography component="span" sx={{ fontWeight: 600 }}>{storeInfo.phone} <br /> 09777 5 7 9 11 - Tuấn</Typography></Typography>}
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>Theo dõi</Typography>
