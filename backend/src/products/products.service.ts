@@ -6,13 +6,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(condition?: string) {
-    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}) };
+  async findAll(filters: { condition?: string; categoryId?: string; q?: string; sort?: string }) {
+    const { condition, categoryId, q, sort } = filters;
+    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...(categoryId ? { categoryId } : {}), ...(q ? { OR: [{ name: { contains: q, mode: 'insensitive' as const } }, { sku: { contains: q, mode: 'insensitive' as const } }, { brand: { contains: q, mode: 'insensitive' as const } }, { size: { contains: q, mode: 'insensitive' as const } }] } : {}) };
     return this.prisma.product.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
     });
   }
 
