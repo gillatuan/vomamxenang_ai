@@ -40,13 +40,14 @@ import SearchIcon from "@mui/icons-material/Search";
 import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useEffect, useMemo, useState } from "react";
-import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/api-client";
+import { adminManagementAPI, categoriesAPI, ContentStatus, productsAPI, Product, ProductCategory } from "@/lib/api-client";
 import Image from "next/image";
 
 type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -73,11 +74,12 @@ export default function ProductsPage() {
     slug: "",
     seo: {} as SeoMetadata,
     status: "DRAFT" as ContentStatus,
-    size: "", brand: "", tireType: "", rimType: "", condition: "",
+    categoryId: "", size: "", brand: "", tireType: "", rimType: "", condition: "",
   });
 
   useEffect(() => {
     loadProducts();
+    categoriesAPI.getAll().then(res => setCategories(res.data)).catch(() => setError("Không thể tải danh mục sản phẩm."));
   }, []);
 
   const loadProducts = () => {
@@ -112,7 +114,7 @@ export default function ProductsPage() {
       slug: product.slug || "",
       seo: product.seo || {},
       status: product.status ?? "PUBLISHED",
-      size: product.size || "", brand: product.brand || "", tireType: product.tireType || "", rimType: (product as any).rimType || "", condition: product.condition || "",
+      categoryId: product.categoryId || "", size: product.size || "", brand: product.brand || "", tireType: product.tireType || "", rimType: (product as any).rimType || "", condition: product.condition || "",
     });
     setOpenDialog(true);
   };
@@ -146,6 +148,7 @@ export default function ProductsPage() {
       minStock: formData.minStock,
       maxStock: formData.maxStock,
       status,
+      categoryId: formData.categoryId || undefined,
       size: formData.size || undefined,
       brand: formData.brand || undefined,
       tireType: formData.type === "TIRE" ? formData.tireType || undefined : undefined,
@@ -197,11 +200,11 @@ export default function ProductsPage() {
   };
 
   const filteredProducts = useMemo(() => {
-    const type = activeTab === 0 ? "TIRE" : "RIM";
+    const selectedCategory = activeTab === 0 ? undefined : categories[activeTab - 1];
     return products
-      .filter((item) => item.type === type)
+      .filter((item) => !selectedCategory || item.categoryId === selectedCategory.id)
       .filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()) || richTextPlain(item.description || "").toLowerCase().includes(searchText.toLowerCase()));
-  }, [activeTab, products, searchText]);
+  }, [activeTab, categories, products, searchText]);
 
   const rows = filteredProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -219,9 +222,9 @@ export default function ProductsPage() {
       />
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-          <Tab label="Vỏ xe" />
-          <Tab label="Mâm xe" />
+        <Tabs value={activeTab} onChange={(_, value) => { setActiveTab(value); setPage(0); }} variant="scrollable" scrollButtons="auto">
+          <Tab label="Tất cả" />
+          {categories.map(category => <Tab key={category.id} label={category.name} />)}
         </Tabs>
         <TextField
           size="small"
@@ -235,7 +238,7 @@ export default function ProductsPage() {
           setPendingImage(null);
           setEditingId(null);
           setFormData({
-            type: activeTab === 0 ? "TIRE" : "RIM",
+            type: "TIRE",
             sku: "",
             name: "",
             importPrice: 0,
@@ -248,7 +251,7 @@ export default function ProductsPage() {
             slug: "",
             seo: {} as SeoMetadata,
             status: "DRAFT",
-            size: "", brand: "", tireType: "", rimType: "", condition: "",
+            categoryId: "", size: "", brand: "", tireType: "", rimType: "", condition: "",
           });
           setOpenDialog(true);
         }}>
@@ -334,6 +337,14 @@ export default function ProductsPage() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Tên sản phẩm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField select fullWidth required label="Danh mục" value={formData.categoryId} onChange={(e) => {
+                const category=categories.find(item=>item.id===e.target.value);
+                setFormData(current=>({...current,categoryId:e.target.value,size:category?.tireSize||current.size,brand:category?.brand||current.brand,tireType:category?.tireType||current.tireType,rimType:category?.rimType||current.rimType,condition:category?.condition||current.condition}));
+              }}>
+                {categories.map(category=><MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>)}
+              </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField select fullWidth label="Loại sản phẩm" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as "TIRE"|"RIM"|"SERVICE" })}>
