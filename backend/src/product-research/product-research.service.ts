@@ -13,6 +13,14 @@ export class ProductResearchService {
   async research(productId:string){
     const product=await this.prisma.product.findUnique({where:{id:productId},select:{id:true,sku:true,name:true,size:true,brand:true,tireType:true,condition:true}});
     if(!product)throw new NotFoundException('Không tìm thấy sản phẩm.');
+    // Per-product cache: reuse the latest reviewable/published research instead
+    // of spending another free-model request for repeated button clicks.
+    const cached=await this.prisma.productContentResearch.findFirst({
+      where:{productId,status:{in:['READY_FOR_REVIEW','APPROVED','PUBLISHED']}},
+      orderBy:{createdAt:'desc'}
+    });
+    if(cached&&Date.now()-cached.createdAt.getTime()<24*60*60*1000)return cached;
+
     const query=[product.brand,product.name,product.size,product.tireType,'forklift tire manufacturer specifications'].filter(Boolean).join(' ');
     const pages=await this.collector.collect(query);
     const sources=pages.map(({url,title})=>({url,title}));
