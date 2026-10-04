@@ -41,7 +41,7 @@ export function CustomerChatbox(){
       {m.reply?.items.map(item=><Paper key={item.kind+item.id} sx={{mt:1,p:1.5,border:"1px solid",borderColor:"divider"}}>
        <Typography sx={{fontWeight:800,fontSize:".88rem"}}>{item.name}</Typography>
        <Typography sx={{fontSize:".75rem",color:"text.secondary"}}>{[item.size,item.brand,item.detail].filter(Boolean).join(" · ")}</Typography>
-       <Box sx={{mt:1,display:"flex",alignItems:"center",gap:1}}><Typography sx={{fontWeight:800,color:"secondary.main"}}>{item.priceText}</Typography><Link component={NextLink} href={item.href} sx={{ml:"auto",fontSize:".72rem",fontWeight:800,color:"text.primary"}}>Xem chi tiết →</Link></Box>
+       <Box sx={{mt:1,display:"flex",alignItems:"center",gap:1}}><Typography sx={{fontWeight:800,color:"secondary.main"}}>{item.priceText}</Typography><Link component={NextLink} href={item.href} sx={{ml:"auto",fontSize:".72rem",fontWeight:800,color:"primary.main",bgcolor:"transparent","&:hover":{color:"primary.dark"}}}>Xem chi tiết →</Link></Box>
       </Paper>)}
       {m.reply?.services.map((s,j)=><Box key={j} sx={{mt:1,p:1.25,borderLeft:"3px solid",borderColor:"secondary.main",bgcolor:"background.paper"}}><Typography sx={{fontWeight:800,fontSize:".82rem"}}>{s.name} · {s.priceText}</Typography><Typography sx={{fontSize:".72rem",color:"text.secondary"}}>{s.note}</Typography></Box>)}
       {m.reply&&<><Typography sx={{mt:1,fontSize:".68rem",color:"text.secondary",lineHeight:1.5}}>{m.reply.disclaimer}</Typography><Typography sx={{mt:.75,fontSize:".78rem",fontWeight:700}}>{m.reply.followUp}</Typography></>}
