@@ -197,6 +197,7 @@ model Category {
   specifications String?
   createdAt      DateTime      @default(now())
   stocks         Stock[]
+  products       Product[]
 }
 
 model Product {
@@ -204,6 +205,8 @@ model Product {
   sku  String      @unique // Mã QR tổng sản phẩm
   type ProductType @default(TIRE)
   name String // Tên mô tả (Ví dụ: Vỏ đặc Casumina 6.00-9)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   // Thuộc tính đặc thù lốp xe nâng
   size      String? // Thông số kích thước: 6.00-9, 7.00-12
@@ -240,6 +243,8 @@ model Product {
   seoKeywords       SeoKeyword[]
   seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
   dailyContentPlans DailyContentPlan[]
+
+  @@index([categoryId])
 }
 
 model WheelRim {
