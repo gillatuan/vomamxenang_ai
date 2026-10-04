@@ -4,7 +4,7 @@ const storeInfo = {
   id: 'store-vomamxenang',
   name: 'Võ Mâm Xe Nâng',
   address: 'TP. Hồ Chí Minh, Việt Nam',
-  phone: '0905 123 456',
+  phone: '0913 600 210',
   email: 'info@vomamxenang.com',
   website: 'https://www.vomamxenang.com',
   facebookUrl: null,

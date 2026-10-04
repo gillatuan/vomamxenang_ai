@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
+import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { aboutAPI, type AboutPage } from "@/lib/api-client";
 
 const fallbackAbout: Pick<AboutPage, "title" | "summary" | "content"> = {
@@ -25,6 +26,7 @@ export default function AboutPage() {
     <PublicHeader />
     <Box component="main" sx={{ backgroundColor: "#fff8f1", py: { xs: 5, md: 9 }, minHeight: "55vh" }}>
       <Container maxWidth="md">
+        <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Giới thiệu", path: "/about" }]} />
         <Typography component="h1" variant="h3" fontWeight={800} sx={{ color: "#5d3416", mb: 2 }}>
           {about.title || fallbackAbout.title}
         </Typography>
