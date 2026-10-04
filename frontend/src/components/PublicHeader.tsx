@@ -21,14 +21,14 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { useCartStore } from "@/store/cart";
-import { useEffect, useState } from "react";
-import { categoriesAPI, ProductCategory } from "@/lib/api-client";
+import { useState } from "react";
 import { CartDrawer } from "./CartDrawer";
 
 const navigation = [
   { label: "Trang chủ", href: "/" },
   { label: "Giới thiệu", href: "/about" },
   { label: "Blog", href: "/blog" },
+  { label: "Sản phẩm", href: "/products" },
 ];
 
 export function PublicHeader() {
@@ -37,9 +37,6 @@ export function PublicHeader() {
   const pathname = usePathname();
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
-  const menuItems = [...navigation, ...categories.map(category => ({ label: category.name, href: `/products?category=${category.id}` }))];
 
   const closeMenu = () => setMenuOpen(false);
   const isActive = (href: string) =>
@@ -77,7 +74,7 @@ export function PublicHeader() {
           </MuiLink>
 
           <Box component="nav" aria-label="Điều hướng chính" sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.25 }}>
-            {menuItems.map((item) => (
+            {navigation.map((item) => (
               <Button key={item.href} variant="text" color="inherit" component={NextLink} href={item.href} sx={navLinkSx}>
                 {item.label}
               </Button>
@@ -156,7 +153,7 @@ export function PublicHeader() {
           </Box>
 
           <Box component="nav" aria-label="Điều hướng mobile" sx={{ px: 2.5, py: 2 }}>
-            {menuItems.map((item, index) => {
+            {navigation.map((item, index) => {
               const active = isActive(item.href);
               return (
                 <MuiLink
