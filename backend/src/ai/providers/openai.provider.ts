@@ -76,7 +76,7 @@ export class OpenAiProvider implements AiProvider {
       if (!text) throw new BadGatewayException('The AI returned an invalid response.');
       return JSON.parse(text) as T;
     } catch (error) {
-      if (error instanceof BadGatewayException || error instanceof ServiceUnavailableException) throw error;
+      if (error instanceof HttpException) throw error;
       if ((error as Error).name === 'AbortError') throw new GatewayTimeoutException('AI generation timed out. Please try again.');
       throw new BadGatewayException('We could not generate content right now.');
     } finally { clearTimeout(timeout); }
