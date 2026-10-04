@@ -8,6 +8,8 @@ export class OpenRouterProvider implements AiProvider {
   readonly model:string;
   private readonly apiKey?:string;
   private readonly models:string[];
+  private readonly cooldownMs:number;
+  private readonly cooldownUntil=new Map<string,number>();
 
   constructor(config:ConfigService){
     this.apiKey=config.get<string>('OPENROUTER_API_KEY');
@@ -19,6 +21,7 @@ export class OpenRouterProvider implements AiProvider {
       'google/gemma-4-31b-it:free',
     ];
     this.model=this.models[0];
+    this.cooldownMs=Number(config.get<string>('OPENROUTER_429_COOLDOWN_MS')||'900000');
   }
 
   async generateStructuredOutput<T>(system:string,input:unknown,schema:JsonSchema):Promise<T>{
@@ -26,6 +29,8 @@ export class OpenRouterProvider implements AiProvider {
 
     const failures:string[]=[];
     for(const model of this.models){
+      const until=this.cooldownUntil.get(model)||0;
+      if(until>Date.now()){failures.push(`${model}: cooldown until ${new Date(until).toISOString()}`);continue;}
       if(!model.endsWith(':free')){
         failures.push(`${model}: rejected because it is not an explicit :free endpoint`);
         continue;
@@ -36,7 +41,9 @@ export class OpenRouterProvider implements AiProvider {
         failures.push(`${model}: invalid JSON`);
       }catch(error){
         if(error instanceof HttpException){
-          failures.push(`${model}: HTTP ${error.getStatus()}`);
+          const status=error.getStatus();
+          if(status===HttpStatus.TOO_MANY_REQUESTS)this.cooldownUntil.set(model,Date.now()+this.cooldownMs);
+          failures.push(`${model}: HTTP ${status}`);
           continue;
         }
         failures.push(`${model}: request failed`);
