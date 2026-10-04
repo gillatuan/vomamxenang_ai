@@ -10,7 +10,7 @@ export class AdminManagementService {
   products() {
     return this.prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { stocks: { select: { quantity: true } }, _count: { select: { favouriteProducts: true } } },
+      include: { category: true, stocks: { select: { quantity: true } }, _count: { select: { favouriteProducts: true } } },
     });
   }
 
