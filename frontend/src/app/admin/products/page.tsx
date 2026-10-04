@@ -44,6 +44,26 @@ import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/a
 import Image from "next/image";
 
 type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
+type ProductForm = {
+  type: Product["type"];
+  sku: string;
+  name: string;
+  importPrice: number;
+  sellingPrice: number;
+  minStock: number;
+  maxStock: number;
+  quantityInStock: number;
+  imageUrl: string;
+  description: string;
+  slug: string;
+  seo: SeoMetadata;
+  status: ContentStatus;
+  size: string;
+  brand: string;
+  tireType: string;
+  rimType: string;
+  condition: "" | NonNullable<Product["condition"]>;
+};
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
@@ -59,7 +79,7 @@ export default function ProductsPage() {
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [previewData, setPreviewData] = useState<{ sku: string; name: string } | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductForm>({
     type: "TIRE" as "TIRE" | "RIM" | "SERVICE",
     sku: "",
     name: "",
@@ -106,7 +126,7 @@ export default function ProductsPage() {
       sellingPrice: product.sellingPrice ?? 0,
       minStock: (product as any).minStock ?? 5,
       maxStock: (product as any).maxStock ?? 100,
-      quantityInStock: product.stocks.reduce((total, stock) => total + stock.quantity, 0),
+      quantityInStock: (product.stocks ?? []).reduce((total, stock) => total + stock.quantity, 0),
       imageUrl: product.imageUrl || "",
       description: product.description || "",
       slug: product.slug || "",
@@ -342,7 +362,7 @@ export default function ProductsPage() {
             </Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Kích thước" placeholder="6.50-10" value={formData.size} onChange={(e)=>setFormData({...formData,size:e.target.value})}/></Grid>
             <Grid item xs={12} sm={6}><TextField fullWidth label="Thương hiệu" value={formData.brand} onChange={(e)=>setFormData({...formData,brand:e.target.value})}/></Grid>
-            <Grid item xs={12} sm={6}><TextField select fullWidth label="Tình trạng" value={formData.condition} onChange={(e)=>setFormData({...formData,condition:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="NEW">Mới</MenuItem><MenuItem value="USED">Cũ</MenuItem></TextField></Grid>
+            <Grid item xs={12} sm={6}><TextField select fullWidth label="Tình trạng" value={formData.condition} onChange={(e)=>setFormData({...formData,condition:e.target.value as ProductForm["condition"]})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="NEW">Mới</MenuItem><MenuItem value="USED">Cũ</MenuItem></TextField></Grid>
             {formData.type==="TIRE" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại vỏ" value={formData.tireType} onChange={(e)=>setFormData({...formData,tireType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="SOLID">Vỏ đặc</MenuItem><MenuItem value="PNEUMATIC">Vỏ hơi</MenuItem><MenuItem value="NON_MARKING">Non-marking</MenuItem></TextField></Grid>}
             {formData.type==="RIM" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại mâm" value={formData.rimType} onChange={(e)=>setFormData({...formData,rimType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="LIP">Lip</MenuItem><MenuItem value="CLICK">Click</MenuItem><MenuItem value="STANDARD">Standard</MenuItem></TextField></Grid>}
               <Grid item xs={12}>
