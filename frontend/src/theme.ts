@@ -3,11 +3,13 @@ import { createTheme } from "@mui/material";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1A1A1A",
+      main: "#ED6C02",
+      dark: "#D86100",
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#B7793E",
+      main: "#ED6C02",
+      dark: "#D86100",
       contrastText: "#ffffff",
     },
     background: {
@@ -47,8 +49,30 @@ const theme = createTheme({
       },
     },
     MuiTextField: {
-      defaultProps: {
-        variant: "outlined",
+      defaultProps: { variant: "outlined" },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-root": {
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.primary.main },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.primary.main },
+          },
+          "& .MuiInputLabel-root.Mui-focused": { color: theme.palette.primary.main },
+        }),
+      },
+    },
+    MuiSlider: { defaultProps: { color: "primary" } },
+    MuiRadio: { defaultProps: { color: "primary" } },
+    MuiTabs: { defaultProps: { textColor: "primary", indicatorColor: "primary" } },
+    MuiPagination: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiPaginationItem-root": { color: theme.palette.primary.main },
+          "& .Mui-selected": {
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            "&:hover": { backgroundColor: theme.palette.primary.dark },
+          },
+        }),
       },
     },
     MuiCard: {
