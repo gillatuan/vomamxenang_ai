@@ -4,8 +4,9 @@ import { PostsModule } from '../posts/posts.module';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { OpenAiProvider } from './providers/openai.provider';
+import { OpenRouterProvider } from './providers/openrouter.provider';
 import { ProductAiService } from './services/product-ai.service';
 import { BlogAiService } from './services/blog-ai.service';
 import { SeoAiService } from './services/seo-ai.service';
-@Module({imports:[ProductsModule,PostsModule],controllers:[AiController],providers:[AiService,OpenAiProvider,{provide:'AI_PROVIDER',useExisting:OpenAiProvider},ProductAiService,BlogAiService,SeoAiService],exports:[BlogAiService,OpenAiProvider]})
+@Module({imports:[ProductsModule,PostsModule],controllers:[AiController],providers:[AiService,OpenAiProvider,OpenRouterProvider,{provide:'AI_PROVIDER',useExisting:OpenAiProvider},ProductAiService,BlogAiService,SeoAiService],exports:[BlogAiService,OpenAiProvider,OpenRouterProvider]})
 export class AiModule {}
