@@ -22,7 +22,7 @@ async function main() {
 
   const clients = [
     { id: 'client-guest', name: 'Guest', email: 'guest@vomamxenang.local', phone: '', company: 'Guest', type: 'RETAIL', notes: 'Guest checkout account' },
-    { id: 'client-logistics', name: 'Công ty Võ Mạnh Logistics', email: 'info@vomamxenang.local', phone: '0905123456', company: 'Võ Mạnh Logistics', type: 'B2B_TIER1', notes: 'Khách hàng doanh nghiệp thân thiết' },
+    { id: 'client-logistics', name: 'Công ty Võ Mạnh Logistics', email: 'info@vomamxenang.local', phone: '0913 600 210', company: 'Võ Mạnh Logistics', type: 'B2B_TIER1', notes: 'Khách hàng doanh nghiệp thân thiết' },
     { id: 'client-thanhdat', name: 'Công ty Thành Đạt', email: 'contact@thanhdat.com', phone: '0987654321', company: 'Thành Đạt Co., Ltd.', type: 'B2B_TIER2', notes: 'Ưu tiên giao hàng trong tuần' },
   ];
   for (const client of clients) {
@@ -54,7 +54,7 @@ async function main() {
     id: 'store-vomamxenang',
     name: 'Võ Mâm Xe Nâng',
     address: 'TP. Hồ Chí Minh, Việt Nam',
-    phone: '0905 123 456',
+    phone: '0913 600 210',
     email: 'info@vomamxenang.com',
     website: 'https://vomamxenang.com',
     facebookUrl: 'https://www.facebook.com/',
