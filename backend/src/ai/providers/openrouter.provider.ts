@@ -17,7 +17,7 @@ export class OpenRouterProvider implements AiProvider {
     try{
       response=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(90000),
         headers:{Authorization:`Bearer ${this.apiKey}`,'Content-Type':'application/json','HTTP-Referer':'https://www.vomamxenang.com','X-Title':'Vo Mam Xe Nang'},
-        body:JSON.stringify({model:this.model,messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(input)}],
+        body:JSON.stringify({model:this.model,messages:[{role:'system',content:`${system}\nReturn ONLY one valid JSON object. No markdown fences, no commentary. The JSON must conform to this schema: ${JSON.stringify(schema)}`},{role:'user',content:JSON.stringify(input)}],
           response_format:{type:'json_schema',json_schema:{name:'research',strict:true,schema}}})});
     }catch(error){
       const name=(error as Error)?.name;
@@ -44,6 +44,25 @@ export class OpenRouterProvider implements AiProvider {
     for(const candidate of candidates){
       try{return JSON.parse(candidate) as T;}catch{}
     }
-    throw new BadGatewayException('OpenRouter Free model không trả về JSON parse được. Hãy thử lại; free router có thể chọn model không hỗ trợ structured output ổn định.');
+
+    // Some free models emit JSON-like output despite explicit structured-output
+    // instructions. Make one deterministic repair attempt using the same free
+    // endpoint; research validation still rejects unsupported facts afterwards.
+    const repair=await this.repairJson<T>(raw,schema);
+    if(repair)return repair;
+    throw new BadGatewayException('OpenRouter Free model không trả về JSON parse được sau bước repair. Vui lòng thử lại.');
+  }
+  private async repairJson<T>(raw:string,schema:JsonSchema):Promise<T|null>{
+    try{
+      const response=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(60000),
+        headers:{Authorization:`Bearer ${this.apiKey}`,'Content-Type':'application/json','HTTP-Referer':'https://www.vomamxenang.com','X-Title':'Vo Mam Xe Nang'},
+        body:JSON.stringify({model:this.model,messages:[{role:'system',content:`Convert the supplied text to ONE valid JSON object matching this schema exactly. Do not add facts, URLs, evidence, or claims. If a value cannot be recovered, use an empty string/array as appropriate. Return JSON only. Schema: ${JSON.stringify(schema)}`},{role:'user',content:raw}]})});
+      if(!response.ok)return null;
+      const body=await response.json() as {choices?:Array<{message?:{content?:string|null}}>} ;
+      const text=body.choices?.[0]?.message?.content?.trim();if(!text)return null;
+      const cleaned=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+      const start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');
+      return JSON.parse(start>=0&&end>start?cleaned.slice(start,end+1):cleaned) as T;
+    }catch{return null;}
   }
 }
