@@ -48,7 +48,8 @@ export default function PostsAdminPage() {
   const save = async (status: ContentStatus) => {
     try {
       let imageUrl = form.seo.imageUrl || "";
-      if (pendingImage) { const body=new FormData(); body.append("file",pendingImage.file); const upload=await apiClient.post<{url:string}>("/admin/media/image",body); imageUrl=upload.data.url; }
+      if (pendingImage) { const body=new FormData(); body.append("file",pendingImage.file,pendingImage.file.name);
+        const upload=await apiClient.post<{url:string}>("/admin/media/image",body,{headers:{"Content-Type":undefined},transformRequest:[(data)=>data]}); imageUrl=upload.data.url; }
     const data = { slug: form.slug, seo: { ...form.seo, imageUrl, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
     if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
       if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
