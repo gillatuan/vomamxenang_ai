@@ -41,9 +41,11 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const addItem = useCartStore((state) => state.addItem);
   const searchParams = useSearchParams();
   const condition = searchParams.get("condition") || undefined;
+  const categoryFromUrl = searchParams.get("category") || "";
   const watermark = useStoreWatermark();
 
   useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
+  useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
 
   useEffect(() => {
     productsAPI
