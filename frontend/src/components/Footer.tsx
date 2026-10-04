@@ -55,8 +55,13 @@ export function Footer() {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Liên hệ</Typography>
-            {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",px:0,color:"text.primary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
-            {storeInfo.phone && <Stack spacing={.5}><Button component="a" href={`tel:${storeInfo.phone.replace(/\\s/g,"")}`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",px:0,color:"text.primary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.phone}</Button><Typography variant="body2" color="text.secondary">09777 5 7 9 11 - Tuấn</Typography></Stack>}
+            {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
+            {storeInfo.phone && (
+              <Stack spacing={.5}>
+                <Button component="a" href={`tel:${storeInfo.phone.replace(/\\s/g,"")}`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.phone}</Button>
+                <Button component="a" href={`tel:0977757911`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>09 777 5 7 9 11 - Tuấn</Button>
+              </Stack>
+            )}
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Theo dõi</Typography>
@@ -67,7 +72,7 @@ export function Footer() {
             </Typography>
           </Grid>
         </Grid>
-        <Typography variant="body2" sx={{ marginTop: { xs: 5, md: 7 }, pt: 2, borderTop: "1px solid", borderColor: "rgba(237,108,2,.28)", color: "text.secondary", fontSize: ".75rem" }}>
+        <Typography variant="body2" sx={{ marginTop: { xs: 5, md: 7 }, pt: 2, borderTop: "1px solid", borderColor: "rgba(237,108,2,.28)", color: "text.secondary", fontSize: ".875rem" }}>
           © {new Date().getFullYear()} {storeInfo.name || fallbackStoreInfo.name}. All rights reserved.
         </Typography>
       </Container>
