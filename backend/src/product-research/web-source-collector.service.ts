@@ -9,7 +9,11 @@ export class WebSourceCollectorService {
   }
   async collect(query:string):Promise<WebSource[]>{
     const searchUrl=`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    const html=await this.fetchText(searchUrl);
+    let html:string;
+    try{html=await this.fetchText(searchUrl);}catch(error){
+      if(error instanceof BadRequestException)throw error;
+      throw new BadRequestException('Web Source Collector không truy cập được search provider. Research chưa được tạo.');
+    }
     const $=cheerio.load(html);const urls:string[]=[];
     $('.result__a').each((_,el)=>{const href=$(el).attr('href');if(!href)return;try{const u=new URL(href,'https://duckduckgo.com');const target=u.searchParams.get('uddg')||u.href;if(this.isPublicHttpUrl(target)&&!target.includes('duckduckgo.com'))urls.push(target);}catch{}});
     const unique=[...new Set(urls)].slice(0,8);
@@ -23,7 +27,9 @@ export class WebSourceCollectorService {
     return {url,title,text};
   }
   private async fetchText(url:string){
-    const r=await fetch(url,{signal:AbortSignal.timeout(10000),redirect:'follow',headers:{'User-Agent':'Mozilla/5.0 (compatible; VoMamXeNangResearch/1.0; +https://www.vomamxenang.com/)','Accept':'text/html,application/xhtml+xml'}});
+    let r:Response;
+    try{r=await fetch(url,{signal:AbortSignal.timeout(10000),redirect:'follow',headers:{'User-Agent':'Mozilla/5.0 (compatible; VoMamXeNangResearch/1.0; +https://www.vomamxenang.com/)','Accept':'text/html,application/xhtml+xml'}});}
+    catch(error){const reason=(error as Error)?.name==='TimeoutError'||(error as Error)?.name==='AbortError'?'timeout':'network error';throw new BadRequestException(`Không truy cập được nguồn web (${reason}).`);}
     if(!r.ok)throw new BadRequestException(`Không đọc được nguồn web (HTTP ${r.status}).`);
     const type=r.headers.get('content-type')||'';if(!type.includes('text/html'))throw new BadRequestException('Nguồn không phải HTML.');
     return (await r.text()).slice(0,1000000);
