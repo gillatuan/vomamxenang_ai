@@ -66,6 +66,7 @@ export type ProductResearchStatus = "RESEARCHING"|"READY_FOR_REVIEW"|"APPROVED"|
 export interface ProductContentResearch { id:string;productId:string;status:ProductResearchStatus;sources:Array<{url:string;title?:string;sourceType?:string}>;facts:Array<{field:string;value:string;source?:string;evidence?:string}>;proposedContent:Partial<Product>;reviewedBy?:string;reviewedAt?:string;publishedAt?:string;createdAt:string; }
 export const productResearchAPI = {
   list:(productId:string)=>apiClient.get<ProductContentResearch[]>(`/admin/product-research/product/${productId}`),
+  research:(productId:string)=>apiClient.post<ProductContentResearch>(`/admin/product-research/product/${productId}/auto`),
   create:(productId:string,data:Pick<ProductContentResearch,"sources"|"facts"|"proposedContent">)=>apiClient.post<ProductContentResearch>(`/admin/product-research/product/${productId}`,data),
   review:(id:string,action:"APPROVE"|"REJECT")=>apiClient.post<ProductContentResearch>(`/admin/product-research/${id}/review`,{action}),
   apply:(id:string)=>apiClient.post<Product>(`/admin/product-research/${id}/apply`),
