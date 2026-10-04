@@ -15,6 +15,8 @@ import {
   CircularProgress,
   Alert,
   Chip,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Suspense, useEffect, useState } from "react";
@@ -23,11 +25,13 @@ import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
-import { productsAPI, clientsAPI, Product } from "@/lib/api-client";
+import { productsAPI, clientsAPI, categoriesAPI, Product, ProductCategory } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
 
 function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [categoryId, setCategoryId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -39,9 +43,11 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const condition = searchParams.get("condition") || undefined;
   const watermark = useStoreWatermark();
 
+  useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
+
   useEffect(() => {
     productsAPI
-      .getAll(condition)
+      .getAll(condition, categoryId || undefined)
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -50,7 +56,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         setError("Failed to load products");
         setLoading(false);
       });
-  }, [condition]);
+  }, [condition, categoryId]);
 
   const handleQuoteClick = (product: Product) => {
     setSelectedProduct(product);
@@ -86,7 +92,11 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
-        {loading && <CircularProgress />}
+        {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{mb:3}}>
+          <Tab value="" label="Tất cả" />
+          {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
+        </Tabs>}
+                {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
 
         <Grid container spacing={{ xs: 2, md: 3 }}>
