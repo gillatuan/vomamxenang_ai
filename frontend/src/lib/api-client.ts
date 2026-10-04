@@ -62,15 +62,6 @@ export interface SeoMetadata {
   twitter?: { card?: "summary_large_image"; title?: string; description?: string };
 }
 
-export type ProductResearchStatus = "RESEARCHING"|"READY_FOR_REVIEW"|"APPROVED"|"REJECTED"|"PUBLISHED";
-export interface ProductContentResearch { id:string;productId:string;status:ProductResearchStatus;sources:Array<{url:string;title?:string;sourceType?:string}>;facts:Array<{field:string;value:string;source?:string;evidence?:string}>;proposedContent:Partial<Product>;reviewedBy?:string;reviewedAt?:string;publishedAt?:string;createdAt:string; }
-export const productResearchAPI = {
-  list:(productId:string)=>apiClient.get<ProductContentResearch[]>(`/admin/product-research/product/${productId}`),
-  create:(productId:string,data:Pick<ProductContentResearch,"sources"|"facts"|"proposedContent">)=>apiClient.post<ProductContentResearch>(`/admin/product-research/product/${productId}`,data),
-  review:(id:string,action:"APPROVE"|"REJECT")=>apiClient.post<ProductContentResearch>(`/admin/product-research/${id}/review`,{action}),
-  apply:(id:string)=>apiClient.post<Product>(`/admin/product-research/${id}/apply`),
-};
-
 export const productsAPI = {
   getAll: (condition?: string) => apiClient.get<Product[]>("/products", { params: condition ? { condition } : undefined }),
   getOne: (id: string) => apiClient.get<Product>(`/products/${id}`),
