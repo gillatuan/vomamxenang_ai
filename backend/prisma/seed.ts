@@ -75,8 +75,8 @@ async function main() {
   await prisma.aboutPage.upsert({ where: { id: aboutPage.id }, update: aboutPage, create: aboutPage });
 
   const categories = [
-    { id: 'category-solid-6009', name: 'Lốp đặc 6.00-9', tireSize: '6.00-9', brand: 'Casumina', tireType: TireType.SOLID, rimType: RimType.CLICK, origin: 'Việt Nam', condition: TireCondition.NEW, specifications: 'Lốp đặc chịu tải 2.5 tấn' },
-    { id: 'category-pneumatic-70012', name: 'Lốp hơi 7.00-12', tireSize: '7.00-12', brand: 'Bridgestone', tireType: TireType.PNEUMATIC, rimType: RimType.LIP, origin: 'Thái Lan', condition: TireCondition.NEW, specifications: 'Lốp hơi cho xe nâng địa hình' },
+    { id: 'category-tires', name: 'Vỏ xe nâng', tireSize: 'Nhiều kích thước', brand: 'Nhiều thương hiệu', tireType: TireType.SOLID, rimType: RimType.STANDARD, origin: 'Nhiều nguồn', condition: TireCondition.NEW, specifications: 'Danh mục vỏ/lốp xe nâng' },
+    { id: 'category-rims', name: 'Mâm xe nâng', tireSize: 'Nhiều kích thước', brand: 'OEM', tireType: TireType.SOLID, rimType: RimType.STANDARD, origin: 'Nhiều nguồn', condition: TireCondition.NEW, specifications: 'Danh mục mâm xe nâng' },
   ];
   for (const category of categories) await prisma.category.upsert({ where: { id: category.id }, update: category, create: category });
 
