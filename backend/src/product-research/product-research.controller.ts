@@ -10,6 +10,7 @@ import { ProductResearchService } from './product-research.service';
 export class ProductResearchController {
   constructor(private service: ProductResearchService) {}
   @Get('product/:productId') list(@Param('productId') productId:string){ return this.service.list(productId); }
+  @Post('product/:productId/auto') research(@Param('productId') productId:string){ return this.service.research(productId); }
   @Post('product/:productId') create(@Param('productId') productId:string,@Body() body:any){ return this.service.create(productId,body); }
   @Post(':id/review') review(@Param('id') id:string,@Body() body:{action:'APPROVE'|'REJECT'},@Req() req:any){ return this.service.review(id,body.action,req.user.sub); }
   @Post(':id/apply') apply(@Param('id') id:string,@Req() req:any){ return this.service.apply(id,req.user.sub); }
