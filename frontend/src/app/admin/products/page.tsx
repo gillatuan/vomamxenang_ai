@@ -31,6 +31,7 @@ import {
   GlobalStyles,
   Grid,
   Chip,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -72,6 +73,7 @@ export default function ProductsPage() {
     slug: "",
     seo: {} as SeoMetadata,
     status: "DRAFT" as ContentStatus,
+    size: "", brand: "", tireType: "", rimType: "", condition: "",
   });
 
   useEffect(() => {
@@ -110,6 +112,7 @@ export default function ProductsPage() {
       slug: product.slug || "",
       seo: product.seo || {},
       status: product.status ?? "PUBLISHED",
+      size: product.size || "", brand: product.brand || "", tireType: product.tireType || "", rimType: (product as any).rimType || "", condition: product.condition || "",
     });
     setOpenDialog(true);
   };
@@ -143,6 +146,11 @@ export default function ProductsPage() {
       minStock: formData.minStock,
       maxStock: formData.maxStock,
       status,
+      size: formData.size || undefined,
+      brand: formData.brand || undefined,
+      tireType: formData.type === "TIRE" ? formData.tireType || undefined : undefined,
+      rimType: formData.type === "RIM" ? formData.rimType || undefined : undefined,
+      condition: formData.condition || undefined,
     };
 
       if (editingId) {
@@ -212,8 +220,8 @@ export default function ProductsPage() {
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-          <Tab label="Danh mục Vỏ xe" />
-          <Tab label="Danh mục Mâm xe" />
+          <Tab label="Vỏ xe" />
+          <Tab label="Mâm xe" />
         </Tabs>
         <TextField
           size="small"
@@ -240,6 +248,7 @@ export default function ProductsPage() {
             slug: "",
             seo: {} as SeoMetadata,
             status: "DRAFT",
+            size: "", brand: "", tireType: "", rimType: "", condition: "",
           });
           setOpenDialog(true);
         }}>
@@ -326,6 +335,16 @@ export default function ProductsPage() {
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Tên sản phẩm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField select fullWidth label="Loại sản phẩm" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as "TIRE"|"RIM"|"SERVICE" })}>
+                <MenuItem value="TIRE">Vỏ xe</MenuItem><MenuItem value="RIM">Mâm xe</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth label="Kích thước" placeholder="6.50-10" value={formData.size} onChange={(e)=>setFormData({...formData,size:e.target.value})}/></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth label="Thương hiệu" value={formData.brand} onChange={(e)=>setFormData({...formData,brand:e.target.value})}/></Grid>
+            <Grid item xs={12} sm={6}><TextField select fullWidth label="Tình trạng" value={formData.condition} onChange={(e)=>setFormData({...formData,condition:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="NEW">Mới</MenuItem><MenuItem value="USED">Cũ</MenuItem></TextField></Grid>
+            {formData.type==="TIRE" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại vỏ" value={formData.tireType} onChange={(e)=>setFormData({...formData,tireType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="SOLID">Vỏ đặc</MenuItem><MenuItem value="PNEUMATIC">Vỏ hơi</MenuItem><MenuItem value="NON_MARKING">Non-marking</MenuItem></TextField></Grid>}
+            {formData.type==="RIM" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại mâm" value={formData.rimType} onChange={(e)=>setFormData({...formData,rimType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="LIP">Lip</MenuItem><MenuItem value="CLICK">Click</MenuItem><MenuItem value="STANDARD">Standard</MenuItem></TextField></Grid>}
               <Grid item xs={12}>
               <ContentSeoFields id={editingId || ""} kind="products" title={formData.name} content={formData.description} slug={formData.slug} seo={formData.seo} onChange={(data) => setFormData(current => ({ ...current, ...data }))} onContentChange={(description) => setFormData(current => ({ ...current, description }))} />
               <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} />
