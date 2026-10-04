@@ -4,7 +4,8 @@ import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
-import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { ImageUploadField, PendingImage } from "@/components/admin/ImageUploadField";
+import apiClient from "@/lib/api";
 
 import {
   Box,
@@ -54,6 +55,7 @@ export default function ProductsPage() {
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [previewData, setPreviewData] = useState<{ sku: string; name: string } | null>(null);
   const [formData, setFormData] = useState({
     type: "TIRE" as "TIRE" | "RIM" | "SERVICE",
@@ -91,6 +93,7 @@ export default function ProductsPage() {
   };
 
   const handleEdit = (product: AdminProduct) => {
+    setPendingImage(null);
     setEditingId(product.id);
     setFormData({
       type: product.type,
@@ -115,13 +118,20 @@ export default function ProductsPage() {
       setError("Vui lòng nhập SKU và tên sản phẩm trước khi lưu.");
       return;
     }
+    try {
+      let imageUrl = formData.imageUrl;
+      if (pendingImage) {
+        const body = new FormData(); body.append("file", pendingImage.file);
+        const upload = await apiClient.post<{url:string}>("/admin/media/image", body);
+        imageUrl = upload.data.url;
+      }
     const payload = {
       sku: formData.sku,
       type: formData.type,
       name: formData.name,
       importPrice: formData.importPrice,
       sellingPrice: formData.sellingPrice,
-      imageUrl: formData.imageUrl,
+      imageUrl,
       description: formData.description,
       slug: formData.slug,
       seo: { ...formData.seo, keywords: (formData.seo.keywords || []).map(word => word.trim()).filter(Boolean) },
@@ -130,7 +140,6 @@ export default function ProductsPage() {
       status,
     };
 
-    try {
       if (editingId) {
         await productsAPI.update(editingId, payload);
       } else {
@@ -139,6 +148,7 @@ export default function ProductsPage() {
       loadProducts();
       setOpenDialog(false);
       setEditingId(null);
+      setPendingImage(null);
       setPreviewData({ sku: formData.sku || payload.name, name: formData.name });
       setOpenQrDialog(true);
     } catch (err: any) {
@@ -209,6 +219,7 @@ export default function ProductsPage() {
           sx={{ minWidth: 240 }}
         />
         <Button startIcon={<AddIcon />} variant="contained" onClick={() => {
+          setPendingImage(null);
           setEditingId(null);
           setFormData({
             type: activeTab === 0 ? "TIRE" : "RIM",
@@ -321,7 +332,7 @@ export default function ProductsPage() {
               <TextField fullWidth label="Max Stock" type="number" value={formData.maxStock} onChange={(e) => setFormData({ ...formData, maxStock: Number(e.target.value) })} />
             </Grid>
             <Grid item xs={12}>
-              <ImageUploadField value={formData.imageUrl} onChange={(imageUrl) => setFormData({ ...formData, imageUrl })} label="Ảnh sản phẩm" />
+              <ImageUploadField value={formData.imageUrl} onChange={setPendingImage} label="Ảnh sản phẩm" />
               <TextField fullWidth label="Hoặc nhập URL ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} sx={{ mt: 1.5 }} />
             </Grid>
           </Grid>
