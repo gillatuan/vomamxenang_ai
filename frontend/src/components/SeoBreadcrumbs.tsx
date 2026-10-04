@@ -1,5 +1,27 @@
-import Link from 'next/link';
-import type { Crumb } from '@/lib/seo/structured-data';
+import Link from "next/link";
+import { Breadcrumbs, Link as MuiLink, Typography } from "@mui/material";
+import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
+import type { Crumb } from "@/lib/seo/structured-data";
+
 export function SeoBreadcrumbs({ items }: { items: Crumb[] }) {
-  return <nav aria-label="Đường dẫn" style={{ marginBottom: 24 }}><ol style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: 0, listStyle: 'none' }}>{items.map((item, i) => <li key={item.path}>{i > 0 && <span aria-hidden="true"> / </span>}{i === items.length - 1 ? <span aria-current="page">{item.name}</span> : <Link href={item.path}>{item.name}</Link>}</li>)}</ol></nav>;
+  return (
+    <Breadcrumbs
+      component="nav"
+      aria-label="Đường dẫn"
+      separator={<NavigateNextRoundedIcon sx={{ fontSize: 18, color: "primary.main", opacity: .65 }} />}
+      sx={{ mb: 3, "& .MuiBreadcrumbs-ol": { alignItems: "center" } }}
+    >
+      {items.map((item, index) =>
+        index === items.length - 1 ? (
+          <Typography key={item.path} aria-current="page" variant="body2" color="text.secondary" fontWeight={600}>
+            {item.name}
+          </Typography>
+        ) : (
+          <MuiLink key={item.path} component={Link} href={item.path} underline="none" variant="body2" sx={{ color: "primary.main", fontWeight: 700, "&:hover": { color: "primary.dark", opacity: .8 } }}>
+            {item.name}
+          </MuiLink>
+        )
+      )}
+    </Breadcrumbs>
+  );
 }
