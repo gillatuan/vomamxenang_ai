@@ -53,10 +53,36 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           "& .MuiOutlinedInput-root": {
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.primary.main },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.primary.main },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: theme.palette.primary.main,
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: theme.palette.primary.main,
+              opacity: 0.8,
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: theme.palette.primary.main,
+              opacity: 1,
+            },
           },
           "& .MuiInputLabel-root.Mui-focused": { color: theme.palette.primary.main },
+        }),
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary.main,
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary.main,
+            opacity: 0.8,
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary.main,
+            opacity: 1,
+          },
         }),
       },
     },
