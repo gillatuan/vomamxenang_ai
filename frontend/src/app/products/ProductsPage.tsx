@@ -140,6 +140,20 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
             </TextField>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{mt:1.5}}>{visibleProducts.length} sản phẩm phù hợp</Typography>
+          {(categoryId || tireTypeFilter || rimTypeFilter || brandFilter || sizeFilter || conditionFilter || appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && (
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{mt:2}} alignItems="center">
+              <Typography variant="body2" fontWeight={700}>Đang lọc:</Typography>
+              {categoryId && <Chip label={categories.find(item=>item.id===categoryId)?.name || "Danh mục"} onDelete={()=>setCategoryId("")} />}
+              {tireTypeFilter && <Chip label={tireTypeFilter==="SOLID"?"Vỏ đặc":tireTypeFilter==="PNEUMATIC"?"Vỏ hơi":"Non-marking"} onDelete={()=>setTireTypeFilter("")} />}
+              {rimTypeFilter && <Chip label={`Mâm ${rimTypeFilter}`} onDelete={()=>setRimTypeFilter("")} />}
+              {brandFilter && <Chip label={`Thương hiệu: ${brandFilter}`} onDelete={()=>setBrandFilter("")} />}
+              {sizeFilter && <Chip label={`Kích thước: ${sizeFilter}`} onDelete={()=>setSizeFilter("")} />}
+              {conditionFilter && <Chip label={conditionFilter==="USED"?"Đã qua sử dụng":"Mới"} onDelete={()=>setConditionFilter("")} />}
+              {(appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && <Chip label={`${appliedPriceRange[0].toLocaleString("vi-VN")} ₫ – ${appliedPriceRange[1].toLocaleString("vi-VN")} ₫`} onDelete={()=>{setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}} />}
+              <Button size="small" onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
+            </Stack>
+          )}
+
         </Box>
         <Drawer anchor="left" open={filterOpen} onClose={()=>setFilterOpen(false)} PaperProps={{sx:{width:{xs:"92vw",sm:430},p:{xs:2.5,sm:3.5}}}}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
