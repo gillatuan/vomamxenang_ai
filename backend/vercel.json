@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "devCommand": "yarn start:dev",
   "buildCommand": "yarn prisma:migrate && APP_ENV=production yarn db:seed:production && yarn build",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" }

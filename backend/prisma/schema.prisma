@@ -58,6 +58,14 @@ enum ContentStatus {
   PUBLISHED
 }
 
+enum ProductResearchStatus {
+  RESEARCHING
+  READY_FOR_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
 enum DailyContentRunStatus {
   RUNNING
   COMPLETED
@@ -240,6 +248,7 @@ model Product {
   seoKeywords       SeoKeyword[]
   seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
   dailyContentPlans DailyContentPlan[]
+  contentResearch   ProductContentResearch[]
 }
 
 model WheelRim {
@@ -671,4 +680,23 @@ model CampaignPost {
   @@unique([campaignId, postId])
   @@index([campaignId, sortOrder])
   @@index([postId])
+}
+
+
+model ProductContentResearch {
+  id              String                @id @default(cuid())
+  productId       String
+  product         Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status          ProductResearchStatus @default(RESEARCHING)
+  sources         Json                  @default("[]")
+  facts           Json                  @default("[]")
+  proposedContent Json                  @default("{}")
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  publishedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([productId, status])
+  @@index([status, createdAt])
 }

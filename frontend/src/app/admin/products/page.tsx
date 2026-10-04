@@ -4,6 +4,9 @@ import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
+import { ImageUploadField, PendingImage } from "@/components/admin/ImageUploadField";
+import { ProductResearchPanel } from "@/components/admin/ProductResearchPanel";
+import apiClient from "@/lib/api";
 
 import {
   Box,
@@ -38,6 +41,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useEffect, useMemo, useState } from "react";
 import { adminManagementAPI, ContentStatus, productsAPI, Product } from "@/lib/api-client";
+import Image from "next/image";
 
 type AdminProduct = Product & { importPrice: number; stocks: { quantity: number }[] };
 
@@ -53,6 +57,7 @@ export default function ProductsPage() {
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [previewData, setPreviewData] = useState<{ sku: string; name: string } | null>(null);
   const [formData, setFormData] = useState({
     type: "TIRE" as "TIRE" | "RIM" | "SERVICE",
@@ -90,6 +95,7 @@ export default function ProductsPage() {
   };
 
   const handleEdit = (product: AdminProduct) => {
+    setPendingImage(null);
     setEditingId(product.id);
     setFormData({
       type: product.type,
@@ -114,13 +120,24 @@ export default function ProductsPage() {
       setError("Vui lòng nhập SKU và tên sản phẩm trước khi lưu.");
       return;
     }
+    try {
+      let imageUrl = formData.imageUrl;
+      if (pendingImage) {
+        const body = new FormData();
+        body.append("file", pendingImage.file, pendingImage.file.name);
+        const upload = await apiClient.post<{url:string}>("/admin/media/image", body, {
+          headers: { "Content-Type": undefined },
+          transformRequest: [(data) => data],
+        });
+        imageUrl = upload.data.url;
+      }
     const payload = {
       sku: formData.sku,
       type: formData.type,
       name: formData.name,
       importPrice: formData.importPrice,
       sellingPrice: formData.sellingPrice,
-      imageUrl: formData.imageUrl,
+      imageUrl,
       description: formData.description,
       slug: formData.slug,
       seo: { ...formData.seo, keywords: (formData.seo.keywords || []).map(word => word.trim()).filter(Boolean) },
@@ -129,7 +146,6 @@ export default function ProductsPage() {
       status,
     };
 
-    try {
       if (editingId) {
         await productsAPI.update(editingId, payload);
       } else {
@@ -138,6 +154,7 @@ export default function ProductsPage() {
       loadProducts();
       setOpenDialog(false);
       setEditingId(null);
+      setPendingImage(null);
       setPreviewData({ sku: formData.sku || payload.name, name: formData.name });
       setOpenQrDialog(true);
     } catch (err: any) {
@@ -208,6 +225,7 @@ export default function ProductsPage() {
           sx={{ minWidth: 240 }}
         />
         <Button startIcon={<AddIcon />} variant="contained" onClick={() => {
+          setPendingImage(null);
           setEditingId(null);
           setFormData({
             type: activeTab === 0 ? "TIRE" : "RIM",
@@ -236,7 +254,7 @@ export default function ProductsPage() {
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
               <TableCell>Tên</TableCell>
               <TableCell>Loại</TableCell>
-              {/* <TableCell>Mô tả</TableCell> */}
+              <TableCell>Image</TableCell>
               <TableCell>Giá nhập</TableCell>
               <TableCell>Giá bán</TableCell>
               <TableCell>Tồn kho</TableCell>
@@ -248,9 +266,15 @@ export default function ProductsPage() {
           <TableBody>
             {rows.map((product) => (
               <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
+                <TableCell sx={{ maxWidth: "210px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</TableCell>
                 <TableCell>{product.type}</TableCell>
-                {/* <TableCell>{richTextPlain(product.description || "") || "-"}</TableCell> */}
+                <TableCell>
+                  {product.imageUrl ? (
+                    <Image src={product.imageUrl} alt={product.name} width={80} height={80} />
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
@@ -319,8 +343,12 @@ export default function ProductsPage() {
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Max Stock" type="number" value={formData.maxStock} onChange={(e) => setFormData({ ...formData, maxStock: Number(e.target.value) })} />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Link ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} />
+            <Grid item xs={12}>
+              <ProductResearchPanel productId={editingId || undefined} onApplied={loadProducts} />
+            </Grid>
+            <Grid item xs={12}>
+              <ImageUploadField value={formData.imageUrl} onChange={setPendingImage} label="Ảnh sản phẩm" />
+              <TextField fullWidth label="Hoặc nhập URL ảnh" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} sx={{ mt: 1.5 }} />
             </Grid>
           </Grid>
 

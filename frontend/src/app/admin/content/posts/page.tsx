@@ -4,6 +4,8 @@ import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
 import { richTextPlain } from "@/lib/rich-text";
+import { ImageUploadField, PendingImage } from "@/components/admin/ImageUploadField";
+import apiClient from "@/lib/api";
 
 import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -27,6 +29,7 @@ export default function PostsAdminPage() {
   const [open, setOpen] = useState(false);
   const [viewing, setViewing] = useState<Post | null>(null);
   const [form, setForm] = useState<PostForm>(emptyForm);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -36,17 +39,22 @@ export default function PostsAdminPage() {
   useEffect(() => { load(); }, []);
 
   const openEditor = (post?: Post) => {
+    setPendingImage(null);
     setEditing(post ?? null);
     setForm(post ? { slug: post.slug || "", seo: post.seo || {}, title: post.title, content: post.content, videoUrl: post.videoUrl ?? "", status: post.status ?? "PUBLISHED" } : emptyForm);
     setOpen(true);
   };
 
   const save = async (status: ContentStatus) => {
-    const data = { slug: form.slug, seo: { ...form.seo, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
-    if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
     try {
+      let imageUrl = form.seo.imageUrl || "";
+      if (pendingImage) { const body=new FormData(); body.append("file",pendingImage.file,pendingImage.file.name);
+        const upload=await apiClient.post<{url:string}>("/admin/media/image",body,{headers:{"Content-Type":undefined},transformRequest:[(data)=>data]}); imageUrl=upload.data.url; }
+    const data = { slug: form.slug, seo: { ...form.seo, imageUrl, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
+    if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
       if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
       setOpen(false);
+      setPendingImage(null);
       load();
     } catch (error: any) { setError(error.response?.data?.message || "Không thể lưu bài viết."); }
   };
@@ -66,7 +74,7 @@ export default function PostsAdminPage() {
 
   const columns: GridColDef<Post>[] = [
     { field: "title", headerName: "Tiêu đề", flex: 1.4 },
-    { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
+    // { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
     { field: "status", headerName: "Trạng thái", width: 130, renderCell: (params: GridRenderCellParams<Post>) => {
       const status = params.row.status ?? "PUBLISHED";
       return <Chip size="small" label={status === "PUBLISHED" ? "Đã publish" : "Nháp"} color={status === "PUBLISHED" ? "success" : "default"} />;
@@ -93,6 +101,8 @@ export default function PostsAdminPage() {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
         <ContentSeoFields id={editing?.id} kind="blog" title={form.title} content={form.content} slug={form.slug} seo={form.seo} onChange={(data) => setForm(current => ({ ...current, ...data }))} onContentChange={(content) => setForm(current => ({ ...current, content }))} />
+        <ImageUploadField label="Ảnh đại diện bài viết" value={form.seo.imageUrl || ""} onChange={setPendingImage} />
+        <Box sx={{ mb: 2 }} />
         <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>

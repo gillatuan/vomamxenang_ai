@@ -21,6 +21,8 @@ import { StoreInfoModule } from "./store-info/store-info.module"
 import { AboutModule } from "./about/about.module"
 import { DailyContentModule } from "./daily-content/daily-content.module"
 import { CustomerChatModule } from "./customer-chat/customer-chat.module"
+import { MediaModule } from "./media/media.module"
+import { ProductResearchModule } from "./product-research/product-research.module"
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { CustomerChatModule } from "./customer-chat/customer-chat.module"
     AboutModule,
     SeoModule,
     DailyContentModule,
+    MediaModule,
+    ProductResearchModule,
     CustomerChatModule,
   ],
   providers: [
