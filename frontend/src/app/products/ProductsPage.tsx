@@ -134,7 +134,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           </Tabs>}
           <Stack direction={{xs:"column",sm:"row"}} spacing={1.5} sx={{mt:2}}>
             <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}} InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
-            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{height:48,minWidth:150,borderRadius:2,fontWeight:700}}>Bộ lọc</Button>
+            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{height:48,minWidth:150,borderRadius:2,fontWeight:700,color:"#ed6c02",borderColor:"#ed6c02","&:hover":{borderColor:"#ed6c02",bgcolor:"rgba(237,108,2,.06)"}}}>Bộ lọc</Button>
             <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:210,"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}}>
               <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
             </TextField>
@@ -150,40 +150,40 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
               {sizeFilter && <Chip label={`Kích thước: ${sizeFilter}`} onDelete={()=>setSizeFilter("")} />}
               {conditionFilter && <Chip label={conditionFilter==="USED"?"Đã qua sử dụng":"Mới"} onDelete={()=>setConditionFilter("")} />}
               {(appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && <Chip label={`${appliedPriceRange[0].toLocaleString("vi-VN")} ₫ – ${appliedPriceRange[1].toLocaleString("vi-VN")} ₫`} onDelete={()=>{setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}} />}
-              <Button size="small" onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
+              <Button size="small" sx={{color:"#ed6c02",fontWeight:800}} onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
             </Stack>
           )}
 
         </Box>
         <Drawer anchor="left" open={filterOpen} onClose={()=>setFilterOpen(false)} PaperProps={{sx:{width:{xs:"92vw",sm:430},p:{xs:2.5,sm:3.5}}}}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h5" fontWeight={800}>Bộ lọc sản phẩm</Typography>
-            <IconButton aria-label="Đóng bộ lọc" onClick={()=>setFilterOpen(false)}><CloseIcon/></IconButton>
+            <Typography variant="h5" fontWeight={800} sx={{color:"#ed6c02"}}>Bộ lọc sản phẩm</Typography>
+            <IconButton aria-label="Đóng bộ lọc" onClick={()=>setFilterOpen(false)} sx={{color:"#ed6c02"}}><CloseIcon/></IconButton>
           </Stack>
           <Divider sx={{my:2}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Danh mục</Typography>
           <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>
             {[{id:"",name:"Tất cả"},...categories].map(category=>{
               const selected=categoryId===category.id;
-              return <Button key={category.id || "all"} size="small" variant={selected?"contained":"outlined"} onClick={()=>setCategoryId(category.id)} sx={{borderRadius:99,textTransform:"none",px:2}}>{category.name}</Button>;
+              return <Button key={category.id || "all"} size="small" variant={selected?"contained":"outlined"} onClick={()=>setCategoryId(category.id)} sx={{borderRadius:99,textTransform:"none",px:2,...(selected?{bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}:{color:"#ed6c02",borderColor:"#ed6c02"})}}>{category.name}</Button>;
             })}
           </Box>
           {categoryId === "category-tires" && <>
             <Typography variant="subtitle1" fontWeight={800} sx={{mt:2,mb:1}}>Loại vỏ</Typography>
-            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{[["","Tất cả"],["SOLID","Vỏ đặc"],["PNEUMATIC","Vỏ hơi"],["NON_MARKING","Non-marking"]].map(([v,l])=><Button key={v||"all-tire"} size="small" variant={tireTypeFilter===v?"contained":"outlined"} onClick={()=>setTireTypeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{l}</Button>)}</Box>
+            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{[["","Tất cả"],["SOLID","Vỏ đặc"],["PNEUMATIC","Vỏ hơi"],["NON_MARKING","Non-marking"]].map(([v,l])=><Button key={v||"all-tire"} size="small" variant={tireTypeFilter===v?"contained":"outlined"} onClick={()=>setTireTypeFilter(v)} sx={{borderRadius:99,textTransform:"none",...(tireTypeFilter===v?{bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}:{color:"#ed6c02",borderColor:"#ed6c02"})}}>{l}</Button>)}</Box>
           </>}
           {categoryId === "category-rims" && <>
             <Typography variant="subtitle1" fontWeight={800} sx={{mt:2,mb:1}}>Loại mâm</Typography>
-            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","CLICK","LIP","STANDARD"].map(v=><Button key={v||"all-rim"} size="small" variant={rimTypeFilter===v?"contained":"outlined"} onClick={()=>setRimTypeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{v||"Tất cả"}</Button>)}</Box>
+            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","CLICK","LIP","STANDARD"].map(v=><Button key={v||"all-rim"} size="small" variant={rimTypeFilter===v?"contained":"outlined"} onClick={()=>setRimTypeFilter(v)} sx={{borderRadius:99,textTransform:"none",color:"#ed6c02",borderColor:"#ed6c02","&.MuiButton-contained":{color:"#fff",bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}}>{v||"Tất cả"}</Button>)}</Box>
           </>}
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Thương hiệu</Typography>
           <TextField fullWidth size="small" value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} placeholder="NEXEN, DUNLOP, OEM..."/>
           <Typography variant="h6" fontWeight={800} sx={{mt:2.5,mb:1.5}}>Kích thước</Typography>
-          <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","5.00-8","6.00-9","6.50-10","7.00-12"].map(v=><Button key={v||"all-size"} size="small" variant={sizeFilter===v?"contained":"outlined"} onClick={()=>setSizeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{v||"Tất cả"}</Button>)}</Box>
+          <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","5.00-8","6.00-9","6.50-10","7.00-12"].map(v=><Button key={v||"all-size"} size="small" variant={sizeFilter===v?"contained":"outlined"} onClick={()=>setSizeFilter(v)} sx={{borderRadius:99,textTransform:"none",color:"#ed6c02",borderColor:"#ed6c02","&.MuiButton-contained":{color:"#fff",bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}}>{v||"Tất cả"}</Button>)}</Box>
           <Typography variant="h6" fontWeight={800} sx={{mt:2.5,mb:.5}}>Khoảng giá</Typography>
           <Stack direction="row" justifyContent="space-between" sx={{mb:.5}}><Typography variant="body2" fontWeight={700}>{priceRange[0].toLocaleString("vi-VN")} ₫</Typography><Typography variant="body2" fontWeight={700}>{priceRange[1].toLocaleString("vi-VN")} ₫</Typography></Stack>
-          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} onChangeCommitted={(_,value)=>setAppliedPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" />
+          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} onChangeCommitted={(_,value)=>setAppliedPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" sx={{color:"#ed6c02"}} />
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1}}>Tình trạng</Typography>
           <Stack>
@@ -197,7 +197,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           <TextField select fullWidth size="small" value={sort} onChange={e=>setSort(e.target.value)}>
             <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
           </TextField>
-          <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99}}>Xem {visibleProducts.length} sản phẩm</Button>
+          <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99,bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}>Xem {visibleProducts.length} sản phẩm</Button>
           </Stack>
         </Drawer>
         {loading && <CircularProgress />}
