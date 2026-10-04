@@ -3,6 +3,7 @@
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import ArticleIcon from "@mui/icons-material/Article";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import CategoryIcon from "@mui/icons-material/Category";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -26,7 +27,7 @@ type Item = { label: string; href: string; icon: ReactNode; adminOnly?: boolean 
 type Group = { label: string; icon: ReactNode; items: Item[] };
 const groups: Group[] = [
   { label: "TỔNG QUAN", icon: <DashboardIcon />, items: [{ label: "Dashboard", href: "/admin/dashboard", icon: <DashboardIcon /> }] },
-  { label: "QUẢN LÝ KHO", icon: <WarehouseIcon />, items: [{ label: "Sản phẩm", href: "/admin/inventory/products", icon: <InventoryIcon /> }, { label: "Mâm xe", href: "/admin/inventory/wheel-rims", icon: <SettingsIcon /> }, { label: "Kho hàng", href: "/admin/inventory/warehouses", icon: <WarehouseIcon /> }, { label: "Tồn kho", href: "/admin/inventory/stock", icon: <InventoryIcon /> }, { label: "Nhập / Xuất", href: "/admin/inventory/transactions", icon: <ReceiptLongIcon /> }, { label: "Ép mâm", href: "/admin/inventory/assembly", icon: <AccountTreeIcon /> }] },
+  { label: "QUẢN LÝ KHO", icon: <WarehouseIcon />, items: [{ label: "Sản phẩm", href: "/admin/inventory/products", icon: <InventoryIcon /> }, { label: "Danh mục sản phẩm", href: "/admin/inventory/categories", icon: <CategoryIcon /> }, { label: "Mâm xe", href: "/admin/inventory/wheel-rims", icon: <SettingsIcon /> }, { label: "Kho hàng", href: "/admin/inventory/warehouses", icon: <WarehouseIcon /> }, { label: "Tồn kho", href: "/admin/inventory/stock", icon: <InventoryIcon /> }, { label: "Nhập / Xuất", href: "/admin/inventory/transactions", icon: <ReceiptLongIcon /> }, { label: "Ép mâm", href: "/admin/inventory/assembly", icon: <AccountTreeIcon /> }] },
   { label: "KINH DOANH", icon: <ReceiptLongIcon />, items: [{ label: "Đơn hàng", href: "/admin/sales/orders", icon: <ReceiptLongIcon />, adminOnly: true }, { label: "Khách hàng", href: "/admin/sales/clients", icon: <GroupIcon />, adminOnly: true }, { label: "Bảng giá B2B", href: "/admin/sales/price-matrix", icon: <LocalShippingIcon />, adminOnly: true }] },
   { label: "NHÀ CUNG CẤP", icon: <LocalShippingIcon />, items: [{ label: "Nhà cung cấp", href: "/admin/suppliers", icon: <LocalShippingIcon />, adminOnly: true }] },
   { label: "NỘI DUNG", icon: <ArticleIcon />, items: [{ label: "Giới thiệu", href: "/admin/content/about", icon: <ArticleIcon />, adminOnly: true }, { label: "Bài viết", href: "/admin/content/posts", icon: <ArticleIcon />, adminOnly: true }, { label: "Bình luận sản phẩm", href: "/admin/content/product-comments", icon: <ArticleIcon />, adminOnly: true }, { label: "Bình luận bài viết", href: "/admin/content/post-comments", icon: <ArticleIcon />, adminOnly: true }, { label: "Sản phẩm yêu thích", href: "/admin/content/favourites", icon: <AssessmentIcon />, adminOnly: true }] },
