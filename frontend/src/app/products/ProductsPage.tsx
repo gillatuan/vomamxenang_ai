@@ -54,6 +54,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [conditionFilter, setConditionFilter] = useState("");
   const [brandFilter,setBrandFilter]=useState(""); const [sizeFilter,setSizeFilter]=useState(""); const [tireTypeFilter,setTireTypeFilter]=useState(""); const [rimTypeFilter,setRimTypeFilter]=useState(""); const PRICE_MIN=0, PRICE_MAX=3000000, PRICE_STEP=50000;
   const [priceRange,setPriceRange]=useState<number[]>([PRICE_MIN,PRICE_MAX]);
+  const [appliedPriceRange,setAppliedPriceRange]=useState<number[]>([PRICE_MIN,PRICE_MAX]);
   const pageSize = 9;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,17 +81,17 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
     const timer = window.setTimeout(() => {
       setLoading(true);
       setError(null);
-      productsAPI.getAll({ condition: conditionFilter || undefined, categoryId: categoryId || undefined, q: query.trim() || undefined, sort, brand:brandFilter||undefined, size:sizeFilter||undefined, tireType:tireTypeFilter||undefined, rimType:rimTypeFilter||undefined, minPrice:priceRange[0]>PRICE_MIN?priceRange[0]:undefined, maxPrice:priceRange[1]<PRICE_MAX?priceRange[1]:undefined })
+      productsAPI.getAll({ condition: conditionFilter || undefined, categoryId: categoryId || undefined, q: query.trim() || undefined, sort, brand:brandFilter||undefined, size:sizeFilter||undefined, tireType:tireTypeFilter||undefined, rimType:rimTypeFilter||undefined, minPrice:appliedPriceRange[0]>PRICE_MIN?appliedPriceRange[0]:undefined, maxPrice:appliedPriceRange[1]<PRICE_MAX?appliedPriceRange[1]:undefined })
         .then(res => { setProducts(res.data); setLoading(false); })
         .catch(() => { setError("Không thể tải sản phẩm"); setLoading(false); });
     }, query ? 300 : 0);
     return () => window.clearTimeout(timer);
-  }, [conditionFilter, categoryId, query, sort, brandFilter, sizeFilter, tireTypeFilter, rimTypeFilter, priceRange]);
+  }, [conditionFilter, categoryId, query, sort, brandFilter, sizeFilter, tireTypeFilter, rimTypeFilter, appliedPriceRange]);
 
   const visibleProducts = products;
   const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
   const pagedProducts = products.slice((page - 1) * pageSize, page * pageSize);
-  useEffect(() => { setPage(1); }, [categoryId, conditionFilter, query, sort, brandFilter, sizeFilter, tireTypeFilter, rimTypeFilter, priceRange]);
+  useEffect(() => { setPage(1); }, [categoryId, conditionFilter, query, sort, brandFilter, sizeFilter, tireTypeFilter, rimTypeFilter, appliedPriceRange]);
 
   const handleQuoteClick = (product: Product) => {
     setSelectedProduct(product);
@@ -168,7 +169,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","5.00-8","6.00-9","6.50-10","7.00-12"].map(v=><Button key={v||"all-size"} size="small" variant={sizeFilter===v?"contained":"outlined"} onClick={()=>setSizeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{v||"Tất cả"}</Button>)}</Box>
           <Typography variant="h6" fontWeight={800} sx={{mt:2.5,mb:.5}}>Khoảng giá</Typography>
           <Stack direction="row" justifyContent="space-between" sx={{mb:.5}}><Typography variant="body2" fontWeight={700}>{priceRange[0].toLocaleString("vi-VN")} ₫</Typography><Typography variant="body2" fontWeight={700}>{priceRange[1].toLocaleString("vi-VN")} ₫</Typography></Stack>
-          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" />
+          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} onChangeCommitted={(_,value)=>setAppliedPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" />
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1}}>Tình trạng</Typography>
           <Stack>
