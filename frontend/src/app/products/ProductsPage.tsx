@@ -128,48 +128,62 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
         <Box component="section" aria-label="Danh mục sản phẩm" sx={{ mb: 3 }}>
-          {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom:"1px solid", borderColor:"divider", "& .MuiTab-root":{fontWeight:800,fontSize:{xs:".85rem",md:"1rem"},px:{xs:2,md:3}} }}>
+          {categories.length > 0 && <Tabs textColor="secondary" indicatorColor="secondary" value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom:"1px solid", borderColor:"divider", "& .MuiTab-root":{fontWeight:800,fontSize:{xs:".85rem",md:"1rem"},px:{xs:2,md:3}} }}>
             <Tab value="" label="Tất cả" />
             {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
           </Tabs>}
           <Stack direction={{xs:"column",sm:"row"}} spacing={1.5} sx={{mt:2}}>
-            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}} InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
-            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{height:48,minWidth:150,borderRadius:2,fontWeight:700}}>Bộ lọc</Button>
-            <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:210,"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}}>
+            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2,"&:hover .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"},"&.Mui-focused .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"}},"& .MuiInputLabel-root.Mui-focused":{color:"#ed6c02"}}} InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
+            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{height:48,minWidth:150,borderRadius:2,fontWeight:700,color:"#ed6c02",borderColor:"#ed6c02","&:hover":{borderColor:"#ed6c02",bgcolor:"rgba(237,108,2,.06)"}}}>Bộ lọc</Button>
+            <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:210,...{"& .MuiOutlinedInput-root":{height:48,borderRadius:2,"&:hover .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"},"&.Mui-focused .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"}},"& .MuiInputLabel-root.Mui-focused":{color:"#ed6c02"}}}}>
               <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
             </TextField>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{mt:1.5}}>{visibleProducts.length} sản phẩm phù hợp</Typography>
+          {(categoryId || tireTypeFilter || rimTypeFilter || brandFilter || sizeFilter || conditionFilter || appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && (
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{mt:2}} alignItems="center">
+              <Typography variant="body2" fontWeight={700}>Đang lọc:</Typography>
+              {categoryId && <Chip label={categories.find(item=>item.id===categoryId)?.name || "Danh mục"} onDelete={()=>setCategoryId("")} />}
+              {tireTypeFilter && <Chip label={tireTypeFilter==="SOLID"?"Vỏ đặc":tireTypeFilter==="PNEUMATIC"?"Vỏ hơi":"Non-marking"} onDelete={()=>setTireTypeFilter("")} />}
+              {rimTypeFilter && <Chip label={`Mâm ${rimTypeFilter}`} onDelete={()=>setRimTypeFilter("")} />}
+              {brandFilter && <Chip label={`Thương hiệu: ${brandFilter}`} onDelete={()=>setBrandFilter("")} />}
+              {sizeFilter && <Chip label={`Kích thước: ${sizeFilter}`} onDelete={()=>setSizeFilter("")} />}
+              {conditionFilter && <Chip label={conditionFilter==="USED"?"Đã qua sử dụng":"Mới"} onDelete={()=>setConditionFilter("")} />}
+              {(appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && <Chip label={`${appliedPriceRange[0].toLocaleString("vi-VN")} ₫ – ${appliedPriceRange[1].toLocaleString("vi-VN")} ₫`} onDelete={()=>{setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}} />}
+              <Button size="small" sx={{color:"#ed6c02",fontWeight:800}} onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
+            </Stack>
+          )}
+
         </Box>
         <Drawer anchor="left" open={filterOpen} onClose={()=>setFilterOpen(false)} PaperProps={{sx:{width:{xs:"92vw",sm:430},p:{xs:2.5,sm:3.5}}}}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h5" fontWeight={800}>Bộ lọc sản phẩm</Typography>
-            <IconButton aria-label="Đóng bộ lọc" onClick={()=>setFilterOpen(false)}><CloseIcon/></IconButton>
+            <Typography variant="h5" fontWeight={800} sx={{color:"#ed6c02"}}>Bộ lọc sản phẩm</Typography>
+            <IconButton aria-label="Đóng bộ lọc" onClick={()=>setFilterOpen(false)} sx={{color:"#ed6c02"}}><CloseIcon/></IconButton>
           </Stack>
           <Divider sx={{my:2}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Danh mục</Typography>
           <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>
             {[{id:"",name:"Tất cả"},...categories].map(category=>{
               const selected=categoryId===category.id;
-              return <Button key={category.id || "all"} size="small" variant={selected?"contained":"outlined"} onClick={()=>setCategoryId(category.id)} sx={{borderRadius:99,textTransform:"none",px:2}}>{category.name}</Button>;
+              return <Button key={category.id || "all"} size="small" variant={selected?"contained":"outlined"} onClick={()=>setCategoryId(category.id)} sx={{borderRadius:99,textTransform:"none",px:2,...(selected?{bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}:{color:"#ed6c02",borderColor:"#ed6c02"})}}>{category.name}</Button>;
             })}
           </Box>
           {categoryId === "category-tires" && <>
             <Typography variant="subtitle1" fontWeight={800} sx={{mt:2,mb:1}}>Loại vỏ</Typography>
-            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{[["","Tất cả"],["SOLID","Vỏ đặc"],["PNEUMATIC","Vỏ hơi"],["NON_MARKING","Non-marking"]].map(([v,l])=><Button key={v||"all-tire"} size="small" variant={tireTypeFilter===v?"contained":"outlined"} onClick={()=>setTireTypeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{l}</Button>)}</Box>
+            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{[["","Tất cả"],["SOLID","Vỏ đặc"],["PNEUMATIC","Vỏ hơi"],["NON_MARKING","Non-marking"]].map(([v,l])=><Button key={v||"all-tire"} size="small" variant={tireTypeFilter===v?"contained":"outlined"} onClick={()=>setTireTypeFilter(v)} sx={{borderRadius:99,textTransform:"none",...(tireTypeFilter===v?{bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}:{color:"#ed6c02",borderColor:"#ed6c02"})}}>{l}</Button>)}</Box>
           </>}
           {categoryId === "category-rims" && <>
             <Typography variant="subtitle1" fontWeight={800} sx={{mt:2,mb:1}}>Loại mâm</Typography>
-            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","CLICK","LIP","STANDARD"].map(v=><Button key={v||"all-rim"} size="small" variant={rimTypeFilter===v?"contained":"outlined"} onClick={()=>setRimTypeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{v||"Tất cả"}</Button>)}</Box>
+            <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","CLICK","LIP","STANDARD"].map(v=><Button key={v||"all-rim"} size="small" variant={rimTypeFilter===v?"contained":"outlined"} onClick={()=>setRimTypeFilter(v)} sx={{borderRadius:99,textTransform:"none",color:"#ed6c02",borderColor:"#ed6c02","&.MuiButton-contained":{color:"#fff",bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}}>{v||"Tất cả"}</Button>)}</Box>
           </>}
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Thương hiệu</Typography>
-          <TextField fullWidth size="small" value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} placeholder="NEXEN, DUNLOP, OEM..."/>
+          <TextField fullWidth size="small" value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} placeholder="NEXEN, DUNLOP, OEM..." sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2,"&:hover .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"},"&.Mui-focused .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"}},"& .MuiInputLabel-root.Mui-focused":{color:"#ed6c02"}}}/>
           <Typography variant="h6" fontWeight={800} sx={{mt:2.5,mb:1.5}}>Kích thước</Typography>
-          <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","5.00-8","6.00-9","6.50-10","7.00-12"].map(v=><Button key={v||"all-size"} size="small" variant={sizeFilter===v?"contained":"outlined"} onClick={()=>setSizeFilter(v)} sx={{borderRadius:99,textTransform:"none"}}>{v||"Tất cả"}</Button>)}</Box>
+          <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>{["","5.00-8","6.00-9","6.50-10","7.00-12"].map(v=><Button key={v||"all-size"} size="small" variant={sizeFilter===v?"contained":"outlined"} onClick={()=>setSizeFilter(v)} sx={{borderRadius:99,textTransform:"none",color:"#ed6c02",borderColor:"#ed6c02","&.MuiButton-contained":{color:"#fff",bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}}>{v||"Tất cả"}</Button>)}</Box>
           <Typography variant="h6" fontWeight={800} sx={{mt:2.5,mb:.5}}>Khoảng giá</Typography>
           <Stack direction="row" justifyContent="space-between" sx={{mb:.5}}><Typography variant="body2" fontWeight={700}>{priceRange[0].toLocaleString("vi-VN")} ₫</Typography><Typography variant="body2" fontWeight={700}>{priceRange[1].toLocaleString("vi-VN")} ₫</Typography></Stack>
-          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} onChangeCommitted={(_,value)=>setAppliedPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" />
+          <Slider value={priceRange} min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP} onChange={(_,value)=>setPriceRange(value as number[])} onChangeCommitted={(_,value)=>setAppliedPriceRange(value as number[])} valueLabelDisplay="auto" valueLabelFormat={value=>`${value.toLocaleString("vi-VN")} ₫`} disableSwap aria-label="Khoảng giá sản phẩm" sx={{color:"#ed6c02"}} />
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1}}>Tình trạng</Typography>
           <Stack>
@@ -180,10 +194,10 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           </Stack>
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Sắp xếp</Typography>
-          <TextField select fullWidth size="small" value={sort} onChange={e=>setSort(e.target.value)}>
+          <TextField select fullWidth size="small" sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2,"&:hover .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"},"&.Mui-focused .MuiOutlinedInput-notchedOutline":{borderColor:"#ed6c02"}},"& .MuiInputLabel-root.Mui-focused":{color:"#ed6c02"}}} value={sort} onChange={e=>setSort(e.target.value)}>
             <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
           </TextField>
-          <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99}}>Xem {visibleProducts.length} sản phẩm</Button>
+          <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99,bgcolor:"#ed6c02","&:hover":{bgcolor:"#d86100"}}}>Xem {visibleProducts.length} sản phẩm</Button>
           </Stack>
         </Drawer>
         {loading && <CircularProgress />}
@@ -210,7 +224,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ px: 0, pb: 0, gap: 1 }}>
-                  <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: "#1a1a1a", textDecoration: "underline", textUnderlineOffset: "4px", marginRight: "auto" }}>
+                  <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: "#ed6c02", fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "4px", marginRight: "auto" }}>
                     Xem chi tiết
                   </Button>
                   {product.sellingPrice ? (
@@ -235,7 +249,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           ))}
         </Grid>
         {!loading && visibleProducts.length === 0 && <Typography sx={{py:6,textAlign:"center"}}>Không tìm thấy sản phẩm phù hợp.</Typography>}
-        {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large"/></Box>}
+        {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large" sx={{"& .MuiPaginationItem-root":{color:"#ed6c02"},"& .Mui-selected":{bgcolor:"#ed6c02 !important",color:"#fff","&:hover":{bgcolor:"#d86100 !important"}}}}/></Box>}
       </Container></Box>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
