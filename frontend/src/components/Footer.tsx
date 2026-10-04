@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Container, Grid, Link, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, Link, Stack, Typography } from "@mui/material";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
 import { storeInfoAPI, type PublicStoreInfo } from "@/lib/api-client";
 
 const fallbackStoreInfo = {
@@ -33,8 +36,8 @@ export function Footer() {
     <Box
       component="footer"
       sx={{
-        backgroundColor: "#1a1a1a",
-        color: "white",
+        backgroundColor: "#FFF7ED",
+        color: "text.primary",
         borderTop: "2px solid",
         borderColor: "primary.main",
         padding: { xs: "3.5rem 0 2rem", md: "5rem 0 2rem" },
@@ -46,27 +49,25 @@ export function Footer() {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Về chúng tôi</Typography>
-            <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", lineHeight: 1.7 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
               {about}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Liên hệ</Typography>
-            {storeInfo.email && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>Email: {storeInfo.email}</Typography>}
-            {storeInfo.phone && <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)", mt: .5 }}>Phone: <Typography component="span" sx={{ fontWeight: 600 }}>{storeInfo.phone} <br /> 09777 5 7 9 11 - Tuấn</Typography></Typography>}
+            {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",px:0,color:"text.primary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
+            {storeInfo.phone && <Stack spacing={.5}><Button component="a" href={`tel:${storeInfo.phone.replace(/\\s/g,"")}`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",px:0,color:"text.primary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.phone}</Button><Typography variant="body2" color="text.secondary">09777 5 7 9 11 - Tuấn</Typography></Stack>}
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Theo dõi</Typography>
-            <Typography variant="body2" sx={{ color: "rgba(255,255,255,.7)" }}>
+            <Typography variant="body2" color="text.secondary">
               {storeInfo.facebookUrl ? (
-                <Link href={storeInfo.facebookUrl} target="_blank" rel="noreferrer" underline="hover" sx={{ color: "primary.main", "&:hover": { opacity: .8 } }}>
-                  Facebook
-                </Link>
-              ) : "Facebook"} {"| Instagram | YouTube"}
+                <Button component="a" href={storeInfo.facebookUrl} target="_blank" rel="noreferrer" variant="outlined" startIcon={<FacebookOutlinedIcon />} sx={{borderColor:"primary.main",color:"primary.main","&:hover":{borderColor:"primary.main",bgcolor:"rgba(237,108,2,.08)"}}}>Facebook</Button>
+              ) : "Facebook"}
             </Typography>
           </Grid>
         </Grid>
-        <Typography variant="body2" sx={{ marginTop: { xs: 5, md: 7 }, pt: 2, borderTop: "1px solid", borderColor: "primary.main", color: "rgba(255,255,255,.55)", fontSize: ".75rem" }}>
+        <Typography variant="body2" sx={{ marginTop: { xs: 5, md: 7 }, pt: 2, borderTop: "1px solid", borderColor: "rgba(237,108,2,.28)", color: "text.secondary", fontSize: ".75rem" }}>
           © {new Date().getFullYear()} {storeInfo.name || fallbackStoreInfo.name}. All rights reserved.
         </Typography>
       </Container>
