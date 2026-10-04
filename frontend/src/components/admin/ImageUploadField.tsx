@@ -8,11 +8,18 @@ export type PendingImage = { file: File; previewUrl: string };
 
 async function cropImage(file: File, zoom: number, offsetX: number, offsetY: number, size=1200, quality=.84): Promise<File> {
   const bitmap=await createImageBitmap(file);
-  const baseScale=Math.max(size/bitmap.width,size/bitmap.height);
-  const scale=baseScale*zoom;
-  const sourceSize=size/scale;
-  const maxX=Math.max(0,bitmap.width-sourceSize), maxY=Math.max(0,bitmap.height-sourceSize);
-  const sx=maxX*((offsetX+100)/200), sy=maxY*((offsetY+100)/200);
+  // The preview uses object-fit: cover, so calculate the crop in the exact same
+  // coordinate system. At zoom=1 the visible square is the centered cover crop.
+  // Positive preview translation moves the image right/down, therefore the
+  // source crop moves left/up.
+  const coverSourceSize=Math.min(bitmap.width,bitmap.height);
+  const sourceSize=coverSourceSize/zoom;
+  const centerX=(bitmap.width-sourceSize)/2;
+  const centerY=(bitmap.height-sourceSize)/2;
+  const travelX=Math.max(0,(bitmap.width-sourceSize)/2);
+  const travelY=Math.max(0,(bitmap.height-sourceSize)/2);
+  const sx=Math.max(0,Math.min(bitmap.width-sourceSize,centerX-(offsetX/100)*travelX));
+  const sy=Math.max(0,Math.min(bitmap.height-sourceSize,centerY-(offsetY/100)*travelY));
   const canvas=document.createElement("canvas"); canvas.width=size; canvas.height=size;
   const ctx=canvas.getContext("2d"); if(!ctx) throw new Error("Không thể xử lý ảnh.");
   ctx.drawImage(bitmap,sx,sy,sourceSize,sourceSize,0,0,size,size); bitmap.close();
@@ -60,7 +67,7 @@ export function ImageUploadField({value,onChange,label="Ảnh đại diện"}:{v
       <DialogTitle>Review & crop ảnh</DialogTitle>
       <DialogContent>
         {sourceUrl&&<Box sx={{height:360,overflow:"hidden",bgcolor:"grey.100",position:"relative",mb:2}}>
-          <Box component="img" src={sourceUrl} alt="Ảnh crop" sx={{width:"100%",height:"100%",objectFit:"cover",transform:`scale(${zoom}) translate(${x/zoom}%,${y/zoom}%)`,transformOrigin:"center"}}/>
+          <Box component="img" src={sourceUrl} alt="Ảnh crop" sx={{width:"100%",height:"100%",objectFit:"cover",transform:`translate(${x}%,${y}%) scale(${zoom})`,transformOrigin:"center"}}/>
         </Box>}
         <Typography>Zoom</Typography><Slider min={1} max={3} step={.05} value={zoom} onChange={(_,v)=>setZoom(v as number)}/>
         <Typography>Căn ngang</Typography><Slider min={-100} max={100} value={x} onChange={(_,v)=>setX(v as number)}/>
