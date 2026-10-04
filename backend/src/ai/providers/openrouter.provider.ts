@@ -63,6 +63,10 @@ export class OpenRouterProvider implements AiProvider {
       const cleaned=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
       const start=cleaned.indexOf('{'),end=cleaned.lastIndexOf('}');
       return JSON.parse(start>=0&&end>start?cleaned.slice(start,end+1):cleaned) as T;
-    }catch{return null;}
+    }catch(error){
+      // Repair is best-effort. Never leak AbortSignal timeout as an unhandled
+      // 500; the caller will return the controlled parse failure instead.
+      return null;
+    }
   }
 }
