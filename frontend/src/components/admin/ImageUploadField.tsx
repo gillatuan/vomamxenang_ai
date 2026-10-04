@@ -1,47 +1,72 @@
 "use client";
 
-import { Alert, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider, Stack, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { useRef, useState } from "react";
-import apiClient from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
 
-async function resizeImage(file: File, maxWidth=1600, maxHeight=1200, quality=.84): Promise<File> {
+export type PendingImage = { file: File; previewUrl: string };
+
+async function cropImage(file: File, zoom: number, offsetX: number, offsetY: number, size=1200, quality=.84): Promise<File> {
   const bitmap=await createImageBitmap(file);
-  const scale=Math.min(1,maxWidth/bitmap.width,maxHeight/bitmap.height);
-  const width=Math.max(1,Math.round(bitmap.width*scale));
-  const height=Math.max(1,Math.round(bitmap.height*scale));
-  const canvas=document.createElement("canvas"); canvas.width=width; canvas.height=height;
+  const baseScale=Math.max(size/bitmap.width,size/bitmap.height);
+  const scale=baseScale*zoom;
+  const sourceSize=size/scale;
+  const maxX=Math.max(0,bitmap.width-sourceSize), maxY=Math.max(0,bitmap.height-sourceSize);
+  const sx=maxX*((offsetX+100)/200), sy=maxY*((offsetY+100)/200);
+  const canvas=document.createElement("canvas"); canvas.width=size; canvas.height=size;
   const ctx=canvas.getContext("2d"); if(!ctx) throw new Error("Không thể xử lý ảnh.");
-  ctx.drawImage(bitmap,0,0,width,height); bitmap.close();
+  ctx.drawImage(bitmap,sx,sy,sourceSize,sourceSize,0,0,size,size); bitmap.close();
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/webp",quality));
-  if(!blob) throw new Error("Không thể resize ảnh.");
-  return new File([blob], file.name.replace(/\.[^.]+$/,"")+".webp",{type:"image/webp"});
+  if(!blob) throw new Error("Không thể crop ảnh.");
+  return new File([blob],file.name.replace(/\.[^.]+$/,"")+".webp",{type:"image/webp"});
 }
 
-export function ImageUploadField({value,onChange,label="Ảnh đại diện"}:{value?:string;onChange:(url:string)=>void;label?:string}) {
-  const input=useRef<HTMLInputElement>(null); const [busy,setBusy]=useState(false); const [error,setError]=useState("");
-  const choose=async(file?:File)=>{
-    if(!file)return; setBusy(true);setError("");
-    try{
-      if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("Chỉ hỗ trợ JPG, PNG hoặc WebP.");
-      if(file.size>12*1024*1024) throw new Error("Ảnh gốc tối đa 12MB.");
-      const resized=await resizeImage(file);
-      const body=new FormData();body.append("file",resized);
-      const {data}=await apiClient.post<{url:string}>("/admin/media/image",body,{headers:{"Content-Type":"multipart/form-data"}});
-      onChange(data.url);
-    }catch(e:any){setError(e.response?.data?.message||e.message||"Không thể upload ảnh.");}
-    finally{setBusy(false);if(input.current)input.current.value="";}
+export function ImageUploadField({value,onChange,label="Ảnh đại diện"}:{value?:string;onChange:(image:PendingImage|null)=>void;label?:string}) {
+  const input=useRef<HTMLInputElement>(null);
+  const [source,setSource]=useState<File|null>(null),[sourceUrl,setSourceUrl]=useState("");
+  const [preview,setPreview]=useState(""),[error,setError]=useState("");
+  const [zoom,setZoom]=useState(1),[x,setX]=useState(0),[y,setY]=useState(0),[open,setOpen]=useState(false);
+
+  useEffect(()=>()=>{if(sourceUrl)URL.revokeObjectURL(sourceUrl);if(preview)URL.revokeObjectURL(preview);},[sourceUrl,preview]);
+
+  const choose=(file?:File)=>{
+    if(!file)return; setError("");
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){setError("Chỉ hỗ trợ JPG, PNG hoặc WebP.");return;}
+    if(file.size>12*1024*1024){setError("Ảnh gốc tối đa 12MB.");return;}
+    if(sourceUrl)URL.revokeObjectURL(sourceUrl);
+    setSource(file);setSourceUrl(URL.createObjectURL(file));setZoom(1);setX(0);setY(0);setOpen(true);
+    if(input.current)input.current.value="";
   };
+  const apply=async()=>{
+    if(!source)return;
+    try{
+      const file=await cropImage(source,zoom,x,y);
+      if(preview)URL.revokeObjectURL(preview);
+      const previewUrl=URL.createObjectURL(file);setPreview(previewUrl);onChange({file,previewUrl});setOpen(false);
+    }catch(e:any){setError(e.message||"Không thể crop ảnh.");}
+  };
+
   return <Box>
     <Typography fontWeight={700} sx={{mb:1}}>{label}</Typography>
-    {value&&<Box component="img" src={value} alt="Xem trước ảnh đã upload" sx={{width:"100%",maxHeight:280,objectFit:"cover",mb:1.5,bgcolor:"grey.100"}}/>}
+    {(preview||value)&&<Box component="img" src={preview||value} alt="Xem trước ảnh" sx={{width:"100%",maxHeight:320,objectFit:"contain",mb:1.5,bgcolor:"grey.100"}}/>}
     <input ref={input} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>choose(e.target.files?.[0])}/>
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Button variant="outlined" startIcon={<CloudUploadIcon/>} disabled={busy} onClick={()=>input.current?.click()}>{value?"Thay ảnh":"Upload ảnh"}</Button>
-      {value&&<Button color="inherit" onClick={()=>onChange("")}>Xóa ảnh</Button>}
+    <Stack direction="row" spacing={1}>
+      <Button variant="outlined" startIcon={<CloudUploadIcon/>} onClick={()=>input.current?.click()}>{preview||value?"Thay ảnh":"Chọn ảnh"}</Button>
+      {(preview||value)&&<Button color="inherit" onClick={()=>{if(preview)URL.revokeObjectURL(preview);setPreview("");onChange(null);}}>Xóa ảnh</Button>}
     </Stack>
-    {busy&&<LinearProgress sx={{mt:1}}/>}
     {error&&<Alert severity="error" sx={{mt:1}}>{error}</Alert>}
-    <Typography variant="caption" color="text.secondary">JPG/PNG/WebP · tự resize tối đa 1600×1200 · chuyển WebP để giảm dung lượng.</Typography>
+    <Typography variant="caption" color="text.secondary">Ảnh chỉ được upload khi bấm Lưu nháp/Publish. Crop vuông 1200×1200 và chuyển WebP.</Typography>
+    <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="sm" fullWidth>
+      <DialogTitle>Review & crop ảnh</DialogTitle>
+      <DialogContent>
+        {sourceUrl&&<Box sx={{height:360,overflow:"hidden",bgcolor:"grey.100",position:"relative",mb:2}}>
+          <Box component="img" src={sourceUrl} alt="Ảnh crop" sx={{width:"100%",height:"100%",objectFit:"cover",transform:`scale(${zoom}) translate(${x/zoom}%,${y/zoom}%)`,transformOrigin:"center"}}/>
+        </Box>}
+        <Typography>Zoom</Typography><Slider min={1} max={3} step={.05} value={zoom} onChange={(_,v)=>setZoom(v as number)}/>
+        <Typography>Căn ngang</Typography><Slider min={-100} max={100} value={x} onChange={(_,v)=>setX(v as number)}/>
+        <Typography>Căn dọc</Typography><Slider min={-100} max={100} value={y} onChange={(_,v)=>setY(v as number)}/>
+      </DialogContent>
+      <DialogActions><Button onClick={()=>setOpen(false)}>Hủy</Button><Button variant="contained" onClick={apply}>Dùng ảnh này</Button></DialogActions>
+    </Dialog>
   </Box>;
 }
