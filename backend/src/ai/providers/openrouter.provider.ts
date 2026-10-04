@@ -13,10 +13,17 @@ export class OpenRouterProvider implements AiProvider {
   }
   async generateStructuredOutput<T>(system:string,input:unknown,schema:JsonSchema):Promise<T>{
     if(!this.apiKey)throw new ServiceUnavailableException('OpenRouter chưa được cấu hình (OPENROUTER_API_KEY).');
-    const response=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(45000),
-      headers:{Authorization:`Bearer ${this.apiKey}`,'Content-Type':'application/json','HTTP-Referer':'https://www.vomamxenang.com','X-Title':'Vo Mam Xe Nang'},
-      body:JSON.stringify({model:this.model,messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(input)}],
-        response_format:{type:'json_schema',json_schema:{name:'research',strict:true,schema}}})});
+    let response:Response;
+    try{
+      response=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(90000),
+        headers:{Authorization:`Bearer ${this.apiKey}`,'Content-Type':'application/json','HTTP-Referer':'https://www.vomamxenang.com','X-Title':'Vo Mam Xe Nang'},
+        body:JSON.stringify({model:this.model,messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(input)}],
+          response_format:{type:'json_schema',json_schema:{name:'research',strict:true,schema}}})});
+    }catch(error){
+      const name=(error as Error)?.name;
+      if(name==='TimeoutError'||name==='AbortError')throw new HttpException('OpenRouter Free model phản hồi quá chậm và đã timeout sau 90 giây. Vui lòng thử lại.',HttpStatus.GATEWAY_TIMEOUT);
+      throw new BadGatewayException('Không kết nối được OpenRouter.');
+    }
     if(!response.ok){
       if(response.status===429)throw new HttpException('OpenRouter Free đang rate limit hoặc đã đạt giới hạn request. Thử lại sau.',HttpStatus.TOO_MANY_REQUESTS);
       if(response.status===401||response.status===403)throw new ServiceUnavailableException('OPENROUTER_API_KEY không hợp lệ hoặc không có quyền.');
