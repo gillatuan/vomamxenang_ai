@@ -37,8 +37,10 @@ import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
-import { productsAPI, clientsAPI, categoriesAPI, Product, ProductCategory } from "@/lib/api-client";
+import { productsAPI, clientsAPI, categoriesAPI, Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
+
+type ProductCategory = { id: string; name: string };
 
 function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -48,7 +50,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [conditionFilter, setConditionFilter] = useState(condition || "");
+  const [conditionFilter, setConditionFilter] = useState("");
   const pageSize = 9;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +66,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
 
   useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
   useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
+  useEffect(() => { setConditionFilter(condition || ""); }, [condition]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -156,6 +159,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
             <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
           </TextField>
           <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99}}>Xem {visibleProducts.length} sản phẩm</Button>
+          </Stack>
         </Drawer>
         {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
