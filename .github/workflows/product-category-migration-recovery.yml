@@ -1,0 +1,55 @@
+name: Product category migration recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      resolution:
+        description: Failed migration resolution after reviewing preflight output
+        required: true
+        type: choice
+        options:
+          - preflight-only
+          - rolled-back
+          - applied
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: backend/yarn.lock
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - name: Require direct PostgreSQL connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${DATABASE_URL:-}" || { echo "DIRECT_DATABASE_URL is required"; exit 1; }
+          case "$DATABASE_URL" in postgresql://*|postgres://*) ;; *) echo "DIRECT_DATABASE_URL must be PostgreSQL"; exit 1;; esac
+          [[ "$DATABASE_URL" != *"accelerate.prisma-data.net"* ]] || { echo "Prisma Accelerate is forbidden for migration recovery"; exit 1; }
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Read-only schema preflight
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/check-product-category-migration.sql
+      - name: Resolve failed migration
+        if: inputs.resolution != 'preflight-only'
+        run: yarn prisma migrate resolve --${{ inputs.resolution }} 20261004140000_product_category_relation
+      - name: Apply migrations after rollback resolution
+        if: inputs.resolution == 'rolled-back'
+        run: yarn prisma:migrate
+      - name: Verify drift
+        if: inputs.resolution != 'preflight-only'
+        run: yarn prisma:migrate:drift-check
