@@ -31,7 +31,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
 import CloseIcon from "@mui/icons-material/Close";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
@@ -48,6 +48,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [conditionFilter, setConditionFilter] = useState(condition || "");
   const pageSize = 9;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,31 +66,20 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
 
   useEffect(() => {
-    productsAPI
-      .getAll(condition, categoryId || undefined)
-      .then((res) => {
-        setProducts(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load products");
-        setLoading(false);
-      });
-  }, [condition, categoryId]);
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      setError(null);
+      productsAPI.getAll({ condition: conditionFilter || undefined, categoryId: categoryId || undefined, q: query.trim() || undefined, sort })
+        .then(res => { setProducts(res.data); setLoading(false); })
+        .catch(() => { setError("Không thể tải sản phẩm"); setLoading(false); });
+    }, query ? 300 : 0);
+    return () => window.clearTimeout(timer);
+  }, [conditionFilter, categoryId, query, sort]);
 
-  const visibleProducts = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    const filtered = products.filter(product => !normalized || [product.name, product.sku, product.brand, product.size, product.category?.name].filter(Boolean).some(value => String(value).toLowerCase().includes(normalized)));
-    return [...filtered].sort((a,b) => {
-      if(sort==="price-asc") return (a.sellingPrice ?? Number.MAX_SAFE_INTEGER) - (b.sellingPrice ?? Number.MAX_SAFE_INTEGER);
-      if(sort==="price-desc") return (b.sellingPrice ?? -1) - (a.sellingPrice ?? -1);
-      if(sort==="name") return a.name.localeCompare(b.name, "vi");
-      return 0;
-    });
-  }, [products, query, sort]);
-  const pageCount = Math.max(1, Math.ceil(visibleProducts.length / pageSize));
-  const pagedProducts = visibleProducts.slice((page - 1) * pageSize, page * pageSize);
-  useEffect(() => { setPage(1); }, [categoryId, query, sort]);
+  const visibleProducts = products;
+  const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
+  const pagedProducts = products.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => { setPage(1); }, [categoryId, conditionFilter, query, sort]);
 
   const handleQuoteClick = (product: Product) => {
     setSelectedProduct(product);
@@ -131,9 +121,9 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
             {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
           </Tabs>}
           <Stack direction={{xs:"column",sm:"row"}} spacing={1.5} sx={{mt:2}}>
-            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
-            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{minWidth:140}}>Bộ lọc</Button>
-            <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:190}}>
+            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." sx={{"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}} InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
+            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{height:48,minWidth:150,borderRadius:2,fontWeight:700}}>Bộ lọc</Button>
+            <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:210,"& .MuiOutlinedInput-root":{height:48,borderRadius:2}}}>
               <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
             </TextField>
           </Stack>
@@ -155,9 +145,10 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1}}>Tình trạng</Typography>
           <Stack>
-            <FormControlLabel control={<Radio checked={!condition} />} label="Tất cả" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.delete("condition");window.history.replaceState(null,"",url);window.location.reload(); }}/>
-            <FormControlLabel control={<Radio checked={condition==="NEW" || condition==="NEW_100"} />} label="Mới" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.set("condition","NEW");window.location.href=url.toString(); }}/>
-            <FormControlLabel control={<Radio checked={condition==="USED"} />} label="Đã qua sử dụng" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.set("condition","USED");window.location.href=url.toString(); }}/>
+            <Stack>
+            <FormControlLabel control={<Radio checked={!conditionFilter} onChange={()=>setConditionFilter("")}/>} label="Tất cả" />
+            <FormControlLabel control={<Radio checked={conditionFilter==="NEW" || conditionFilter==="NEW_100"} onChange={()=>setConditionFilter("NEW")}/>} label="Mới" />
+            <FormControlLabel control={<Radio checked={conditionFilter==="USED"} onChange={()=>setConditionFilter("USED")}/>} label="Đã qua sử dụng" />
           </Stack>
           <Divider sx={{my:3}}/>
           <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Sắp xếp</Typography>
