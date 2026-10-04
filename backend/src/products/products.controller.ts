@@ -9,8 +9,8 @@ export class ProductsController {
   constructor(private service: ProductsService) {}
 
   @Get()
-  findAll(@Query('condition') condition?: string) {
-    return this.service.findAll(condition);
+  findAll(@Query('condition') condition?: string, @Query('categoryId') categoryId?: string, @Query('q') q?: string, @Query('sort') sort?: string) {
+    return this.service.findAll({ condition, categoryId, q, sort });
   }
 
   @Get('reviews/featured')
