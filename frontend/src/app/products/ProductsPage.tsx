@@ -21,9 +21,16 @@ import {
   Pagination,
   InputAdornment,
   Stack,
+  Drawer,
+  IconButton,
+  Divider,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
+import TuneIcon from "@mui/icons-material/Tune";
+import CloseIcon from "@mui/icons-material/Close";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -40,6 +47,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
+  const [filterOpen, setFilterOpen] = useState(false);
   const pageSize = 9;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,19 +125,47 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
-        <Box component="section" aria-label="Lọc danh mục sản phẩm" sx={{ mb: 4, borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider", py: 2 }}>
-          {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{mb:2}}>
+        <Box component="section" aria-label="Danh mục sản phẩm" sx={{ mb: 3 }}>
+          {categories.length > 0 && <Tabs value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom:"1px solid", borderColor:"divider", "& .MuiTab-root":{fontWeight:800,fontSize:{xs:".85rem",md:"1rem"},px:{xs:2,md:3}} }}>
             <Tab value="" label="Tất cả" />
             {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}
           </Tabs>}
-          <Stack direction={{xs:"column",md:"row"}} spacing={2} alignItems={{md:"center"}}>
-            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} label="Tìm sản phẩm" placeholder="Tên, SKU, thương hiệu, kích thước..." InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
-            <TextField select size="small" label="Sắp xếp" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:{md:220}}}>
+          <Stack direction={{xs:"column",sm:"row"}} spacing={1.5} sx={{mt:2}}>
+            <TextField fullWidth size="small" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tên, SKU, thương hiệu, kích thước..." InputProps={{startAdornment:<InputAdornment position="start"><SearchIcon/></InputAdornment>}}/>
+            <Button variant="outlined" startIcon={<TuneIcon/>} onClick={()=>setFilterOpen(true)} sx={{minWidth:140}}>Bộ lọc</Button>
+            <TextField select size="small" value={sort} onChange={e=>setSort(e.target.value)} sx={{minWidth:190}}>
               <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
             </TextField>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{mt:1.5}}>{visibleProducts.length} sản phẩm phù hợp</Typography>
         </Box>
+        <Drawer anchor="left" open={filterOpen} onClose={()=>setFilterOpen(false)} PaperProps={{sx:{width:{xs:"92vw",sm:430},p:{xs:2.5,sm:3.5}}}}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h5" fontWeight={800}>Bộ lọc sản phẩm</Typography>
+            <IconButton aria-label="Đóng bộ lọc" onClick={()=>setFilterOpen(false)}><CloseIcon/></IconButton>
+          </Stack>
+          <Divider sx={{my:2}}/>
+          <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Danh mục</Typography>
+          <Box sx={{display:"flex",flexWrap:"wrap",gap:1}}>
+            {[{id:"",name:"Tất cả"},...categories].map(category=>{
+              const selected=categoryId===category.id;
+              return <Button key={category.id || "all"} size="small" variant={selected?"contained":"outlined"} onClick={()=>setCategoryId(category.id)} sx={{borderRadius:99,textTransform:"none",px:2}}>{category.name}</Button>;
+            })}
+          </Box>
+          <Divider sx={{my:3}}/>
+          <Typography variant="h6" fontWeight={800} sx={{mb:1}}>Tình trạng</Typography>
+          <Stack>
+            <FormControlLabel control={<Radio checked={!condition} />} label="Tất cả" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.delete("condition");window.history.replaceState(null,"",url);window.location.reload(); }}/>
+            <FormControlLabel control={<Radio checked={condition==="NEW" || condition==="NEW_100"} />} label="Mới" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.set("condition","NEW");window.location.href=url.toString(); }}/>
+            <FormControlLabel control={<Radio checked={condition==="USED"} />} label="Đã qua sử dụng" onClick={()=>{ const url=new URL(window.location.href);url.searchParams.set("condition","USED");window.location.href=url.toString(); }}/>
+          </Stack>
+          <Divider sx={{my:3}}/>
+          <Typography variant="h6" fontWeight={800} sx={{mb:1.5}}>Sắp xếp</Typography>
+          <TextField select fullWidth size="small" value={sort} onChange={e=>setSort(e.target.value)}>
+            <MenuItem value="newest">Mới nhất</MenuItem><MenuItem value="name">Tên A–Z</MenuItem><MenuItem value="price-asc">Giá thấp → cao</MenuItem><MenuItem value="price-desc">Giá cao → thấp</MenuItem>
+          </TextField>
+          <Button fullWidth size="large" variant="contained" onClick={()=>setFilterOpen(false)} sx={{mt:4,borderRadius:99}}>Xem {visibleProducts.length} sản phẩm</Button>
+        </Drawer>
         {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
 
