@@ -65,7 +65,7 @@ export interface SeoMetadata {
 }
 
 export const productsAPI = {
-  getAll: (params?: { condition?: string; categoryId?: string; q?: string; sort?: string }) => apiClient.get<Product[]>("/products", { params }),
+  getAll: (params?: { condition?: string; categoryId?: string; q?: string; sort?: string; brand?: string; size?: string; tireType?: string; rimType?: string; minPrice?: number; maxPrice?: number }) => apiClient.get<Product[]>("/products", { params }),
   getOne: (id: string) => apiClient.get<Product>(`/products/${id}`),
 
   create: (data: Partial<Product>) => apiClient.post<Product>("/products", data),
