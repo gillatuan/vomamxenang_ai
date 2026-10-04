@@ -7,6 +7,7 @@ import NextLink from "next/link";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { postsAPI, Post } from "@/lib/api-client";
 
 export default function BlogPage({ initialPosts }: { initialPosts: Post[] }) {
@@ -31,6 +32,7 @@ export default function BlogPage({ initialPosts }: { initialPosts: Post[] }) {
     <>
       <Header />
       <Container component="main" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 6, md: 10 } }}>
+        <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Blog", path: "/blog" }]} />
         <Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>KIẾN THỨC VẬN HÀNH</Typography>
         <Typography component="h1" variant="h2" sx={{ mb: 5 }}>Câu chuyện từ xưởng và đội xe.</Typography>
 
