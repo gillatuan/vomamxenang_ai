@@ -22,9 +22,21 @@ export class OpenRouterProvider implements AiProvider {
       if(response.status===401||response.status===403)throw new ServiceUnavailableException('OPENROUTER_API_KEY không hợp lệ hoặc không có quyền.');
       throw new BadGatewayException(`OpenRouter tạm thời không khả dụng (HTTP ${response.status}).`);
     }
-    const body=await response.json() as {choices?:Array<{message?:{content?:string}}>} ;
-    const text=body.choices?.[0]?.message?.content;
-    if(!text)throw new BadGatewayException('OpenRouter trả về response rỗng.');
-    try{return JSON.parse(text) as T;}catch{throw new BadGatewayException('OpenRouter không trả về JSON hợp lệ.');}
+    const body=await response.json() as {choices?:Array<{message?:{content?:string|null;refusal?:string}}>};
+    const raw=body.choices?.[0]?.message?.content?.trim();
+    if(!raw)throw new BadGatewayException('OpenRouter Free model trả về response rỗng hoặc từ chối structured output.');
+
+    // Free routing can select models that ignore response_format and wrap JSON
+    // in markdown fences or explanatory text. Parse conservatively without
+    // trusting any non-JSON prose.
+    const candidates=[raw];
+    const fenced=raw.match(/```(?:json)?\\s*([\\s\\S]*?)```/i)?.[1]?.trim();
+    if(fenced)candidates.push(fenced);
+    const firstObject=raw.indexOf('{'),lastObject=raw.lastIndexOf('}');
+    if(firstObject>=0&&lastObject>firstObject)candidates.push(raw.slice(firstObject,lastObject+1));
+    for(const candidate of candidates){
+      try{return JSON.parse(candidate) as T;}catch{}
+    }
+    throw new BadGatewayException('OpenRouter Free model không trả về JSON parse được. Hãy thử lại; free router có thể chọn model không hỗ trợ structured output ổn định.');
   }
 }
