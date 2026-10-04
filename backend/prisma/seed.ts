@@ -98,6 +98,17 @@ async function main() {
     const { id: _id, ...data } = product;
     await prisma.product.upsert({ where: { slug: product.slug }, update: data, create: product });
   }
+  const rimProducts = [
+    { id:'product-rim-600-9-click', sku:'SEED-RIM-600-9-CLICK', name:'Mâm xe nâng 6.00-9 kiểu CLICK', slug:'mam-xe-nang-6-00-9-click', type:'RIM' as const, categoryId:'category-rims', size:'6.00-9', brand:'OEM', tireType:null, rimType:'CLICK', condition:'NEW_100', importPrice:1250000, sellingPrice:1580000, minStock:3, maxStock:20, status:'PUBLISHED' as const },
+    { id:'product-rim-650-10-standard', sku:'SEED-RIM-650-10-STANDARD', name:'Mâm xe nâng 6.50-10 Standard', slug:'mam-xe-nang-6-50-10-standard', type:'RIM' as const, categoryId:'category-rims', size:'6.50-10', brand:'OEM', tireType:null, rimType:'STANDARD', condition:'NEW_100', importPrice:1450000, sellingPrice:1850000, minStock:3, maxStock:20, status:'PUBLISHED' as const },
+    { id:'product-rim-700-12-lip', sku:'SEED-RIM-700-12-LIP', name:'Mâm xe nâng 7.00-12 kiểu LIP', slug:'mam-xe-nang-7-00-12-lip', type:'RIM' as const, categoryId:'category-rims', size:'7.00-12', brand:'TOYOTA OEM', tireType:null, rimType:'LIP', condition:'NEW_100', importPrice:1750000, sellingPrice:2280000, minStock:2, maxStock:15, status:'PUBLISHED' as const },
+    { id:'product-rim-500-8-used', sku:'SEED-RIM-500-8-USED', name:'Mâm xe nâng 5.00-8 đã qua sử dụng', slug:'mam-xe-nang-5-00-8-da-qua-su-dung', type:'RIM' as const, categoryId:'category-rims', size:'5.00-8', brand:'OEM', tireType:null, rimType:'STANDARD', condition:'USED', importPrice:650000, sellingPrice:950000, minStock:2, maxStock:12, status:'PUBLISHED' as const },
+  ];
+  for (const product of rimProducts) {
+    const { id: _id, ...data } = product;
+    await prisma.product.upsert({ where: { slug: product.slug }, update: data, create: product });
+  }
+
   const rims = [
     { id: 'rim-1', sku: 'RIM-600-9-6H', size: '6.00-9', boltHoles: 6, compatibleModels: 'Toyota, Komatsu', brand: 'OEM', importPrice: 850000, sellingPrice: 980000 },
     { id: 'rim-2', sku: 'RIM-700-12-8H', size: '7.00-12', boltHoles: 8, compatibleModels: 'Mitsubishi, TCM', brand: 'OEM', importPrice: 1120000, sellingPrice: 1280000 },
