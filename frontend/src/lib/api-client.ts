@@ -26,6 +26,8 @@ export interface Product {
   sku: string;
   type: "TIRE" | "RIM" | "SERVICE";
   name: string;
+  categoryId?: string;
+  category?: ProductCategory;
   importPrice?: number;
   sellingPrice?: number;
   minStock?: number;
@@ -46,6 +48,8 @@ export interface Product {
   tags?: string[];
 }
 
+export interface ProductCategory { id:string;name:string;tireSize:string;brand:string;tireType:string;rimType:string;condition:string;origin?:string;specifications?:string|null; }
+
 export type ContentStatus = "DRAFT" | "PUBLISHED";
 
 export interface SeoMetadata {
@@ -63,7 +67,7 @@ export interface SeoMetadata {
 }
 
 export const productsAPI = {
-  getAll: (condition?: string) => apiClient.get<Product[]>("/products", { params: condition ? { condition } : undefined }),
+  getAll: (condition?: string, categoryId?: string) => apiClient.get<Product[]>("/products", { params: { ...(condition ? { condition } : {}), ...(categoryId ? { categoryId } : {}) } }),
   getOne: (id: string) => apiClient.get<Product>(`/products/${id}`),
 
   create: (data: Partial<Product>) => apiClient.post<Product>("/products", data),
@@ -219,7 +223,7 @@ export const adminManagementAPI = {
 };
 
 export const categoriesAPI = {
-  getAll: () => apiClient.get<{ id: string; name: string; tireSize: string; brand: string; tireType: string; rimType: string; condition: string; origin: string; specifications?: string | null }[]>("/categories"),
+  getAll: () => apiClient.get<ProductCategory[]>("/categories"),
   create: (data: Record<string, unknown>) => apiClient.post("/categories", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/categories/${id}`, data), delete: (id: string) => apiClient.delete(`/categories/${id}`),
 };
 export const suppliersAPI = {
