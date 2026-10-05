@@ -29,7 +29,8 @@ export class OrdersService {
       const order = await tx.order.findUnique({ where: { id: orderId }, include: { payments: true } });
       if (!order || order.stripeSessionId !== session.id) throw new BadRequestException('Stripe session does not match order');
       const paid = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
-      const amount = Math.min(Math.max(0, order.totalAmount - paid), (session.amount_total ?? 0) / 100);
+      const stripeAmount = session.currency === 'vnd' ? (session.amount_total ?? 0) : (session.amount_total ?? 0) / 100;
+      const amount = Math.min(Math.max(0, order.totalAmount - paid), stripeAmount);
       if (amount > 0) await tx.orderPayment.create({ data: { orderId, amount, method: PaymentMethod.STRIPE, externalId: session.id, reference: session.payment_intent ? String(session.payment_intent) : session.id, receivedAt: new Date(), createdById: null } });
       if (paid + amount >= order.totalAmount) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.PAID } });
       return { received: true };
@@ -199,9 +200,9 @@ export class OrdersService {
       mode: 'payment',
       line_items: checkoutItems.map((checkout) => ({
         price_data: {
-          currency: 'usd',
+          currency: 'vnd',
           product_data: { name: checkout.description },
-          unit_amount: Math.round(checkout.price * 100),
+          unit_amount: Math.round(checkout.price),
         },
         quantity: checkout.item.quantity,
       })),
