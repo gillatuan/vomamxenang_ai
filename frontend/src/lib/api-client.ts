@@ -255,16 +255,21 @@ export const wheelRimsAPI = {
 
 
 export type QuoteLeadStatus = "NEW" | "CONTACTED" | "QUOTED" | "WON" | "LOST";
+export interface QuoteLeadActivity { id:string;type:string;content:string;createdAt:string;user:{id:string;email:string}; }
 export interface QuoteLead {
   id: string; name: string; phone: string; zalo?: string; company?: string; quantity?: number;
   forkliftModel?: string; location?: string; note?: string; imageUrl?: string; landingPage?: string;
-  status: QuoteLeadStatus; createdAt: string;
+  status: QuoteLeadStatus; createdAt: string; updatedAt?:string; followUpAt?:string|null;lastContactAt?:string|null;assigneeId?:string|null;
+  assignee?: { id:string;email:string;role:string } | null; activities?: QuoteLeadActivity[];
   product?: { id: string; name: string; sku: string; slug?: string };
 }
 export const quoteLeadsAPI = {
   create: (data: FormData) => apiClient.post<{ id: string; status: QuoteLeadStatus; createdAt: string }>("/quote-leads", data, { headers: { "Content-Type": "multipart/form-data" } }),
-  getAll: () => apiClient.get<QuoteLead[]>("/quote-leads"),
+  getAll: (params?:{status?:QuoteLeadStatus;assigneeId?:string;overdue?:boolean}) => apiClient.get<QuoteLead[]>("/quote-leads",{params}),
+  assignees:()=>apiClient.get<{id:string;email:string;role:string}[]>("/quote-leads/assignees"),
   updateStatus: (id: string, status: QuoteLeadStatus) => apiClient.patch<QuoteLead>(`/quote-leads/${id}/status`, { status }),
+  updateCrm:(id:string,data:{assigneeId?:string|null;followUpAt?:string|null})=>apiClient.patch<QuoteLead>(`/quote-leads/${id}/crm`,data),
+  addNote:(id:string,content:string)=>apiClient.post<QuoteLeadActivity>(`/quote-leads/${id}/notes`,{content}),
 };
 
 
