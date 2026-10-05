@@ -190,7 +190,8 @@ export class InventoryService {
       }
     });
 
-    return this.findIssueById(id);
+    const confirmed = await this.findIssueById(id);
+    return confirmed;
   }
 
   async findAllInventoryLogs() {

@@ -10,20 +10,42 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.order.findMany({ include: { client: true, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
+    return this.prisma.order.findMany({ include: { client: true, fulfillment: { select: { id: true, code: true, status: true, confirmedAt: true } }, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async createFulfillment(id: string, userId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { id }, include: { client: true, items: true, fulfillment: true } });
+      if (!order) throw new BadRequestException('Order not found');
+      if (order.fulfillment) return order.fulfillment;
+      if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot be fulfilled');
+      if (!order.items.length) throw new BadRequestException('Order has no items');
+      const demand = new Map<string, { productId?: string; wheelRimId?: string; locationId: string; quantity: number }>();
+      for (const item of order.items) {
+        const key = `${item.productId ?? ''}:${item.wheelRimId ?? ''}:${item.locationId}`;
+        const current = demand.get(key);
+        demand.set(key, { productId: item.productId ?? undefined, wheelRimId: item.wheelRimId ?? undefined, locationId: item.locationId, quantity: (current?.quantity ?? 0) + item.quantity });
+      }
+      for (const required of demand.values()) {
+        const stock = await tx.stockLocation.findFirst({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId }, select: { quantity: true } });
+        if (!stock || stock.quantity < required.quantity) throw new BadRequestException('Insufficient stock to create fulfillment');
+      }
+      return tx.inventoryTransaction.create({ data: { code: `EXPORT-ORDER-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`, type: 'EXPORT', partnerName: order.client.name, userId, orderId: order.id, details: { create: order.items.map(item => ({ productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: item.quantity, price: item.price })) } }, include: { details: true } });
+    });
   }
 
    async updateStatus(id: string, status: OrderStatus) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, fulfillment: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
     if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
+    if (order.fulfillment) throw new BadRequestException('Orders with fulfillment cannot change status manually');
     return this.prisma.order.update({ where: { id }, data: { status } });
   }
 
   async deleteDraft(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true, fulfillment: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
-    if (order.status === OrderStatus.PAID || order.stripeSessionId) throw new BadRequestException('Paid or checkout orders cannot be deleted');
+    if (order.status === OrderStatus.PAID || order.stripeSessionId || order.fulfillment) throw new BadRequestException('Paid, checkout, or fulfillment orders cannot be deleted');
     return this.prisma.$transaction([
       this.prisma.orderItem.deleteMany({ where: { orderId: id } }),
       this.prisma.order.delete({ where: { id } }),
