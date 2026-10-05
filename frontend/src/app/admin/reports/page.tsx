@@ -27,7 +27,7 @@ export default function ReportsPage(){
 
    <Grid item xs={12}><Typography variant="h5" fontWeight={800} sx={{mt:1}}>Sales pipeline</Typography></Grid>
    <Grid item xs={6} md={2}><StatCard label="Lead tổng" value={s.totalLeads} icon="◎"/></Grid>
-   <Grid item xs={6} md={2}><StatCard label="Lead 30 ngày" value={s.recentLeads} icon="30"/></Grid>
+   <Grid item xs={6} md={2}><StatCard label="Lead mới 30 ngày" value={s.recentLeads} icon="30"/></Grid>
    <Grid item xs={6} md={2}><StatCard label="Quá hạn" value={s.overdue} icon="!"/></Grid>
    <Grid item xs={6} md={2}><StatCard label="Chưa giao" value={s.unassigned} icon="?"/></Grid>
    <Grid item xs={6} md={2}><StatCard label="WON" value={s.won} icon="✓"/></Grid>
