@@ -186,7 +186,7 @@ export const cacheAPI = {
     apiClient.post<{ revalidated: boolean; paths: string[] }>("/admin/cache/purge", data),
 };
 
-export interface StockLocationRow { id: string; quantity: number; location: { locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }
+export interface StockLocationRow { id: string; quantity: number; location: { id: string; locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }
 export const inventoryAPI = {
   stockSummary: () => apiClient.get<StockLocationRow[]>("/inventory/stocks/summary"),
   logs: () => apiClient.get<{ id: string; quantity: number; price: number; transaction: { code: string; type: string; createdAt: string }; product?: { sku: string; name: string }; wheelRim?: { sku: string; size: string } }[]>("/inventory/logs"),
