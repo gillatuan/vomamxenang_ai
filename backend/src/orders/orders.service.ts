@@ -37,11 +37,11 @@ export class OrdersService {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
-  async updatePaymentDueDate(id: string, paymentDueAt: string | null) {
+  async updatePaymentDueDate(id: string, paymentDueDate: string | null) {
     const order = await this.prisma.order.findUnique({ where: { id }, select: { id: true, status: true } });
     if (!order) throw new BadRequestException('Order not found');
-    if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot have a payment due date');
-    const due = paymentDueAt ? new Date(paymentDueAt) : null;
+    if (order.status !== OrderStatus.PENDING) throw new BadRequestException('Only pending orders can have a payment due date');
+    const due = paymentDueDate ? new Date(`${paymentDueDate}T00:00:00.000Z`) : null;
     if (due && Number.isNaN(due.getTime())) throw new BadRequestException('Invalid payment due date');
     return this.prisma.order.update({ where: { id }, data: { paymentDueAt: due } });
   }
@@ -52,12 +52,14 @@ export class OrdersService {
       include: { client: { select: { id: true, name: true, phone: true, company: true } }, payments: { select: { amount: true } } },
       orderBy: [{ paymentDueAt: 'asc' }, { createdAt: 'asc' }],
     });
-    const now = Date.now();
+    const vietnamDateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const todayUtc = Date.parse(`${vietnamDateKey}T00:00:00.000Z`);
     return orders.map(order => {
       const paidAmount = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
       const balance = Math.max(0, order.totalAmount - paidAmount);
-      const overdueDays = order.paymentDueAt ? Math.max(0, Math.floor((now - order.paymentDueAt.getTime()) / 86400000)) : 0;
-      const agingBucket = !order.paymentDueAt || order.paymentDueAt.getTime() >= now ? 'CURRENT' : overdueDays <= 30 ? '1_30' : overdueDays <= 60 ? '31_60' : overdueDays <= 90 ? '61_90' : '90_PLUS';
+      const dueUtc = order.paymentDueAt ? Date.UTC(order.paymentDueAt.getUTCFullYear(), order.paymentDueAt.getUTCMonth(), order.paymentDueAt.getUTCDate()) : null;
+      const overdueDays = dueUtc === null ? 0 : Math.max(0, Math.floor((todayUtc - dueUtc) / 86400000));
+      const agingBucket = dueUtc === null || dueUtc >= todayUtc ? 'CURRENT' : overdueDays <= 30 ? '1_30' : overdueDays <= 60 ? '31_60' : overdueDays <= 90 ? '61_90' : '90_PLUS';
       return { id: order.id, code: order.code, createdAt: order.createdAt, paymentDueAt: order.paymentDueAt, totalAmount: order.totalAmount, paidAmount, balance, overdueDays, agingBucket, client: order.client };
     }).filter(order => order.balance > 0);
   }
