@@ -516,6 +516,8 @@ model InventoryTransaction {
   partnerName String? // Tên nhà cung cấp hoặc khách mua lẻ
   userId      String // Người thực hiện giao dịch (Storekeeper/Admin)
   createdAt   DateTime            @default(now())
+  status      InventoryTransactionStatus @default(DRAFT)
+  confirmedAt DateTime?
   details     TransactionDetail[]
 }
 
