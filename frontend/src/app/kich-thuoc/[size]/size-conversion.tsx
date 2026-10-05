@@ -1,0 +1,7 @@
+"use client";
+import { useState } from "react";
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import PhoneIcon from "@mui/icons-material/Phone";import ChatIcon from "@mui/icons-material/Chat";import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
+const phone="0913600210";
+export function SizeConversion({size}:{size:string}){const[open,setOpen]=useState(false);return <Card sx={{mt:3}}><CardContent><Typography variant="h5" fontWeight={800}>Cần báo giá vỏ {size}?</Typography><Typography color="text.secondary" sx={{mt:1}}>Gửi ảnh bánh hiện tại hoặc thông tin xe nâng để được đối chiếu trước khi xác nhận sản phẩm.</Typography><Stack direction={{xs:"column",sm:"row"}} spacing={1.5} sx={{mt:2}}><Button component="a" href={`tel:${phone}`} variant="contained" startIcon={<PhoneIcon/>}>Gọi ngay</Button><Button component="a" href={`https://zalo.me/${phone}`} target="_blank" rel="noopener noreferrer" variant="outlined" startIcon={<ChatIcon/>}>Chat Zalo</Button><Button variant="outlined" startIcon={<RequestQuoteIcon/>} onClick={()=>setOpen(true)}>Yêu cầu báo giá</Button></Stack><QuoteRequestDialog open={open} onClose={()=>setOpen(false)} context={`Vỏ xe nâng kích thước ${size}`}/></CardContent></Card>}
