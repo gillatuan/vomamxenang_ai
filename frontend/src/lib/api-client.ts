@@ -32,6 +32,7 @@ export interface Product {
   sellingPrice?: number;
   minStock?: number;
   maxStock?: number;
+  stocks?: { quantity: number }[];
   imageUrl?: string;
   shortDescription?: string;
   description?: string;
@@ -228,7 +229,7 @@ export const suppliersAPI = {
   getAll: () => apiClient.get<{ id: string; name: string; company: string | null; email: string; phone: string | null; address: string | null }[]>("/suppliers"),
   create: (data: Record<string, unknown>) => apiClient.post("/suppliers", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/suppliers/${id}`, data), delete: (id: string) => apiClient.delete(`/suppliers/${id}`),
 };
-export interface StoreInfo { id:string;name:string;address:string;phone:string;email?:string|null;website?:string|null;taxCode?:string|null;logoUrl?:string|null;facebookUrl?:string|null;businessHours?:string|null;notes?:string|null;isActive:boolean;createdAt:string;updatedAt:string; }
+export interface StoreInfo { id:string;name:string;address:string;phone:string;email?:string|null;website?:string|null;taxCode?:string|null;logoUrl?:string|null;facebookUrl?:string|null;googleMapsUrl?:string|null;latitude?:number|null;longitude?:number|null;businessHours?:string|null;notes?:string|null;isActive:boolean;createdAt:string;updatedAt:string; }
 export type PublicStoreInfo = Omit<StoreInfo, 'taxCode' | 'isActive'>;
 export type StoreInfoInput = Omit<StoreInfo,'id'|'createdAt'|'updatedAt'>;
 export const storeInfoAPI = {
@@ -250,4 +251,27 @@ export const aboutAPI = {
 };
 export const wheelRimsAPI = {
   create: (data: Record<string, unknown>) => apiClient.post("/wheel-rims", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/wheel-rims/${id}`, data), delete: (id: string) => apiClient.delete(`/wheel-rims/${id}`),
+};
+
+
+export type QuoteLeadStatus = "NEW" | "CONTACTED" | "QUOTED" | "WON" | "LOST";
+export interface QuoteLead {
+  id: string; name: string; phone: string; zalo?: string; company?: string; quantity?: number;
+  forkliftModel?: string; location?: string; note?: string; imageUrl?: string; landingPage?: string;
+  status: QuoteLeadStatus; createdAt: string;
+  product?: { id: string; name: string; sku: string; slug?: string };
+}
+export const quoteLeadsAPI = {
+  create: (data: FormData) => apiClient.post<{ id: string; status: QuoteLeadStatus; createdAt: string }>("/quote-leads", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  getAll: () => apiClient.get<QuoteLead[]>("/quote-leads"),
+  updateStatus: (id: string, status: QuoteLeadStatus) => apiClient.patch<QuoteLead>(`/quote-leads/${id}/status`, { status }),
+};
+
+
+export const mediaAPI = {
+  uploadImage: (file: File) => {
+    const data = new FormData();
+    data.append("file", file);
+    return apiClient.post<{ url: string; width: number | null; height: number | null; bytes: number; mimeType: string }>("/admin/media/image", data, { headers: { "Content-Type": "multipart/form-data" } });
+  },
 };

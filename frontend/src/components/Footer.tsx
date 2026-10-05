@@ -5,6 +5,7 @@ import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import { storeInfoAPI, type PublicStoreInfo } from "@/lib/api-client";
 
 const fallbackStoreInfo = {
@@ -55,6 +56,7 @@ export function Footer() {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Liên hệ</Typography>
+            {storeInfo.address && <Typography variant="body2" color="text.secondary" sx={{ mb: 1.2, lineHeight: 1.6 }}><LocationOnOutlinedIcon sx={{ fontSize: 17, verticalAlign: "middle", mr: .7 }} />{storeInfo.address}</Typography>}
             {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
             {storeInfo.phone && (
               <Stack spacing={.5}>
@@ -62,6 +64,7 @@ export function Footer() {
                 <Button component="a" href={`tel:0977757911`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>09 777 5 7 9 11 - Tuấn</Button>
               </Stack>
             )}
+            {storeInfo.googleMapsUrl && <Button component="a" href={storeInfo.googleMapsUrl} target="_blank" rel="noopener noreferrer" variant="text" startIcon={<LocationOnOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"text.secondary","&:hover":{color:"primary.main",bgcolor:"transparent"}}}>Google Maps</Button>}
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: "primary.main" }}>Theo dõi</Typography>

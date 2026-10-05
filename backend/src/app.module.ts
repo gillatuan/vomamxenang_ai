@@ -22,6 +22,9 @@ import { AboutModule } from "./about/about.module"
 import { DailyContentModule } from "./daily-content/daily-content.module"
 import { CustomerChatModule } from "./customer-chat/customer-chat.module"
 import { MediaModule } from "./media/media.module"
+import { QuoteLeadsModule } from "./quote-leads/quote-leads.module"
+import { CaseStudiesModule } from "./case-studies/case-studies.module"
+import { ConversionAnalyticsModule } from "./conversion-analytics/conversion-analytics.module"
 
 @Module({
   imports: [
@@ -70,6 +73,9 @@ import { MediaModule } from "./media/media.module"
     DailyContentModule,
     MediaModule,
     CustomerChatModule,
+    QuoteLeadsModule,
+    CaseStudiesModule,
+    ConversionAnalyticsModule,
   ],
   providers: [
     {
