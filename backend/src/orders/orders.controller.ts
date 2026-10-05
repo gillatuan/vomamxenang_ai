@@ -16,6 +16,9 @@ class CheckoutItemDto {
   @IsString() locationId!: string;
   @IsInt() @Min(1) quantity!: number;
 }
+class PaymentDueDto {
+  @IsOptional() @IsDateString() paymentDueAt?: string | null;
+}
 class RecordPaymentDto {
   @IsNumber() @Min(0.01) amount!: number;
   @IsEnum(PaymentMethod) method!: PaymentMethod;
@@ -43,6 +46,16 @@ export class OrdersController {
   @Roles('ADMIN_MANAGER')
   @Get()
   findAll() { return this.service.findAll(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
+  @Get('receivables')
+  receivables() { return this.service.receivables(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
+  @Patch(':id/payment-due')
+  updatePaymentDue(@Param('id') id: string, @Body() body: PaymentDueDto) { return this.service.updatePaymentDueDate(id, body.paymentDueAt ?? null); }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
