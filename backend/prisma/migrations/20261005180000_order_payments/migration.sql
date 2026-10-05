@@ -8,10 +8,12 @@ CREATE TABLE "OrderPayment" (
   "reference" TEXT,
   "note" TEXT,
   "receivedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "createdById" TEXT NOT NULL,
+  "externalId" TEXT,
+  "createdById" TEXT,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "OrderPayment_pkey" PRIMARY KEY ("id")
 );
+CREATE UNIQUE INDEX "OrderPayment_externalId_key" ON "OrderPayment"("externalId");
 CREATE INDEX "OrderPayment_orderId_receivedAt_idx" ON "OrderPayment"("orderId", "receivedAt");
 CREATE INDEX "OrderPayment_createdById_createdAt_idx" ON "OrderPayment"("createdById", "createdAt");
 ALTER TABLE "OrderPayment" ADD CONSTRAINT "OrderPayment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
