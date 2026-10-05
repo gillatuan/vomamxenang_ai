@@ -10,12 +10,13 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import ChatIcon from "@mui/icons-material/Chat";
 import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
 import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
 import { PublicHeader } from "@/components/PublicHeader";
 import { Product } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
+import { trackConversion } from "@/lib/conversion-analytics";
 
 export default function ProductDetailPage({ product, related, breadcrumbs }: { product: Product; related?: React.ReactNode; breadcrumbs?: React.ReactNode }) {
   const [favourite, setFavourite] = useState(false);
@@ -24,6 +25,7 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
   const zaloUrl = `https://zalo.me/${phone}`;
   const addItem = useCartStore((state) => state.addItem);
   const watermark = useStoreWatermark();
+  useEffect(() => { trackConversion("VIEW_PRODUCT", { productId: product.id, context: product.size }); }, [product.id, product.size]);
 
   const specifications = Array.isArray(product.specifications) ? product.specifications : [];
   const highlights = Array.isArray(product.highlights) ? product.highlights : [];
@@ -54,9 +56,9 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
           </Stack>
           <Typography component="p" variant="h5" color="primary" fontWeight={700}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ báo giá"}</Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ mt: 3 }}>
-            <Button component="a" href={`tel:${phone}`} variant="contained" startIcon={<PhoneIcon />}>Gọi ngay</Button>
-            <Button component="a" href={zaloUrl} target="_blank" rel="noopener noreferrer" variant="outlined" startIcon={<ChatIcon />}>Chat Zalo</Button>
-            <Button variant="outlined" startIcon={<RequestQuoteIcon />} onClick={() => setQuoteOpen(true)}>Yêu cầu báo giá</Button>
+            <Button component="a" href={`tel:${phone}`} onClick={() => trackConversion("CLICK_PHONE", { productId: product.id, context: product.size })} variant="contained" startIcon={<PhoneIcon />}>Gọi ngay</Button>
+            <Button component="a" href={zaloUrl} onClick={() => trackConversion("CLICK_ZALO", { productId: product.id, context: product.size })} target="_blank" rel="noopener noreferrer" variant="outlined" startIcon={<ChatIcon />}>Chat Zalo</Button>
+            <Button variant="outlined" startIcon={<RequestQuoteIcon />} onClick={() => { trackConversion("OPEN_QUOTE", { productId: product.id, context: product.size }); setQuoteOpen(true); }}>Yêu cầu báo giá</Button>
             <Button variant="text" startIcon={<ShoppingCartIcon />} disabled={!product.sellingPrice} onClick={() => addItem(product, 1)}>Thêm vào giỏ</Button>
             <IconButton aria-label="Lưu yêu thích" color={favourite ? "error" : "default"} onClick={() => setFavourite(!favourite)}>{favourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}</IconButton>
           </Stack>
@@ -92,7 +94,7 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
       <Card variant="outlined" sx={{ mt: 3 }}><CardContent>
         <Typography component="h2" variant="h5" fontWeight={800}>Cần xác nhận sản phẩm này có phù hợp?</Typography>
         <Typography color="text.secondary" sx={{ mt: 1 }}>Chụp thông số trên hông vỏ và ảnh bánh/mâm hiện tại rồi gửi cùng yêu cầu báo giá. Chúng tôi sẽ đối chiếu trước khi xác nhận sản phẩm hoặc dịch vụ ép/thay vỏ.</Typography>
-        <Button variant="contained" startIcon={<RequestQuoteIcon />} sx={{ mt: 2 }} onClick={() => setQuoteOpen(true)}>Gửi ảnh & yêu cầu báo giá</Button>
+        <Button variant="contained" startIcon={<RequestQuoteIcon />} sx={{ mt: 2 }} onClick={() => { trackConversion("OPEN_QUOTE", { productId: product.id, context: product.size }); setQuoteOpen(true); }}>Gửi ảnh & yêu cầu báo giá</Button>
       </CardContent></Card>
       {related}
     </Container>
