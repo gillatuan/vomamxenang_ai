@@ -28,13 +28,13 @@ export class QuoteLeadsService {
     return this.prisma.quoteLead.create({ data: { ...data, quantity, imageUrl, source: 'WEBSITE' }, select: { id: true, status: true, createdAt: true } });
   }
 
-  findAll(filters: { status?: string; assigneeId?: string; overdue?: boolean }) {
+  findAll(filters: { status?: 'NEW'|'CONTACTED'|'QUOTED'|'WON'|'LOST'; assigneeId?: string; overdue?: boolean }) {
     const now = new Date();
     return this.prisma.quoteLead.findMany({
       where: {
-        ...(filters.status ? { status: filters.status as any } : {}),
+        ...(filters.status ? { status: filters.status } : {}),
         ...(filters.assigneeId ? { assigneeId: filters.assigneeId } : {}),
-        ...(filters.overdue ? { followUpAt: { lt: now }, status: { notIn: ['WON', 'LOST'] as any } } : {}),
+        ...(filters.overdue ? { followUpAt: { lt: now }, status: { notIn: ['WON', 'LOST'] } } : {}),
       },
       orderBy: [{ followUpAt: 'asc' }, { createdAt: 'desc' }],
       include: {
@@ -46,9 +46,11 @@ export class QuoteLeadsService {
   }
 
   async updateStatus(id: string, status: 'NEW'|'CONTACTED'|'QUOTED'|'WON'|'LOST', userId: string) {
-    const lead = await this.prisma.quoteLead.update({ where: { id }, data: { status, ...(status === 'CONTACTED' ? { lastContactAt: new Date() } : {}), ...(closedStatuses.has(status) ? { followUpAt: null } : {}) } });
-    await this.activity(id, userId, 'STATUS', `Đổi trạng thái thành ${status}`);
-    return lead;
+    return this.prisma.$transaction(async tx => {
+      const lead = await tx.quoteLead.update({ where: { id }, data: { status, ...(status === 'CONTACTED' ? { lastContactAt: new Date() } : {}), ...(closedStatuses.has(status) ? { followUpAt: null } : {}) } });
+      await tx.quoteLeadActivity.create({ data: { leadId: id, userId, type: 'STATUS', content: `Đổi trạng thái thành ${status}` } });
+      return lead;
+    });
   }
 
   async updateCrm(id: string, data: { assigneeId?: string | null; followUpAt?: string | null }, userId: string) {
@@ -58,9 +60,11 @@ export class QuoteLeadsService {
     }
     const followUpAt = data.followUpAt ? new Date(data.followUpAt) : null;
     if (data.followUpAt && Number.isNaN(followUpAt!.getTime())) throw new BadRequestException('Lịch follow-up không hợp lệ.');
-    const lead = await this.prisma.quoteLead.update({ where: { id }, data: { ...(data.assigneeId !== undefined ? { assigneeId: data.assigneeId || null } : {}), ...(data.followUpAt !== undefined ? { followUpAt } : {}) } });
-    await this.activity(id, userId, 'CRM_UPDATE', 'Cập nhật người phụ trách / lịch follow-up');
-    return lead;
+    return this.prisma.$transaction(async tx => {
+      const lead = await tx.quoteLead.update({ where: { id }, data: { ...(data.assigneeId !== undefined ? { assigneeId: data.assigneeId || null } : {}), ...(data.followUpAt !== undefined ? { followUpAt } : {}) } });
+      await tx.quoteLeadActivity.create({ data: { leadId: id, userId, type: 'CRM_UPDATE', content: 'Cập nhật người phụ trách / lịch follow-up' } });
+      return lead;
+    });
   }
 
   async addNote(id: string, content: string, userId: string) {
