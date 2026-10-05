@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,7 +23,10 @@ export class QuoteLeadsController {
   create(@Body() body: CreateQuoteLeadDto, @UploadedFile() file?: Express.Multer.File) { return this.service.create(body, file); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Get() findAll(@Query('status') status?: string, @Query('assigneeId') assigneeId?: string, @Query('overdue') overdue?: string) { return this.service.findAll({ status, assigneeId, overdue: overdue === 'true' }); }
+  @Get() findAll(@Query('status') status?: string, @Query('assigneeId') assigneeId?: string, @Query('overdue') overdue?: string) {
+    if (status && !statuses.includes(status as Status)) throw new BadRequestException('Trạng thái lead không hợp lệ.');
+    return this.service.findAll({ status: status as Status | undefined, assigneeId, overdue: overdue === 'true' });
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
   @Get('assignees') assignees() { return this.service.assignees(); }
