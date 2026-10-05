@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { quoteLeadsAPI, Product } from "@/lib/api-client";
+import { trackConversion } from "@/lib/conversion-analytics";
 
 export function QuoteRequestDialog({ open, onClose, product, context }: { open: boolean; onClose: () => void; product?: Product; context?: string }) {
   const [form, setForm] = useState({ name: "", phone: "", zalo: "", company: "", quantity: "1", forkliftModel: "", location: "", note: "", website: "" });
@@ -20,6 +21,7 @@ export function QuoteRequestDialog({ open, onClose, product, context }: { open: 
       data.append("landingPage", window.location.pathname);
       if (image) data.append("image", image);
       await quoteLeadsAPI.create(data);
+      trackConversion("SUBMIT_QUOTE", { productId: product?.id, context });
       setState("success");
     } catch { setState("error"); }
   };
