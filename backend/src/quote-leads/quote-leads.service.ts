@@ -24,7 +24,8 @@ export class QuoteLeadsService {
       const exists = await this.prisma.product.findUnique({ where: { id: data.productId }, select: { id: true } });
       if (!exists) data.productId = undefined;
     }
-    return this.prisma.quoteLead.create({ data: { ...data, imageUrl, source: 'WEBSITE' }, select: { id: true, status: true, createdAt: true } });
+    const quantity = data.quantity == null ? undefined : Number(data.quantity);
+    return this.prisma.quoteLead.create({ data: { ...data, quantity, imageUrl, source: 'WEBSITE' }, select: { id: true, status: true, createdAt: true } });
   }
 
   findAll() {
