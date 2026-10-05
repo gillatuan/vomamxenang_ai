@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Headers, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
 import { Type } from 'class-transformer';
 import { IsArray, IsDateString, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateNested } from 'class-validator';
 import { PaymentMethod } from '@prisma/client';
@@ -31,6 +32,12 @@ class CheckoutDto {
 @Controller('orders')
 export class OrdersController {
   constructor(private service: OrdersService) {}
+
+  @Post('webhook')
+  stripeWebhook(@Req() req: Request & { rawBody?: Buffer }, @Headers('stripe-signature') signature?: string) {
+    if (!req.rawBody || !signature) throw new BadRequestException('Missing Stripe webhook signature');
+    return this.service.handleStripeWebhook(req.rawBody, signature);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
