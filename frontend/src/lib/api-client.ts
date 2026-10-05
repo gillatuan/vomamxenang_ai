@@ -159,17 +159,22 @@ export interface Order {
   fulfillment?: { id: string; code: string; status: "DRAFT" | "CONFIRMED"; confirmedAt?: string | null } | null;
   payments?: OrderPayment[];
   createdAt: string;
+  paymentDueAt?: string | null;
   items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
 
 export interface CheckoutItem { productId?: string; wheelRimId?: string; locationId?: string; quantity: number; }
 
+export type AgingBucket="CURRENT"|"1_30"|"31_60"|"61_90"|"90_PLUS";
+export interface ReceivableOrder{id:string;code:string;createdAt:string;paymentDueAt:string|null;totalAmount:number;paidAmount:number;balance:number;overdueDays:number;agingBucket:AgingBucket;client:{id:string;name:string;phone:string;company?:string|null}}
 export const ordersAPI = {
   getAll: () => apiClient.get<Order[]>("/orders"),
 
    updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
   createFulfillment: (id: string) => apiClient.post<{ id: string; code: string; status: "DRAFT" | "CONFIRMED" }>(`/orders/${id}/fulfillment`),
+  receivables:()=>apiClient.get<ReceivableOrder[]>("/orders/receivables"),
+  updatePaymentDue:(id:string,paymentDueAt:string|null)=>apiClient.patch<Order>(`/orders/${id}/payment-due`,{paymentDueAt}),
   recordPayment: (id:string,data:{amount:number;method:Exclude<PaymentMethod,"STRIPE">;reference?:string;note?:string;receivedAt?:string}) => apiClient.post<{payment:OrderPayment;paidAmount:number;balance:number;status:Order["status"]}>(`/orders/${id}/payments`,data),
 
   createCheckoutSession: (items: CheckoutItem[]) =>

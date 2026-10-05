@@ -497,10 +497,13 @@ model Order {
   status          OrderStatus @default(PENDING)
   stripeSessionId String?     @unique
   createdAt       DateTime    @default(now())
+  paymentDueAt    DateTime?
   items           OrderItem[]
   salesQuote      SalesQuote?
   fulfillment     InventoryTransaction?
   payments        OrderPayment[]
+
+  @@index([paymentDueAt, status])
 }
 
 model OrderPayment {
