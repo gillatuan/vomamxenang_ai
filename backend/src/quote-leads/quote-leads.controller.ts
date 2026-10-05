@@ -1,8 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/auth.types';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateQuoteLeadDto } from './dto/create-quote-lead.dto';
@@ -16,7 +16,6 @@ class CrmDto {
   @IsOptional() @IsString() followUpAt?: string | null;
 }
 class NoteDto { @IsString() @MaxLength(2000) content!: string; }
-type AuthenticatedRequest = Request & { user: { sub: string; userId: string; email: string; role: string } };
 
 @Controller('quote-leads')
 export class QuoteLeadsController {
