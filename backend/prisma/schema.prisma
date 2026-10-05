@@ -492,6 +492,7 @@ model Order {
   createdAt       DateTime    @default(now())
   items           OrderItem[]
   salesQuote      SalesQuote?
+  fulfillment     InventoryTransaction?
 }
 
 model OrderItem {
@@ -518,6 +519,8 @@ model InventoryTransaction {
   createdAt   DateTime            @default(now())
   status      InventoryTransactionStatus @default(DRAFT)
   confirmedAt DateTime?
+  orderId     String?             @unique
+  order       Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   details     TransactionDetail[]
 }
 
