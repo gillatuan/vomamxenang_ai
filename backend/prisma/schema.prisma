@@ -163,6 +163,7 @@ model User {
   assignedQuoteLeads QuoteLead[]     @relation("QuoteLeadAssignee")
   quoteLeadActivities QuoteLeadActivity[]
   salesQuotes       SalesQuote[]
+  orderPayments     OrderPayment[] @relation("OrderPaymentCreatedBy")
 }
 
 model Client {
@@ -521,7 +522,7 @@ model OrderPayment {
   receivedAt  DateTime      @default(now())
   externalId  String?       @unique
   createdById String?
-  createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy   User?         @relation("OrderPaymentCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt   DateTime      @default(now())
 
   @@index([orderId, receivedAt])
