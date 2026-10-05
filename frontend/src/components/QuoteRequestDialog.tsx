@@ -4,7 +4,7 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { quoteLeadsAPI, Product } from "@/lib/api-client";
 
-export function QuoteRequestDialog({ open, onClose, product }: { open: boolean; onClose: () => void; product?: Product }) {
+export function QuoteRequestDialog({ open, onClose, product, context }: { open: boolean; onClose: () => void; product?: Product; context?: string }) {
   const [form, setForm] = useState({ name: "", phone: "", zalo: "", company: "", quantity: "1", forkliftModel: "", location: "", note: "", website: "" });
   const [image, setImage] = useState<File | null>(null);
   const [state, setState] = useState<"idle"|"sending"|"success"|"error">("idle");
@@ -14,7 +14,8 @@ export function QuoteRequestDialog({ open, onClose, product }: { open: boolean; 
     setState("sending");
     try {
       const data = new FormData();
-      Object.entries(form).forEach(([k,v]) => v && data.append(k,v));
+      Object.entries(form).forEach(([k,v]) => v && k !== "note" && data.append(k,v));
+      if (form.note || context) data.append("note", [context, form.note].filter(Boolean).join(" — "));
       if (product?.id) data.append("productId", product.id);
       data.append("landingPage", window.location.pathname);
       if (image) data.append("image", image);
@@ -25,7 +26,7 @@ export function QuoteRequestDialog({ open, onClose, product }: { open: boolean; 
   return <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
     <DialogTitle>Yêu cầu báo giá{product ? ` — ${product.name}` : ""}</DialogTitle>
     <DialogContent><Stack spacing={2} sx={{ pt: 1 }}>
-      <Typography color="text.secondary">Để lại thông tin, chúng tôi sẽ liên hệ tư vấn đúng loại vỏ/mâm và xác nhận tồn kho.</Typography>
+      <Typography color="text.secondary">Để lại thông tin, chúng tôi sẽ liên hệ tư vấn và xác nhận phương án phù hợp.</Typography>
       {state === "success" && <Alert severity="success">Đã nhận yêu cầu. Chúng tôi sẽ liên hệ với bạn sớm.</Alert>}
       {state === "error" && <Alert severity="error">Vui lòng nhập tên, số điện thoại hợp lệ và thử lại.</Alert>}
       <TextField required label="Tên khách hàng" value={form.name} onChange={change("name")} inputProps={{ maxLength: 120 }} />
