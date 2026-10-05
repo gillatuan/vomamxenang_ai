@@ -144,8 +144,8 @@ jobs:
           BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel curl "$BACKEND_URL/api/v1/health/live" --token="$VERCEL_TOKEN" -- --fail --silent --show-error
-          vercel curl "$BACKEND_URL/api/v1/health/ready" --token="$VERCEL_TOKEN" -- --fail --silent --show-error
+          vercel curl "$BACKEND_URL/api/v1/health/live" -- --fail --silent --show-error
+          vercel curl "$BACKEND_URL/api/v1/health/ready" -- --fail --silent --show-error
 
       - name: Deploy frontend
         id: deploy_frontend
@@ -162,12 +162,12 @@ jobs:
         env:
           FRONTEND_URL: ${{ steps.deploy_frontend.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel curl "$FRONTEND_URL/" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
+        run: vercel curl "$FRONTEND_URL/" -- --fail --silent --show-error >/dev/null
 
       - name: Smoke public production API
         env:
           BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel curl "$BACKEND_URL/api/v1/store-info/public" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
-          vercel curl "$BACKEND_URL/api/v1/products" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
+          vercel curl "$BACKEND_URL/api/v1/store-info/public" -- --fail --silent --show-error >/dev/null
+          vercel curl "$BACKEND_URL/api/v1/products" -- --fail --silent --show-error >/dev/null
