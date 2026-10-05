@@ -1,16 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Req } from '@nestjs/common';
-import { OrdersService } from './orders.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AuthenticatedRequest } from '../auth/auth.types';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { AuthenticatedRequest } from '../auth/auth.types';
-import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { Type } from 'class-transformer';
+import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { AuthenticatedRequest } from '../auth/auth.types';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { OrdersService } from './orders.service';
 
-class CheckoutItemDto { @IsOptional() @IsString() productId?:string; @IsOptional() @IsString() wheelRimId?:string; @IsString() locationId!:string; @IsInt() @Min(1) quantity!:number; }
-class CheckoutDto { @IsArray() @ValidateNested({each:true}) @Type(()=>CheckoutItemDto) items!:CheckoutItemDto[]; @IsOptional() @IsString() clientId?:string; @IsOptional() @IsIn(['RETAIL','B2B_TIER1','B2B_TIER2']) customerType?:'RETAIL'|'B2B_TIER1'|'B2B_TIER2'; }
+class CheckoutItemDto {
+  @IsOptional() @IsString() productId?: string;
+  @IsOptional() @IsString() wheelRimId?: string;
+  @IsString() locationId!: string;
+  @IsInt() @Min(1) quantity!: number;
+}
+class CheckoutDto {
+  @IsArray() @ValidateNested({ each: true }) @Type(() => CheckoutItemDto) items!: CheckoutItemDto[];
+  @IsOptional() @IsString() clientId?: string;
+  @IsOptional() @IsIn(['RETAIL', 'B2B_TIER1', 'B2B_TIER2']) customerType?: 'RETAIL' | 'B2B_TIER1' | 'B2B_TIER2';
+}
 
 @Controller('orders')
 export class OrdersController {
@@ -19,25 +27,28 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
   @Get()
-  findAll() {
-    return this.service.findAll();
-  }
+  findAll() { return this.service.findAll(); }
 
-   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN_MANAGER')
-  @Post(':id/fulfillment')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
-  createFulfillment(@Param('id') id: string, @Req() req: AuthenticatedRequest) { return this.service.createFulfillment(id, req.user.sub); }
+  @Post(':id/fulfillment')
+  createFulfillment(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.service.createFulfillment(id, req.user.sub);
+  }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) { return this.service.updateStatus(id, dto.status); }
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+    return this.service.updateStatus(id, dto.status);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
   @Delete(':id')
   deleteDraft(@Param('id') id: string) { return this.service.deleteDraft(id); }
 
+  @UseGuards(JwtAuthGuard)
   @Post('checkout-session')
   async checkoutSession(@Body() body: CheckoutDto, @Req() req: AuthenticatedRequest) {
     return this.service.createCheckoutSession(body, req);
