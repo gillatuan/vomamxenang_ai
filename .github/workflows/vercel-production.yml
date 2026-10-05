@@ -142,9 +142,10 @@ jobs:
       - name: Smoke backend deployment
         env:
           BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$BACKEND_URL/api/v1/health/live"
-          curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$BACKEND_URL/api/v1/health/ready"
+          vercel curl "$BACKEND_URL/api/v1/health/live" --token="$VERCEL_TOKEN" -- --fail --silent --show-error
+          vercel curl "$BACKEND_URL/api/v1/health/ready" --token="$VERCEL_TOKEN" -- --fail --silent --show-error
 
       - name: Deploy frontend
         id: deploy_frontend
@@ -160,11 +161,13 @@ jobs:
       - name: Smoke frontend deployment
         env:
           FRONTEND_URL: ${{ steps.deploy_frontend.outputs.url }}
-        run: curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$FRONTEND_URL/" >/dev/null
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel curl "$FRONTEND_URL/" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
 
       - name: Smoke public production API
         env:
           BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 3 "$BACKEND_URL/api/v1/store-info/public" >/dev/null
-          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 3 "$BACKEND_URL/api/v1/products" >/dev/null
+          vercel curl "$BACKEND_URL/api/v1/store-info/public" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
+          vercel curl "$BACKEND_URL/api/v1/products" --token="$VERCEL_TOKEN" -- --fail --silent --show-error >/dev/null
