@@ -32,10 +32,12 @@ export class SalesQuotesService {
    if(quote.items.some(item=>!item.productId))throw new BadRequestException('Báo giá có dòng nhập thủ công; cần gắn sản phẩm trước khi tạo đơn hàng.');
    const locationMap=new Map(locations.map(x=>[x.itemId,x.locationId]));if(locationMap.size!==quote.items.length)throw new BadRequestException('Cần chọn vị trí kho cho từng dòng báo giá.');
    const orderItems=[] as {productId:string;locationId:string;quantity:number;price:number}[];
+   const demand=new Map<string,{productId:string;locationId:string;quantity:number;description:string}>();
    for(const item of quote.items){const locationId=locationMap.get(item.id);if(!locationId)throw new BadRequestException('Thiếu vị trí kho cho dòng báo giá.');
-    const stock=await tx.stockLocation.findFirst({where:{locationId,productId:item.productId!},select:{quantity:true}});if(!stock||stock.quantity<item.quantity)throw new BadRequestException(`Không đủ tồn kho cho ${item.description} tại vị trí đã chọn.`);
-    orderItems.push({productId:item.productId!,locationId,quantity:item.quantity,price:item.unitPrice});
+    const productId=item.productId!;const key=`${productId}:${locationId}`;const current=demand.get(key);demand.set(key,{productId,locationId,quantity:(current?.quantity??0)+item.quantity,description:item.description});
+    orderItems.push({productId,locationId,quantity:item.quantity,price:item.unitPrice});
    }
+   for(const required of demand.values()){const stock=await tx.stockLocation.findFirst({where:{locationId:required.locationId,productId:required.productId},select:{quantity:true}});if(!stock||stock.quantity<required.quantity)throw new BadRequestException(`Không đủ tồn kho cho ${required.description} tại vị trí đã chọn.`);}
    const order=await tx.order.create({data:{clientId,totalAmount:quote.total,status:'PENDING',items:{create:orderItems}},include:{items:true}});
    await tx.salesQuote.update({where:{id},data:{clientId,orderId:order.id,convertedAt:new Date()}});
    return order;
