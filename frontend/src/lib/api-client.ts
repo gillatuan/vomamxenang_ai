@@ -158,6 +158,8 @@ export interface Order {
   items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
 
+export interface CheckoutItem { productId?: string; wheelRimId?: string; locationId?: string; quantity: number; }
+
 export const ordersAPI = {
   getAll: () => apiClient.get<Order[]>("/orders"),
 
@@ -165,7 +167,7 @@ export const ordersAPI = {
   updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
 
-  createCheckoutSession: (items: any[]) =>
+  createCheckoutSession: (items: CheckoutItem[]) =>
     apiClient.post<{ sessionId: string; url: string }>(
       "/orders/checkout-session",
       { items }
