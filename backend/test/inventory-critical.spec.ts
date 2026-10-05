@@ -17,7 +17,10 @@ async function main() {
     ],
   };
   const prisma:any={
-    inventoryTransaction:{ findUnique: async ({where}:any) => where.id==='missing'?null:{id:where.id,type:where.id.includes('receipt')?'IMPORT':'EXPORT',details:detailsById[where.id]} },
+    inventoryTransaction:{
+      findUnique: async ({where}:any) => where.id==='missing'?null:{id:where.id,type:where.id.includes('receipt')?'IMPORT':'EXPORT',status:'DRAFT',details:detailsById[where.id]},
+      updateMany: async (args:any)=>{updates.push(args);return {count:1};},
+    },
     stockLocation:{
       findFirst: async ({where}:any)=> where.productId==='P2'?{id:'stock-p2',quantity:1}:{id:'stock-p1',quantity:5},
       update: (args:any)=>{updates.push(args);return Promise.resolve(args);},
