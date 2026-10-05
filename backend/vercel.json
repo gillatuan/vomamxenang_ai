@@ -3,9 +3,18 @@
   "devCommand": "yarn start:dev",
   "buildCommand": "yarn build",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    }
   ],
   "crons": [
-    { "path": "/api/v1/internal/daily-content/run", "schedule": "0 19 * * *" }
-  ]
+    {
+      "path": "/api/v1/internal/daily-content/run",
+      "schedule": "0 19 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
