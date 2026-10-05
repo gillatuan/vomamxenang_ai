@@ -13,6 +13,29 @@ export class OrdersService {
     return this.prisma.order.findMany({ include: { client: true, payments: { orderBy: { receivedAt: 'desc' }, include: { createdBy: { select: { id: true, email: true } } } }, fulfillment: { select: { id: true, code: true, status: true, confirmedAt: true } }, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
   }
 
+  async handleStripeWebhook(rawBody: Buffer, signature: string) {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) throw new BadRequestException('Stripe webhook is not configured');
+    let event;
+    try { event = getStripeClient().webhooks.constructEvent(rawBody, signature, secret); }
+    catch { throw new BadRequestException('Invalid Stripe webhook signature'); }
+    if (event.type !== 'checkout.session.completed') return { received: true };
+    const session = event.data.object;
+    const orderId = session.metadata?.orderId;
+    if (!orderId || session.payment_status !== 'paid') return { received: true };
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.orderPayment.findUnique({ where: { externalId: session.id } });
+      if (existing) return { received: true };
+      const order = await tx.order.findUnique({ where: { id: orderId }, include: { payments: true } });
+      if (!order || order.stripeSessionId !== session.id) throw new BadRequestException('Stripe session does not match order');
+      const paid = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      const amount = Math.min(Math.max(0, order.totalAmount - paid), (session.amount_total ?? 0) / 100);
+      if (amount > 0) await tx.orderPayment.create({ data: { orderId, amount, method: PaymentMethod.STRIPE, externalId: session.id, reference: session.payment_intent ? String(session.payment_intent) : session.id, receivedAt: new Date(), createdById: null } });
+      if (paid + amount >= order.totalAmount) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.PAID } });
+      return { received: true };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+
   async recordPayment(id: string, input: { amount: number; method: PaymentMethod; reference?: string; note?: string; receivedAt?: string }, userId: string) {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id }, include: { payments: true } });
