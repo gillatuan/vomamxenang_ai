@@ -26,6 +26,7 @@ import { QuoteLeadsModule } from "./quote-leads/quote-leads.module"
 import { SalesQuotesModule } from "./sales-quotes/sales-quotes.module"
 import { CaseStudiesModule } from "./case-studies/case-studies.module"
 import { ConversionAnalyticsModule } from "./conversion-analytics/conversion-analytics.module"
+import { HealthModule } from "./health/health.module"
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { ConversionAnalyticsModule } from "./conversion-analytics/conversion-ana
     SalesQuotesModule,
     CaseStudiesModule,
     ConversionAnalyticsModule,
+    HealthModule,
   ],
   providers: [
     {
