@@ -24,6 +24,7 @@ import { CustomerChatModule } from "./customer-chat/customer-chat.module"
 import { MediaModule } from "./media/media.module"
 import { QuoteLeadsModule } from "./quote-leads/quote-leads.module"
 import { CaseStudiesModule } from "./case-studies/case-studies.module"
+import { ConversionAnalyticsModule } from "./conversion-analytics/conversion-analytics.module"
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { CaseStudiesModule } from "./case-studies/case-studies.module"
     CustomerChatModule,
     QuoteLeadsModule,
     CaseStudiesModule,
+    ConversionAnalyticsModule,
   ],
   providers: [
     {
