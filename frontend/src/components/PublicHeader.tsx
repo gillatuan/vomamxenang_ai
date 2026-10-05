@@ -29,6 +29,9 @@ const navigation = [
   { label: "Giới thiệu", href: "/about" },
   { label: "Blog", href: "/blog" },
   { label: "Sản phẩm", href: "/products" },
+  { label: "Dịch vụ", href: "/services" },
+  { label: "Công việc đã làm", href: "/cong-viec-da-lam" },
+  { label: "Liên hệ", href: "/lien-he" },
 ];
 
 export function PublicHeader() {
