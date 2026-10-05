@@ -35,16 +35,17 @@ export class OrdersService {
   }
 
    async updateStatus(id: string, status: OrderStatus) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, fulfillment: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
     if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
+    if (order.fulfillment) throw new BadRequestException('Orders with fulfillment cannot change status manually');
     return this.prisma.order.update({ where: { id }, data: { status } });
   }
 
   async deleteDraft(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true, fulfillment: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
-    if (order.status === OrderStatus.PAID || order.stripeSessionId) throw new BadRequestException('Paid or checkout orders cannot be deleted');
+    if (order.status === OrderStatus.PAID || order.stripeSessionId || order.fulfillment) throw new BadRequestException('Paid, checkout, or fulfillment orders cannot be deleted');
     return this.prisma.$transaction([
       this.prisma.orderItem.deleteMany({ where: { orderId: id } }),
       this.prisma.order.delete({ where: { id } }),
