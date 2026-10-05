@@ -3,13 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Box, Button, Chip, FormControl, InputLabel, Link, MenuItem, Paper, Select, Stack, TextField, Typography } from "@mui/material";
 import { QuoteLead, QuoteLeadStatus, quoteLeadsAPI } from "@/lib/api-client";
 
+type PipelineFilter=QuoteLeadStatus|""|"OVERDUE";
+const pipelineFilters:readonly PipelineFilter[]=["","OVERDUE","NEW","CONTACTED","QUOTED","WON","LOST"];
+const isPipelineFilter=(value:string):value is PipelineFilter=>pipelineFilters.includes(value as PipelineFilter);
 const labels:Record<QuoteLeadStatus,string>={NEW:"Mới",CONTACTED:"Đã liên hệ",QUOTED:"Đã báo giá",WON:"Thành công",LOST:"Không thành công"};
 const open=(s:QuoteLeadStatus)=>s!=="WON"&&s!=="LOST";
 const localInput=(iso?:string|null)=>iso?new Date(new Date(iso).getTime()-new Date(iso).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
 
 export default function QuoteLeadsPage(){
  const [rows,setRows]=useState<QuoteLead[]>([]),[assignees,setAssignees]=useState<{id:string;email:string;role:string}[]>([]);
- const [error,setError]=useState(""),[statusFilter,setStatusFilter]=useState<QuoteLeadStatus|""| "OVERDUE">(""),[assigneeFilter,setAssigneeFilter]=useState("");
+ const [error,setError]=useState(""),[statusFilter,setStatusFilter]=useState<PipelineFilter>(""),[assigneeFilter,setAssigneeFilter]=useState("");
  const [notes,setNotes]=useState<Record<string,string>>({});
  const load=()=>quoteLeadsAPI.getAll(statusFilter==="OVERDUE"?{overdue:true,assigneeId:assigneeFilter||undefined}:{status:statusFilter||undefined,assigneeId:assigneeFilter||undefined}).then(r=>setRows(r.data)).catch(()=>setError("Không tải được lead."));
  useEffect(()=>{quoteLeadsAPI.assignees().then(r=>setAssignees(r.data)).catch(()=>{});},[]);
@@ -23,7 +26,7 @@ export default function QuoteLeadsPage(){
   <Typography color="text.secondary" sx={{mb:2}}>Theo dõi yêu cầu báo giá, người phụ trách và lịch gọi lại để không bỏ sót khách.</Typography>
   {error&&<Alert severity="error" onClose={()=>setError("")} sx={{mb:2}}>{error}</Alert>}
   <Stack direction={{xs:"column",md:"row"}} spacing={1.5} sx={{mb:2}}>
-   <FormControl size="small" sx={{minWidth:180}}><InputLabel>Pipeline</InputLabel><Select label="Pipeline" value={statusFilter} onChange={e=>setStatusFilter(e.target.value as any)}><MenuItem value="">Tất cả</MenuItem><MenuItem value="OVERDUE">Quá hạn follow-up</MenuItem>{Object.entries(labels).map(([v,l])=><MenuItem key={v} value={v}>{l}</MenuItem>)}</Select></FormControl>
+   <FormControl size="small" sx={{minWidth:180}}><InputLabel>Pipeline</InputLabel><Select label="Pipeline" value={statusFilter} onChange={e=>{const value=e.target.value;if(isPipelineFilter(value))setStatusFilter(value)}}><MenuItem value="">Tất cả</MenuItem><MenuItem value="OVERDUE">Quá hạn follow-up</MenuItem>{Object.entries(labels).map(([v,l])=><MenuItem key={v} value={v}>{l}</MenuItem>)}</Select></FormControl>
    <FormControl size="small" sx={{minWidth:220}}><InputLabel>Người phụ trách</InputLabel><Select label="Người phụ trách" value={assigneeFilter} onChange={e=>setAssigneeFilter(e.target.value)}><MenuItem value="">Tất cả</MenuItem>{assignees.map(a=><MenuItem key={a.id} value={a.id}>{a.email}</MenuItem>)}</Select></FormControl>
    <Chip label={`Đang hiển thị: ${rows.length}`} /><Chip color={overdueCount?"error":"default"} label={`Quá hạn: ${overdueCount}`} />
   </Stack>
