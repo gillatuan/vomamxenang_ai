@@ -74,6 +74,7 @@ import { ConversionAnalyticsModule } from "./conversion-analytics/conversion-ana
     MediaModule,
     CustomerChatModule,
     QuoteLeadsModule,
+    SalesQuotesModule,
     CaseStudiesModule,
     ConversionAnalyticsModule,
   ],
