@@ -60,7 +60,10 @@ export class InventoryService {
       throw new NotFoundException('Receipt transaction not found');
     }
 
+    if (transaction.status === 'CONFIRMED') return transaction;
     await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.inventoryTransaction.updateMany({ where: { id, status: 'DRAFT' }, data: { status: 'CONFIRMED', confirmedAt: new Date() } });
+      if (claimed.count !== 1) throw new BadRequestException('Receipt has already been confirmed');
       for (const detail of transaction.details) {
         if (!detail.locationId) {
           throw new BadRequestException('Receipt detail requires locationId');
@@ -147,7 +150,10 @@ export class InventoryService {
       throw new NotFoundException('Issue transaction not found');
     }
 
+    if (transaction.status === 'CONFIRMED') return transaction;
     await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.inventoryTransaction.updateMany({ where: { id, status: 'DRAFT' }, data: { status: 'CONFIRMED', confirmedAt: new Date() } });
+      if (claimed.count !== 1) throw new BadRequestException('Issue has already been confirmed');
       const stockUpdates = new Map<string, number>();
 
       for (const detail of transaction.details) {
@@ -184,7 +190,8 @@ export class InventoryService {
       }
     });
 
-    return this.findIssueById(id);
+    const confirmed = await this.findIssueById(id);
+    return confirmed;
   }
 
   async findAllInventoryLogs() {
