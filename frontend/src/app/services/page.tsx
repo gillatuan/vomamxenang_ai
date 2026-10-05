@@ -1,5 +1,5 @@
 import NextLink from "next/link";
-import { Box, Button, Card, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Container, Grid, Typography } from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
 import TireRepairIcon from "@mui/icons-material/TireRepair";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
