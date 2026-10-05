@@ -1,12 +1,8 @@
 name: CI and deploy production
 
+# CI/CD intentionally runs only after changes land on main.
+# Feature branches and pull requests must not consume Vercel deployment quota.
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "frontend/**"
-      - "backend/**"
-      - ".github/workflows/vercel-production.yml"
   push:
     branches: [main]
     paths:
