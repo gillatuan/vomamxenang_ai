@@ -3,7 +3,7 @@ export type ConversionEventType="VIEW_SIZE"|"VIEW_PRODUCT"|"CLICK_PHONE"|"CLICK_
 export type ConversionReport={
  events:Record<string,number>;leads:Record<string,number>;topPaths:{path:string;count:number}[];
  sales:{totalLeads:number;recentLeads:number;overdue:number;unassigned:number;won:number;lost:number;winRate:number};
- byAssignee:{assigneeId:string|null;email:string;total:number;won:number;open:number}[];
+ byAssignee:{assigneeId:string|null;email:string;total:number;won:number;lost:number;open:number;winRate:number}[];
  topSources:{source:string;count:number}[];
  topLandingPages:{path:string;count:number}[];
  topProducts:{product:{id:string;name:string;sku:string;slug:string|null};count:number}[];
