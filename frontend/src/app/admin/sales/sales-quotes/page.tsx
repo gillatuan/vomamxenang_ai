@@ -2,7 +2,7 @@
 import { useEffect,useState } from "react";
 import { Alert,Box,Button,Card,CardContent,Dialog,DialogActions,DialogContent,DialogTitle,Grid,MenuItem,Stack,TextField,Typography } from "@mui/material";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { Client,Product,QuoteLead,SalesQuote,SalesQuoteStatus,adminManagementAPI,clientsAPI,inventoryAPI,quoteLeadsAPI,salesQuotesAPI } from "@/lib/api-client";
+import { Client,Product,QuoteLead,SalesQuote,SalesQuoteStatus,StockLocationRow,adminManagementAPI,clientsAPI,inventoryAPI,quoteLeadsAPI,salesQuotesAPI } from "@/lib/api-client";
 
 const labels:Record<SalesQuoteStatus,string>={DRAFT:"Nháp",SENT:"Đã gửi",ACCEPTED:"Đã chấp nhận",REJECTED:"Từ chối",EXPIRED:"Hết hạn"};
 const transitions:Record<SalesQuoteStatus,readonly SalesQuoteStatus[]>={DRAFT:["SENT"],SENT:["ACCEPTED","REJECTED","EXPIRED"],ACCEPTED:[],REJECTED:[],EXPIRED:[]};
