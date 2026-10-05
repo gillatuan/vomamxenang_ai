@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { OrderStatus, Prisma } from '@prisma/client';
+import { OrderStatus, PaymentMethod, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { getStripeClient } from '../stripe';
 import { AuthenticatedRequest } from '../auth/auth.types';
@@ -10,7 +10,25 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.order.findMany({ include: { client: true, fulfillment: { select: { id: true, code: true, status: true, confirmedAt: true } }, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
+    return this.prisma.order.findMany({ include: { client: true, payments: { orderBy: { receivedAt: 'desc' }, include: { createdBy: { select: { id: true, email: true } } } }, fulfillment: { select: { id: true, code: true, status: true, confirmedAt: true } }, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async recordPayment(id: string, input: { amount: number; method: PaymentMethod; reference?: string; note?: string; receivedAt?: string }, userId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { id }, include: { payments: true } });
+      if (!order) throw new BadRequestException('Order not found');
+      if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot receive payment');
+      if (input.method === PaymentMethod.STRIPE) throw new BadRequestException('Stripe payments are recorded by webhook');
+      const paid = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      const balance = Math.max(0, order.totalAmount - paid);
+      if (input.amount <= 0 || input.amount > balance) throw new BadRequestException('Payment amount exceeds outstanding balance');
+      const receivedAt = input.receivedAt ? new Date(input.receivedAt) : new Date();
+      if (Number.isNaN(receivedAt.getTime())) throw new BadRequestException('Invalid payment date');
+      const payment = await tx.orderPayment.create({ data: { orderId: id, amount: input.amount, method: input.method, reference: input.reference?.trim() || null, note: input.note?.trim() || null, receivedAt, createdById: userId } });
+      const newPaid = paid + input.amount;
+      if (newPaid >= order.totalAmount) await tx.order.update({ where: { id }, data: { status: OrderStatus.PAID } });
+      return { payment, paidAmount: newPaid, balance: Math.max(0, order.totalAmount - newPaid), status: newPaid >= order.totalAmount ? OrderStatus.PAID : order.status };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
   async createFulfillment(id: string, userId: string) {
@@ -43,17 +61,17 @@ export class OrdersService {
   }
 
    async updateStatus(id: string, status: OrderStatus) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, fulfillment: { select: { id: true } } } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, fulfillment: { select: { id: true } }, payments: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
     if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
-    if (order.fulfillment) throw new BadRequestException('Orders with fulfillment cannot change status manually');
+    if (order.fulfillment || order.payments.length) throw new BadRequestException('Orders with fulfillment or payments cannot change status manually');
     return this.prisma.order.update({ where: { id }, data: { status } });
   }
 
   async deleteDraft(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true, fulfillment: { select: { id: true } } } });
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true, stripeSessionId: true, fulfillment: { select: { id: true } }, payments: { select: { id: true } } } });
     if (!order) throw new BadRequestException('Order not found');
-    if (order.status === OrderStatus.PAID || order.stripeSessionId || order.fulfillment) throw new BadRequestException('Paid, checkout, or fulfillment orders cannot be deleted');
+    if (order.status === OrderStatus.PAID || order.stripeSessionId || order.fulfillment || order.payments.length) throw new BadRequestException('Paid, checkout, or fulfillment orders cannot be deleted');
     return this.prisma.$transaction([
       this.prisma.orderItem.deleteMany({ where: { orderId: id } }),
       this.prisma.order.delete({ where: { id } }),
