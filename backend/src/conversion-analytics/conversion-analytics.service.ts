@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { ConversionEventType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ConversionAnalyticsService {
   constructor(private p: PrismaService) {}
 
-  async create(d:{type:any;path:string;productId?:string;context?:string;sessionId?:string}) {
+  async create(d:{type:ConversionEventType;path:string;productId?:string;context?:string;sessionId?:string}) {
     if(d.productId){const exists=await this.p.product.findUnique({where:{id:d.productId},select:{id:true}});if(!exists)d.productId=undefined}
     return this.p.conversionEvent.create({data:d,select:{id:true}});
   }
