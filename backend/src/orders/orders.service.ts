@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { getStripeClient } from '../stripe';
 import { AuthenticatedRequest } from '../auth/auth.types';
@@ -30,7 +30,15 @@ export class OrdersService {
         const stock = await tx.stockLocation.findFirst({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId }, select: { quantity: true } });
         if (!stock || stock.quantity < required.quantity) throw new BadRequestException('Insufficient stock to create fulfillment');
       }
-      return tx.inventoryTransaction.create({ data: { code: `EXPORT-ORDER-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`, type: 'EXPORT', partnerName: order.client.name, userId, orderId: order.id, details: { create: order.items.map(item => ({ productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: item.quantity, price: item.price })) } }, include: { details: true } });
+      try {
+        return await tx.inventoryTransaction.create({ data: { code: `EXPORT-ORDER-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`, type: 'EXPORT', partnerName: order.client.name, userId, orderId: order.id, details: { create: order.items.map(item => ({ productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: item.quantity, price: item.price })) } }, include: { details: true } });
+      } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          const existing = await tx.inventoryTransaction.findUnique({ where: { orderId: order.id }, include: { details: true } });
+          if (existing) return existing;
+        }
+        throw error;
+      }
     });
   }
 
