@@ -1,36 +1,39 @@
-import { Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IsIn } from 'class-validator';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateQuoteLeadDto } from './dto/create-quote-lead.dto';
 import { QuoteLeadsService } from './quote-leads.service';
 
-const quoteLeadStatuses = ['NEW', 'CONTACTED', 'QUOTED', 'WON', 'LOST'] as const;
-type QuoteLeadStatusValue = typeof quoteLeadStatuses[number];
-class UpdateQuoteLeadStatusDto {
-  @IsIn(quoteLeadStatuses)
-  status!: QuoteLeadStatusValue;
+const statuses = ['NEW', 'CONTACTED', 'QUOTED', 'WON', 'LOST'] as const;
+type Status = typeof statuses[number];
+class StatusDto { @IsIn(statuses) status!: Status; }
+class CrmDto {
+  @IsOptional() @IsString() assigneeId?: string | null;
+  @IsOptional() @IsString() followUpAt?: string | null;
 }
+class NoteDto { @IsString() @MaxLength(2000) content!: string; }
 
 @Controller('quote-leads')
 export class QuoteLeadsController {
   constructor(private service: QuoteLeadsService) {}
-
-  @Post()
-  @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }))
-  create(@Body() body: CreateQuoteLeadDto, @UploadedFile() file?: Express.Multer.File) {
-    return this.service.create(body, file);
-  }
+  @Post() @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  create(@Body() body: CreateQuoteLeadDto, @UploadedFile() file?: Express.Multer.File) { return this.service.create(body, file); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Get()
-  findAll() { return this.service.findAll(); }
+  @Get() findAll(@Query('status') status?: string, @Query('assigneeId') assigneeId?: string, @Query('overdue') overdue?: string) { return this.service.findAll({ status, assigneeId, overdue: overdue === 'true' }); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() body: UpdateQuoteLeadStatusDto) {
-    return this.service.updateStatus(id, body.status);
-  }
+  @Get('assignees') assignees() { return this.service.assignees(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
+  @Patch(':id/status') updateStatus(@Req() req: any, @Param('id') id: string, @Body() body: StatusDto) { return this.service.updateStatus(id, body.status, req.user.sub); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
+  @Patch(':id/crm') updateCrm(@Req() req: any, @Param('id') id: string, @Body() body: CrmDto) { return this.service.updateCrm(id, body, req.user.sub); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
+  @Post(':id/notes') addNote(@Req() req: any, @Param('id') id: string, @Body() body: NoteDto) { return this.service.addNote(id, body.content, req.user.sub); }
 }
