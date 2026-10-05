@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Req } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/auth.types';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -24,6 +25,11 @@ export class OrdersController {
 
    @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
+  @Post(':id/fulfillment')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
+  createFulfillment(@Param('id') id: string, @Req() req: AuthenticatedRequest) { return this.service.createFulfillment(id, req.user.sub); }
+
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) { return this.service.updateStatus(id, dto.status); }
 
