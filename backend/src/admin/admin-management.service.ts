@@ -100,14 +100,16 @@ export class AdminManagementService {
   }
 
   async reports() {
-    const [paidOrders, orderCount, clients, stocks] = await Promise.all([
+    const [paidOrders, orderCount, clients, stocks, offlinePayments] = await Promise.all([
       this.prisma.order.aggregate({ where: { status: OrderStatus.PAID }, _sum: { totalAmount: true }, _avg: { totalAmount: true } }),
       this.prisma.order.count({ where: { status: OrderStatus.PAID } }),
-      this.prisma.client.findMany({ select: { id: true, name: true, type: true, orders: { where: { status: OrderStatus.PAID }, select: { totalAmount: true } } } }),
+      this.prisma.client.findMany({ select: { id: true, name: true, type: true, orders: { select: { id: true, totalAmount: true, status: true, payments: { select: { amount: true } } } } } }),
       this.prisma.stockLocation.findMany({ include: { product: { select: { importPrice: true } }, wheelRim: { select: { importPrice: true } } } }),
+      this.prisma.orderPayment.aggregate({ where: { method: { not: 'STRIPE' } }, _sum: { amount: true } }),
     ]);
     const inventoryCost = stocks.reduce((sum, stock) => sum + stock.quantity * (stock.product?.importPrice ?? stock.wheelRim?.importPrice ?? 0), 0);
-    const topClients = clients.map((client) => ({ id: client.id, name: client.name, type: client.type, revenue: client.orders.reduce((sum, order) => sum + order.totalAmount, 0), orders: client.orders.length })).sort((left, right) => right.revenue - left.revenue).slice(0, 10);
-    return { revenue: paidOrders._sum.totalAmount ?? 0, paidOrders: orderCount, averageOrderValue: paidOrders._avg.totalAmount ?? 0, inventoryCost, topClients };
+    const topClients = clients.map((client) => ({ id: client.id, name: client.name, type: client.type, revenue: client.orders.reduce((sum, order) => sum + order.payments.reduce((paid, payment) => paid + payment.amount, 0), 0), orders: client.orders.filter(order => order.status === OrderStatus.PAID).length })).sort((left, right) => right.revenue - left.revenue).slice(0, 10);
+    const receivables = clients.reduce((sum, client) => sum + client.orders.filter(order => order.status !== OrderStatus.FAILED).reduce((orderSum, order) => orderSum + Math.max(0, order.totalAmount - order.payments.reduce((paid, payment) => paid + payment.amount, 0)), 0), 0);
+    return { revenue: paidOrders._sum.totalAmount ?? 0, paidOrders: orderCount, averageOrderValue: paidOrders._avg.totalAmount ?? 0, inventoryCost, topClients, offlineCollected: offlinePayments._sum.amount ?? 0, receivables };
   }
 }
