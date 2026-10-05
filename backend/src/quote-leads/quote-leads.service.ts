@@ -25,6 +25,7 @@ export class QuoteLeadsService {
       if (!exists) data.productId = undefined;
     }
     const quantity = data.quantity == null ? undefined : Number(data.quantity);
+    if (quantity != null && (!Number.isInteger(quantity) || quantity < 1 || quantity > 10000)) throw new BadRequestException('Số lượng không hợp lệ.');
     return this.prisma.quoteLead.create({ data: { ...data, quantity, imageUrl, source: 'WEBSITE' }, select: { id: true, status: true, createdAt: true } });
   }
 
