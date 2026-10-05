@@ -154,6 +154,7 @@ export interface Order {
   totalAmount: number;
   status: "PENDING" | "PAID" | "FAILED";
   stripeSessionId?: string;
+  fulfillment?: { id: string; code: string; status: "DRAFT" | "CONFIRMED"; confirmedAt?: string | null } | null;
   createdAt: string;
   items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
