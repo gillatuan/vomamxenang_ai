@@ -4,34 +4,43 @@
   "status": "development",
   "owner": "developer",
   "risk": {
+    "database": false,
+    "destructiveDatabase": false,
     "security": true,
     "payment": false,
     "inventory": false,
     "pricing": false,
-    "production": true,
-    "database": false
+    "production": true
   },
-  "artifacts": [
-    "requirement.md",
-    "plan.md",
-    "architecture.md"
-  ],
+  "artifacts": {
+    "requirement": ".ai/tasks/TASK-0009/requirement.md",
+    "plan": ".ai/tasks/TASK-0009/plan.md",
+    "architecture": ".ai/tasks/TASK-0009/architecture.md"
+  },
   "history": [
     {
-      "status": "requirement",
-      "owner": "planner"
+      "from": null,
+      "to": "requirement",
+      "by": "planner",
+      "evidence": "requirement.md"
     },
     {
-      "status": "planning",
-      "owner": "planner"
+      "from": "requirement",
+      "to": "planning",
+      "by": "planner",
+      "evidence": "plan.md"
     },
     {
-      "status": "architecture",
-      "owner": "architect"
+      "from": "planning",
+      "to": "architecture",
+      "by": "architect",
+      "evidence": "architecture.md"
     },
     {
-      "status": "development",
-      "owner": "developer"
+      "from": "architecture",
+      "to": "development",
+      "by": "developer",
+      "evidence": "Implementation in progress"
     }
   ]
 }
