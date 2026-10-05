@@ -175,8 +175,7 @@ model Client {
   notes     String?
   createdAt DateTime @default(now())
   orders    Order[]
-  salesQuotes SalesQuote[]
-  salesQuoteOrder SalesQuote?
+  salesQuotes SalesQuote[] @relation("SalesQuoteClient")
 }
 
 model Supplier {
@@ -452,7 +451,7 @@ model SalesQuote {
   leadId       String?
   lead         QuoteLead?       @relation(fields: [leadId], references: [id], onDelete: SetNull)
   clientId     String?
-  client       Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  client       Client?          @relation("SalesQuoteClient", fields: [clientId], references: [id], onDelete: SetNull)
   createdById  String
   createdBy    User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
   customerName String
