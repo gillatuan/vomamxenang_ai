@@ -34,11 +34,12 @@ export class ConversionAnalyticsService {
     ]);
     const userMap=new Map(users.map(x=>[x.id,x.email]));
     const productMap=new Map(products.map(x=>[x.id,x]));
-    const byAssignee=new Map<string,{assigneeId:string|null;email:string;total:number;won:number;open:number}>();
+    const byAssignee=new Map<string,{assigneeId:string|null;email:string;total:number;won:number;lost:number;open:number;winRate:number}>();
     for(const row of assigneeRows){
-      const key=row.assigneeId||'UNASSIGNED'; const current=byAssignee.get(key)||{assigneeId:row.assigneeId,email:row.assigneeId?userMap.get(row.assigneeId)||'Không xác định':'Chưa giao',total:0,won:0,open:0};
-      current.total+=row._count._all;if(row.status==='WON')current.won+=row._count._all;if(row.status!=='WON'&&row.status!=='LOST')current.open+=row._count._all;byAssignee.set(key,current);
+      const key=row.assigneeId||'UNASSIGNED'; const current=byAssignee.get(key)||{assigneeId:row.assigneeId,email:row.assigneeId?userMap.get(row.assigneeId)||'Không xác định':'Chưa giao',total:0,won:0,lost:0,open:0,winRate:0};
+      current.total+=row._count._all;if(row.status==='WON')current.won+=row._count._all;if(row.status==='LOST')current.lost+=row._count._all;if(row.status!=='WON'&&row.status!=='LOST')current.open+=row._count._all;byAssignee.set(key,current);
     }
+    for(const value of byAssignee.values()){const closed=value.won+value.lost;value.winRate=closed?Math.round(value.won/closed*1000)/10:0;}
     const won=leads.find(x=>x.status==='WON')?._count._all||0;
     const lost=leads.find(x=>x.status==='LOST')?._count._all||0;
     return {
