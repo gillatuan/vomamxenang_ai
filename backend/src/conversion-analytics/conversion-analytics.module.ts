@@ -1,0 +1,1 @@
+import{Module}from'@nestjs/common';import{ConversionAnalyticsController}from'./conversion-analytics.controller';import{ConversionAnalyticsService}from'./conversion-analytics.service';@Module({controllers:[ConversionAnalyticsController],providers:[ConversionAnalyticsService]})export class ConversionAnalyticsModule{}
