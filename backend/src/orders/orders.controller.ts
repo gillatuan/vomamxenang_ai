@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, ValidateNested } from 'class-validator';
+import { PaymentMethod } from '@prisma/client';
 import { AuthenticatedRequest } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -13,6 +14,13 @@ class CheckoutItemDto {
   @IsOptional() @IsString() wheelRimId?: string;
   @IsString() locationId!: string;
   @IsInt() @Min(1) quantity!: number;
+}
+class RecordPaymentDto {
+  @IsNumber() @Min(0.01) amount!: number;
+  @IsEnum(PaymentMethod) method!: PaymentMethod;
+  @IsOptional() @IsString() @MaxLength(120) reference?: string;
+  @IsOptional() @IsString() @MaxLength(500) note?: string;
+  @IsOptional() @IsDateString() receivedAt?: string;
 }
 class CheckoutDto {
   @IsArray() @ValidateNested({ each: true }) @Type(() => CheckoutItemDto) items!: CheckoutItemDto[];
@@ -28,6 +36,13 @@ export class OrdersController {
   @Roles('ADMIN_MANAGER')
   @Get()
   findAll() { return this.service.findAll(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
+  @Post(':id/payments')
+  recordPayment(@Param('id') id: string, @Body() body: RecordPaymentDto, @Req() req: AuthenticatedRequest) {
+    return this.service.recordPayment(id, body, req.user.sub);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
