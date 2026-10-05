@@ -174,7 +174,7 @@ export const ordersAPI = {
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
   createFulfillment: (id: string) => apiClient.post<{ id: string; code: string; status: "DRAFT" | "CONFIRMED" }>(`/orders/${id}/fulfillment`),
   receivables:()=>apiClient.get<ReceivableOrder[]>("/orders/receivables"),
-  updatePaymentDue:(id:string,paymentDueAt:string|null)=>apiClient.patch<Order>(`/orders/${id}/payment-due`,{paymentDueAt}),
+  updatePaymentDue:(id:string,paymentDueDate:string|null)=>apiClient.patch<Order>(`/orders/${id}/payment-due`,{paymentDueDate}),
   recordPayment: (id:string,data:{amount:number;method:Exclude<PaymentMethod,"STRIPE">;reference?:string;note?:string;receivedAt?:string}) => apiClient.post<{payment:OrderPayment;paidAmount:number;balance:number;status:Order["status"]}>(`/orders/${id}/payments`,data),
 
   createCheckoutSession: (items: CheckoutItem[]) =>
