@@ -37,6 +37,31 @@ export class OrdersService {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
+  async updatePaymentDueDate(id: string, paymentDueAt: string | null) {
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { id: true, status: true } });
+    if (!order) throw new BadRequestException('Order not found');
+    if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot have a payment due date');
+    const due = paymentDueAt ? new Date(paymentDueAt) : null;
+    if (due && Number.isNaN(due.getTime())) throw new BadRequestException('Invalid payment due date');
+    return this.prisma.order.update({ where: { id }, data: { paymentDueAt: due } });
+  }
+
+  async receivables() {
+    const orders = await this.prisma.order.findMany({
+      where: { status: OrderStatus.PENDING },
+      include: { client: { select: { id: true, name: true, phone: true, company: true } }, payments: { select: { amount: true } } },
+      orderBy: [{ paymentDueAt: 'asc' }, { createdAt: 'asc' }],
+    });
+    const now = Date.now();
+    return orders.map(order => {
+      const paidAmount = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      const balance = Math.max(0, order.totalAmount - paidAmount);
+      const overdueDays = order.paymentDueAt ? Math.max(0, Math.floor((now - order.paymentDueAt.getTime()) / 86400000)) : 0;
+      const agingBucket = !order.paymentDueAt || order.paymentDueAt.getTime() >= now ? 'CURRENT' : overdueDays <= 30 ? '1_30' : overdueDays <= 60 ? '31_60' : overdueDays <= 90 ? '61_90' : '90_PLUS';
+      return { id: order.id, code: order.code, createdAt: order.createdAt, paymentDueAt: order.paymentDueAt, totalAmount: order.totalAmount, paidAmount, balance, overdueDays, agingBucket, client: order.client };
+    }).filter(order => order.balance > 0);
+  }
+
   async recordPayment(id: string, input: { amount: number; method: PaymentMethod; reference?: string; note?: string; receivedAt?: string }, userId: string) {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id }, include: { payments: true } });
