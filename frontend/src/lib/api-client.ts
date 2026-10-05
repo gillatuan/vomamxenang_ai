@@ -142,6 +142,8 @@ export const dailyContentAPI = {
   run: (runDate?: string) => apiClient.post<{ run: DailyContentRun; reused?: boolean; running?: boolean }>('/admin/daily-content/run', runDate ? { runDate } : {}),
 };
 
+export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "STRIPE" | "OTHER";
+export interface OrderPayment { id:string;amount:number;method:PaymentMethod;reference?:string|null;note?:string|null;receivedAt:string;createdAt:string;createdBy:{id:string;email:string}; }
 export interface Order {
   id: string;
   code: string;
@@ -154,18 +156,28 @@ export interface Order {
   totalAmount: number;
   status: "PENDING" | "PAID" | "FAILED";
   stripeSessionId?: string;
+  fulfillment?: { id: string; code: string; status: "DRAFT" | "CONFIRMED"; confirmedAt?: string | null } | null;
+  payments?: OrderPayment[];
   createdAt: string;
+  paymentDueAt?: string | null;
   items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
 
+export interface CheckoutItem { productId?: string; wheelRimId?: string; locationId?: string; quantity: number; }
+
+export type AgingBucket="CURRENT"|"1_30"|"31_60"|"61_90"|"90_PLUS";
+export interface ReceivableOrder{id:string;code:string;createdAt:string;paymentDueAt:string|null;totalAmount:number;paidAmount:number;balance:number;overdueDays:number;agingBucket:AgingBucket;client:{id:string;name:string;phone:string;company?:string|null}}
 export const ordersAPI = {
   getAll: () => apiClient.get<Order[]>("/orders"),
 
-  create: (data: Partial<Order>) => apiClient.post<Order>("/orders", data),
-  updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
+   updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
+  createFulfillment: (id: string) => apiClient.post<{ id: string; code: string; status: "DRAFT" | "CONFIRMED" }>(`/orders/${id}/fulfillment`),
+  receivables:()=>apiClient.get<ReceivableOrder[]>("/orders/receivables"),
+  updatePaymentDue:(id:string,paymentDueDate:string|null)=>apiClient.patch<Order>(`/orders/${id}/payment-due`,{paymentDueDate}),
+  recordPayment: (id:string,data:{amount:number;method:Exclude<PaymentMethod,"STRIPE">;reference?:string;note?:string;receivedAt?:string}) => apiClient.post<{payment:OrderPayment;paidAmount:number;balance:number;status:Order["status"]}>(`/orders/${id}/payments`,data),
 
-  createCheckoutSession: (items: any[]) =>
+  createCheckoutSession: (items: CheckoutItem[]) =>
     apiClient.post<{ sessionId: string; url: string }>(
       "/orders/checkout-session",
       { items }
@@ -184,7 +196,7 @@ export const cacheAPI = {
     apiClient.post<{ revalidated: boolean; paths: string[] }>("/admin/cache/purge", data),
 };
 
-export interface StockLocationRow { id: string; quantity: number; location: { locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }
+export interface StockLocationRow { id: string; quantity: number; location: { id: string; locationCode: string; capacity: number; warehouse?: { code: string; name: string } }; product?: { id: string; sku: string; name: string; type: string }; wheelRim?: { id: string; sku: string; size: string; brand?: string | null }; }
 export const inventoryAPI = {
   stockSummary: () => apiClient.get<StockLocationRow[]>("/inventory/stocks/summary"),
   logs: () => apiClient.get<{ id: string; quantity: number; price: number; transaction: { code: string; type: string; createdAt: string }; product?: { sku: string; name: string }; wheelRim?: { sku: string; size: string } }[]>("/inventory/logs"),
@@ -255,18 +267,28 @@ export const wheelRimsAPI = {
 
 
 export type QuoteLeadStatus = "NEW" | "CONTACTED" | "QUOTED" | "WON" | "LOST";
+export interface QuoteLeadActivity { id:string;type:string;content:string;createdAt:string;user:{id:string;email:string}; }
 export interface QuoteLead {
   id: string; name: string; phone: string; zalo?: string; company?: string; quantity?: number;
   forkliftModel?: string; location?: string; note?: string; imageUrl?: string; landingPage?: string;
-  status: QuoteLeadStatus; createdAt: string;
+  status: QuoteLeadStatus; createdAt: string; updatedAt?:string; followUpAt?:string|null;lastContactAt?:string|null;assigneeId?:string|null;
+  assignee?: { id:string;email:string;role:string } | null; activities?: QuoteLeadActivity[];
   product?: { id: string; name: string; sku: string; slug?: string };
 }
 export const quoteLeadsAPI = {
   create: (data: FormData) => apiClient.post<{ id: string; status: QuoteLeadStatus; createdAt: string }>("/quote-leads", data, { headers: { "Content-Type": "multipart/form-data" } }),
-  getAll: () => apiClient.get<QuoteLead[]>("/quote-leads"),
+  getAll: (params?:{status?:QuoteLeadStatus;assigneeId?:string;overdue?:boolean}) => apiClient.get<QuoteLead[]>("/quote-leads",{params}),
+  assignees:()=>apiClient.get<{id:string;email:string;role:string}[]>("/quote-leads/assignees"),
   updateStatus: (id: string, status: QuoteLeadStatus) => apiClient.patch<QuoteLead>(`/quote-leads/${id}/status`, { status }),
+  updateCrm:(id:string,data:{assigneeId?:string|null;followUpAt?:string|null})=>apiClient.patch<QuoteLead>(`/quote-leads/${id}/crm`,data),
+  addNote:(id:string,content:string)=>apiClient.post<QuoteLeadActivity>(`/quote-leads/${id}/notes`,{content}),
 };
 
+export type SalesQuoteStatus="DRAFT"|"SENT"|"ACCEPTED"|"REJECTED"|"EXPIRED";
+export interface SalesQuoteItem{id:string;productId?:string|null;description:string;quantity:number;unitPrice:number;lineTotal:number;product?:{id:string;sku:string;name:string}|null}
+export interface SalesQuote{id:string;code:string;leadId?:string|null;clientId?:string|null;customerName:string;phone:string;company?:string|null;status:SalesQuoteStatus;subtotal:number;discount:number;total:number;note?:string|null;validUntil?:string|null;sentAt?:string|null;acceptedAt?:string|null;createdAt:string;orderId?:string|null;convertedAt?:string|null;order?:{id:string;code:string;status:Order["status"]}|null;items:SalesQuoteItem[];createdBy:{id:string;email:string};lead?:{id:string;name:string;status:QuoteLeadStatus}|null}
+export interface CreateSalesQuote{leadId?:string;clientId?:string;customerName:string;phone:string;company?:string;discount?:number;note?:string;validUntil?:string;items:{productId?:string;description:string;quantity:number;unitPrice:number}[]}
+export const salesQuotesAPI={getAll:()=>apiClient.get<SalesQuote[]>("/sales-quotes"),create:(data:CreateSalesQuote)=>apiClient.post<SalesQuote>("/sales-quotes",data),updateStatus:(id:string,status:SalesQuoteStatus)=>apiClient.patch<SalesQuote>(`/sales-quotes/${id}/status`,{status}),convertToOrder:(id:string,data:{clientId:string;locations:{itemId:string;locationId:string}[]})=>apiClient.post<Order>(`/sales-quotes/${id}/convert-to-order`,data)};
 
 export const mediaAPI = {
   uploadImage: (file: File) => {

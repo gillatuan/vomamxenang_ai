@@ -12,6 +12,16 @@ import { InventoryService } from './inventory.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/auth.types';
+import { IsInt, IsNumber, IsString, Min } from 'class-validator';
+
+class AssembleInventoryDto {
+  @IsString() productId!: string;
+  @IsString() wheelRimId!: string;
+  @IsInt() @Min(1) quantity!: number;
+  @IsNumber() @Min(0) pressingFee!: number;
+  @IsString() locationId!: string;
+}
 
 @Controller('inventory')
 export class InventoryController {
@@ -19,7 +29,7 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('receipts')
-  createReceipt(@Req() req: any, @Body() createReceiptDto: CreateReceiptDto) {
+  createReceipt(@Req() req: AuthenticatedRequest, @Body() createReceiptDto: CreateReceiptDto) {
     return this.inventoryService.createReceipt(createReceiptDto, req.user.sub);
   }
 
@@ -43,7 +53,7 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('issues')
-  createIssue(@Req() req: any, @Body() createIssueDto: CreateIssueDto) {
+  createIssue(@Req() req: AuthenticatedRequest, @Body() createIssueDto: CreateIssueDto) {
     return this.inventoryService.createIssue(createIssueDto, req.user.sub);
   }
 
@@ -67,7 +77,7 @@ export class InventoryController {
 
   @UseGuards(JwtAuthGuard)
   @Post('assembly')
-  assembleInventory(@Req() req: any, @Body() body: any) {
+  assembleInventory(@Req() req: AuthenticatedRequest, @Body() body: AssembleInventoryDto) {
     const { productId, wheelRimId, quantity, pressingFee, locationId } = body;
     return this.inventoryService.assembleInventory(productId, wheelRimId, quantity, pressingFee, locationId, req.user.sub);
   }
