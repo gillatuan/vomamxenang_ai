@@ -27,7 +27,7 @@ async function main() {
   process.env.STRIPE_SECRET_KEY='sk_test_placeholder';
   const stripe=require('../src/stripe');
   const original=stripe.getStripeClient;
-  stripe.getStripeClient=()=>({checkout:{sessions:{create:async(args:any)=>{assert.equal(args.line_items[0].price_data.unit_amount,9000);return{id:'cs_test',url:'https://example.test/checkout'};}}}});
+  stripe.getStripeClient=()=>({checkout:{sessions:{create:async(args:any)=>{assert.equal(args.line_items[0].price_data.unit_amount,90);return{id:'cs_test',url:'https://example.test/checkout'};}}}});
   try {
     const out=await service.createCheckoutSession({items:[{productId:'P1',locationId:'L1',quantity:2}],clientId:'c1'}, {});
     assert.equal(out.url,'https://example.test/checkout');
