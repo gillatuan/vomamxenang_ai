@@ -276,9 +276,9 @@ export const quoteLeadsAPI = {
 
 export type SalesQuoteStatus="DRAFT"|"SENT"|"ACCEPTED"|"REJECTED"|"EXPIRED";
 export interface SalesQuoteItem{id:string;productId?:string|null;description:string;quantity:number;unitPrice:number;lineTotal:number;product?:{id:string;sku:string;name:string}|null}
-export interface SalesQuote{id:string;code:string;leadId?:string|null;clientId?:string|null;customerName:string;phone:string;company?:string|null;status:SalesQuoteStatus;subtotal:number;discount:number;total:number;note?:string|null;validUntil?:string|null;sentAt?:string|null;acceptedAt?:string|null;createdAt:string;items:SalesQuoteItem[];createdBy:{id:string;email:string};lead?:{id:string;name:string;status:QuoteLeadStatus}|null}
+export interface SalesQuote{id:string;code:string;leadId?:string|null;clientId?:string|null;customerName:string;phone:string;company?:string|null;status:SalesQuoteStatus;subtotal:number;discount:number;total:number;note?:string|null;validUntil?:string|null;sentAt?:string|null;acceptedAt?:string|null;createdAt:string;orderId?:string|null;convertedAt?:string|null;order?:{id:string;code:string;status:Order["status"]}|null;items:SalesQuoteItem[];createdBy:{id:string;email:string};lead?:{id:string;name:string;status:QuoteLeadStatus}|null}
 export interface CreateSalesQuote{leadId?:string;clientId?:string;customerName:string;phone:string;company?:string;discount?:number;note?:string;validUntil?:string;items:{productId?:string;description:string;quantity:number;unitPrice:number}[]}
-export const salesQuotesAPI={getAll:()=>apiClient.get<SalesQuote[]>("/sales-quotes"),create:(data:CreateSalesQuote)=>apiClient.post<SalesQuote>("/sales-quotes",data),updateStatus:(id:string,status:SalesQuoteStatus)=>apiClient.patch<SalesQuote>(`/sales-quotes/${id}/status`,{status})};
+export const salesQuotesAPI={getAll:()=>apiClient.get<SalesQuote[]>("/sales-quotes"),create:(data:CreateSalesQuote)=>apiClient.post<SalesQuote>("/sales-quotes",data),updateStatus:(id:string,status:SalesQuoteStatus)=>apiClient.patch<SalesQuote>(`/sales-quotes/${id}/status`,{status}),convertToOrder:(id:string,data:{clientId:string;locations:{itemId:string;locationId:string}[]})=>apiClient.post<Order>(`/sales-quotes/${id}/convert-to-order`,data)};
 
 export const mediaAPI = {
   uploadImage: (file: File) => {
