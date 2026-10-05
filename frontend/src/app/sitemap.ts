@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/services`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${siteUrl}/services/ep-vo-xe-nang`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${siteUrl}/services/thay-vo-xe-nang`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${siteUrl}/lien-he`, changeFrequency: "monthly", priority: 0.8 },
     ...(['vo-xe-nang', 'lop-dac-xe-nang', 'mam-xe-nang'] as const).filter(slug => topicProducts(slug, products as Product[]).length || slug === 'mam-xe-nang' && rims.length).map(slug => ({ url: `${siteUrl}/${slug}`, changeFrequency: 'weekly' as const, priority: 0.9 })),
     ...rims.map(rim => ({ url: siteUrl + rimPath(rim), lastModified: rim.createdAt, changeFrequency: 'monthly' as const, priority: 0.7 })),
     ...uniqueProductSizes(products as Product[]).map(({ slug }) => ({ url: `${siteUrl}/kich-thuoc/${slug}`, changeFrequency: 'daily' as const, priority: 0.85 })),
