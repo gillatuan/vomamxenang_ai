@@ -29,7 +29,7 @@ async function bootstrap() {
 
   app.use(express.json({
     limit: '30mb',
-    verify: (req: any, res, buf) => {
+    verify: (req: express.Request & { rawBody?: Buffer }, _res, buf) => {
       if (req.originalUrl?.includes('/api/v1/orders/webhook')) {
         req.rawBody = buf;
       }
