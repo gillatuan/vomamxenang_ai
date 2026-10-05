@@ -266,3 +266,12 @@ export const quoteLeadsAPI = {
   getAll: () => apiClient.get<QuoteLead[]>("/quote-leads"),
   updateStatus: (id: string, status: QuoteLeadStatus) => apiClient.patch<QuoteLead>(`/quote-leads/${id}/status`, { status }),
 };
+
+
+export const mediaAPI = {
+  uploadImage: (file: File) => {
+    const data = new FormData();
+    data.append("file", file);
+    return apiClient.post<{ url: string; width: number | null; height: number | null; bytes: number; mimeType: string }>("/admin/media/image", data, { headers: { "Content-Type": "multipart/form-data" } });
+  },
+};
