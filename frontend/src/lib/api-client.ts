@@ -163,8 +163,7 @@ export interface CheckoutItem { productId?: string; wheelRimId?: string; locatio
 export const ordersAPI = {
   getAll: () => apiClient.get<Order[]>("/orders"),
 
-  create: (data: Partial<Order>) => apiClient.post<Order>("/orders", data),
-  updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
+   updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
 
   createCheckoutSession: (items: CheckoutItem[]) =>

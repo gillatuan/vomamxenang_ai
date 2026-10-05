@@ -2,6 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { getStripeClient } from '../stripe';
+import { AuthenticatedRequest } from '../auth/auth.types';
+import { Client } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -11,11 +13,7 @@ export class OrdersService {
     return this.prisma.order.findMany({ include: { client: true, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
   }
 
-  async create(data: any) {
-    return this.prisma.order.create({ data });
-  }
-
-  async updateStatus(id: string, status: OrderStatus) {
+   async updateStatus(id: string, status: OrderStatus) {
     const order = await this.prisma.order.findUnique({ where: { id }, select: { status: true } });
     if (!order) throw new BadRequestException('Order not found');
     if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
@@ -32,13 +30,8 @@ export class OrdersService {
     ]);
   }
 
-  async createCheckoutSession(body: any, req: any) {
-    const items = body.items as Array<{
-      productId?: string;
-      wheelRimId?: string;
-      locationId?: string;
-      quantity: number;
-    }>;
+  async createCheckoutSession(body: {items:Array<{productId?:string;wheelRimId?:string;locationId:string;quantity:number}>;clientId?:string;customerType?:'RETAIL'|'B2B_TIER1'|'B2B_TIER2'}, req: AuthenticatedRequest) {
+    const items = body.items;
     const customerType = body.customerType ?? 'RETAIL';
 
     if (!items || items.length === 0) {
@@ -54,9 +47,9 @@ export class OrdersService {
     // Support two checkout assumptions:
     // - Logged-in user: attempt to resolve a Client by authenticated user's email (req.user.email)
     // - Guest (anonymous): use provided clientId or create/lookup a guest client record
-    const authUser = req?.user as { sub?: string; email?: string } | undefined;
+    const authUser = req.user;
 
-    let client = null as any;
+    let client: Client | null = null;
     if (authUser?.email) {
       client = await this.prisma.client.findUnique({ where: { email: authUser.email } });
     }
