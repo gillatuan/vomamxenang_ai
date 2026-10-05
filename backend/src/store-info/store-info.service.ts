@@ -14,7 +14,7 @@ export class StoreInfoService {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, name: true, address: true, phone: true, email: true, website: true,
-        logoUrl: true, facebookUrl: true, googleMapsUrl: true, latitude: true, longitude: true,
+        logoUrl: true, facebookUrl: true,
         businessHours: true, notes: true, createdAt: true, updatedAt: true,
       },
     });
