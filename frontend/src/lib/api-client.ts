@@ -251,3 +251,17 @@ export const aboutAPI = {
 export const wheelRimsAPI = {
   create: (data: Record<string, unknown>) => apiClient.post("/wheel-rims", data), update: (id: string, data: Record<string, unknown>) => apiClient.patch(`/wheel-rims/${id}`, data), delete: (id: string) => apiClient.delete(`/wheel-rims/${id}`),
 };
+
+
+export type QuoteLeadStatus = "NEW" | "CONTACTED" | "QUOTED" | "WON" | "LOST";
+export interface QuoteLead {
+  id: string; name: string; phone: string; zalo?: string; company?: string; quantity?: number;
+  forkliftModel?: string; location?: string; note?: string; imageUrl?: string; landingPage?: string;
+  status: QuoteLeadStatus; createdAt: string;
+  product?: { id: string; name: string; sku: string; slug?: string };
+}
+export const quoteLeadsAPI = {
+  create: (data: FormData) => apiClient.post<{ id: string; status: QuoteLeadStatus; createdAt: string }>("/quote-leads", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  getAll: () => apiClient.get<QuoteLead[]>("/quote-leads"),
+  updateStatus: (id: string, status: QuoteLeadStatus) => apiClient.patch<QuoteLead>(`/quote-leads/${id}/status`, { status }),
+};
