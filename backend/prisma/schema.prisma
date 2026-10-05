@@ -166,6 +166,9 @@ model StoreInfo {
   taxCode       String?
   logoUrl       String?
   facebookUrl   String?
+  googleMapsUrl String?
+  latitude      Float?
+  longitude     Float?
   businessHours String?
   notes         String?
   isActive      Boolean  @default(true)
