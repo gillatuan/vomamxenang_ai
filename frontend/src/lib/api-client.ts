@@ -32,6 +32,7 @@ export interface Product {
   sellingPrice?: number;
   minStock?: number;
   maxStock?: number;
+  stocks?: { quantity: number }[];
   imageUrl?: string;
   shortDescription?: string;
   description?: string;
