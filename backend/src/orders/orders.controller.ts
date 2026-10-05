@@ -17,7 +17,7 @@ class CheckoutItemDto {
   @IsInt() @Min(1) quantity!: number;
 }
 class PaymentDueDto {
-  @IsOptional() @IsDateString() paymentDueAt?: string | null;
+  @IsOptional() @IsString() paymentDueDate?: string | null;
 }
 class RecordPaymentDto {
   @IsNumber() @Min(0.01) amount!: number;
@@ -55,7 +55,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
   @Patch(':id/payment-due')
-  updatePaymentDue(@Param('id') id: string, @Body() body: PaymentDueDto) { return this.service.updatePaymentDueDate(id, body.paymentDueAt ?? null); }
+  updatePaymentDue(@Param('id') id: string, @Body() body: PaymentDueDto) { return this.service.updatePaymentDueDate(id, body.paymentDueDate ?? null); }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
