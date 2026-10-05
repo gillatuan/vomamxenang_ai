@@ -41,6 +41,14 @@ enum OrderStatus {
   FAILED
 }
 
+enum QuoteLeadStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  WON
+  LOST
+}
+
 enum AiGenerationType {
   PRODUCT
   BLOG
@@ -243,6 +251,7 @@ model Product {
   seoKeywords       SeoKeyword[]
   seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
   dailyContentPlans DailyContentPlan[]
+  quoteLeads        QuoteLead[]
 
   @@index([categoryId])
 }
@@ -312,6 +321,29 @@ model PriceMatrix {
   price        Float
 
   @@unique([productId, customerType])
+}
+
+model QuoteLead {
+  id            String          @id @default(cuid())
+  name          String
+  phone         String
+  zalo          String?
+  company       String?
+  quantity      Int?
+  forkliftModel String?
+  location      String?
+  note          String?
+  imageUrl      String?
+  source        String          @default("WEBSITE")
+  landingPage   String?
+  productId     String?
+  product       Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  status        QuoteLeadStatus @default(NEW)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([productId])
 }
 
 model Order {
