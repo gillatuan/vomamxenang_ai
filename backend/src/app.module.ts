@@ -23,6 +23,7 @@ import { DailyContentModule } from "./daily-content/daily-content.module"
 import { CustomerChatModule } from "./customer-chat/customer-chat.module"
 import { MediaModule } from "./media/media.module"
 import { QuoteLeadsModule } from "./quote-leads/quote-leads.module"
+import { CaseStudiesModule } from "./case-studies/case-studies.module"
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { QuoteLeadsModule } from "./quote-leads/quote-leads.module"
     MediaModule,
     CustomerChatModule,
     QuoteLeadsModule,
+    CaseStudiesModule,
   ],
   providers: [
     {

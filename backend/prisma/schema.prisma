@@ -255,6 +255,7 @@ model Product {
   seoAudits         SeoAudit[]          @relation("ProductSeoAudits")
   dailyContentPlans DailyContentPlan[]
   quoteLeads        QuoteLead[]
+  caseStudies       CaseStudy[]
 
   @@index([categoryId])
 }
@@ -324,6 +325,29 @@ model PriceMatrix {
   price        Float
 
   @@unique([productId, customerType])
+}
+
+model CaseStudy {
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  summary        String?
+  content        String?
+  tireSize       String?
+  forkliftType   String?
+  serviceType    String?
+  area           String?
+  beforeImageUrl String?
+  afterImageUrl  String?
+  productId      String?
+  product        Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  isPublished    Boolean   @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isPublished, completedAt])
+  @@index([tireSize])
 }
 
 model QuoteLead {
