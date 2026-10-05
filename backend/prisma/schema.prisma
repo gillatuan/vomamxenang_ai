@@ -41,6 +41,15 @@ enum OrderStatus {
   FAILED
 }
 
+enum ConversionEventType {
+  VIEW_SIZE
+  VIEW_PRODUCT
+  CLICK_PHONE
+  CLICK_ZALO
+  OPEN_QUOTE
+  SUBMIT_QUOTE
+}
+
 enum QuoteLeadStatus {
   NEW
   CONTACTED
@@ -256,6 +265,7 @@ model Product {
   dailyContentPlans DailyContentPlan[]
   quoteLeads        QuoteLead[]
   caseStudies       CaseStudy[]
+  conversionEvents  ConversionEvent[]
 
   @@index([categoryId])
 }
@@ -325,6 +335,21 @@ model PriceMatrix {
   price        Float
 
   @@unique([productId, customerType])
+}
+
+model ConversionEvent {
+  id        String              @id @default(cuid())
+  type      ConversionEventType
+  path      String
+  productId String?
+  product   Product?            @relation(fields: [productId], references: [id], onDelete: SetNull)
+  context   String?
+  sessionId String?
+  createdAt DateTime            @default(now())
+
+  @@index([type, createdAt])
+  @@index([path, createdAt])
+  @@index([productId])
 }
 
 model CaseStudy {
