@@ -2,6 +2,7 @@ import { topicProducts } from '@/lib/seo/category-seo';
 import type { Product } from '@/lib/api-client';
 import { getPublicRims } from '@/lib/public-seo';
 import { rimPath } from '@/lib/seo/rim-seo';
+import { uniqueProductSizes } from '@/lib/seo/size-seo';
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site-config";
 
@@ -25,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/services/thay-vo-xe-nang`, changeFrequency: "monthly", priority: 0.9 },
     ...(['vo-xe-nang', 'lop-dac-xe-nang', 'mam-xe-nang'] as const).filter(slug => topicProducts(slug, products as Product[]).length || slug === 'mam-xe-nang' && rims.length).map(slug => ({ url: `${siteUrl}/${slug}`, changeFrequency: 'weekly' as const, priority: 0.9 })),
     ...rims.map(rim => ({ url: siteUrl + rimPath(rim), lastModified: rim.createdAt, changeFrequency: 'monthly' as const, priority: 0.7 })),
+    ...uniqueProductSizes(products as Product[]).map(({ slug }) => ({ url: `${siteUrl}/kich-thuoc/${slug}`, changeFrequency: 'daily' as const, priority: 0.85 })),
     ...products.filter(item => !item.seo?.robots?.includes("noindex")).map((item) => ({ url: `${siteUrl}/products/${encodeURIComponent(item.slug || item.id)}`, lastModified: item.createdAt, changeFrequency: "weekly" as const, priority: 0.8 })),
     ...posts.filter(item => !item.seo?.robots?.includes("noindex")).map((item) => ({ url: `${siteUrl}/blog/${encodeURIComponent(item.slug || item.id)}`, lastModified: item.createdAt, changeFrequency: "monthly" as const, priority: 0.7 })),
   ];
