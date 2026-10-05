@@ -146,6 +146,11 @@ enum TransactionType {
   ASSEMBLY_IN // Nhập bộ vỏ mâm hoàn chỉnh sau khi ép (hoặc rã bánh)
 }
 
+enum InventoryTransactionStatus {
+  DRAFT
+  CONFIRMED
+}
+
 model User {
   id                String             @id @default(uuid())
   email             String             @unique
