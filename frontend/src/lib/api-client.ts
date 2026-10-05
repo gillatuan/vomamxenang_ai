@@ -142,6 +142,8 @@ export const dailyContentAPI = {
   run: (runDate?: string) => apiClient.post<{ run: DailyContentRun; reused?: boolean; running?: boolean }>('/admin/daily-content/run', runDate ? { runDate } : {}),
 };
 
+export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "STRIPE" | "OTHER";
+export interface OrderPayment { id:string;amount:number;method:PaymentMethod;reference?:string|null;note?:string|null;receivedAt:string;createdAt:string;createdBy:{id:string;email:string}; }
 export interface Order {
   id: string;
   code: string;
@@ -155,6 +157,7 @@ export interface Order {
   status: "PENDING" | "PAID" | "FAILED";
   stripeSessionId?: string;
   fulfillment?: { id: string; code: string; status: "DRAFT" | "CONFIRMED"; confirmedAt?: string | null } | null;
+  payments?: OrderPayment[];
   createdAt: string;
   items?: { id: string; quantity: number; price: number; product?: { sku: string; name: string } | null; wheelRim?: { sku: string; size: string } | null; location?: { locationCode: string } }[];
 }
@@ -167,6 +170,7 @@ export const ordersAPI = {
    updateStatus: (id: string, status: Order["status"]) => apiClient.patch<Order>(`/orders/${id}/status`, { status }),
   delete: (id: string) => apiClient.delete(`/orders/${id}`),
   createFulfillment: (id: string) => apiClient.post<{ id: string; code: string; status: "DRAFT" | "CONFIRMED" }>(`/orders/${id}/fulfillment`),
+  recordPayment: (id:string,data:{amount:number;method:Exclude<PaymentMethod,"STRIPE">;reference?:string;note?:string;receivedAt?:string}) => apiClient.post<{payment:OrderPayment;paidAmount:number;balance:number;status:Order["status"]}>(`/orders/${id}/payments`,data),
 
   createCheckoutSession: (items: CheckoutItem[]) =>
     apiClient.post<{ sessionId: string; url: string }>(
