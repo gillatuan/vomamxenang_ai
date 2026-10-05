@@ -51,6 +51,10 @@ export function contentJsonLd(item: PublicSeoItem, kind: 'products' | 'blog') {
   return jsonLd([entity, breadcrumbSchema(contentBreadcrumbs(item, kind))]);
 }
 
+export async function getPublicProducts(): Promise<Product[]> {
+  return getPublicCollection('products') as Promise<Product[]>;
+}
+
 export async function getPublicCollection(type: 'products' | 'posts'): Promise<PublicSeoItem[]> {
   const response = await fetch(`${apiUrl}/${type}`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Không thể tải danh mục. Vui lòng thử lại.');
