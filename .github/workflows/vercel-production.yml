@@ -103,6 +103,8 @@ jobs:
           node-version: 20
       - run: corepack enable
       - run: yarn install
+      - name: Validate Prisma schema
+        run: yarn prisma validate
       - name: Typecheck backend
         run: yarn tsc --noEmit -p tsconfig.build.json
       - name: Apply test database migrations
@@ -127,15 +129,42 @@ jobs:
       - run: npm install --global vercel@58.9.2
 
       - name: Deploy backend
+        id: deploy_backend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
-        run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+        shell: bash
+        run: |
+          url="$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke backend deployment
+        env:
+          BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
+        run: |
+          curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$BACKEND_URL/api/v1/health/live"
+          curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$BACKEND_URL/api/v1/health/ready"
 
       - name: Deploy frontend
+        id: deploy_frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
-        run: vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+        shell: bash
+        run: |
+          url="$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke frontend deployment
+        env:
+          FRONTEND_URL: ${{ steps.deploy_frontend.outputs.url }}
+        run: curl --fail --silent --show-error --retry 8 --retry-all-errors --retry-delay 5 "$FRONTEND_URL/" >/dev/null
+
+      - name: Smoke public production API
+        env:
+          BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 3 "$BACKEND_URL/api/v1/store-info/public" >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 3 "$BACKEND_URL/api/v1/products" >/dev/null
