@@ -1,4 +1,4 @@
-import apiClient from "./api-client";
+import apiClient from "./api";
 export type CaseStudy={id:string;title:string;slug:string;summary?:string;content?:string;tireSize?:string;forkliftType?:string;serviceType?:string;area?:string;beforeImageUrl?:string;afterImageUrl?:string;productId?:string;isPublished:boolean;completedAt?:string;createdAt:string;product?:{id:string;name:string;slug?:string;size?:string}};
 export const caseStudiesAPI={all:()=>apiClient.get<CaseStudy[]>("/case-studies/admin/all"),create:(d:Partial<CaseStudy>)=>apiClient.post("/case-studies/admin",d),update:(id:string,d:Partial<CaseStudy>)=>apiClient.patch(`/case-studies/admin/${id}`,d),remove:(id:string)=>apiClient.delete(`/case-studies/admin/${id}`)};
 const base=(process.env.NEXT_PUBLIC_API_BASE||process.env.NEXT_PUBLIC_BACKEND_URL||"https://vomamxenang-backend.vercel.app/api/v1").replace(/\/$/,"");

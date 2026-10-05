@@ -12,20 +12,10 @@ export class StoreInfoService {
     return this.prisma.storeInfo.findFirst({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
-      // Keep administrative information such as taxCode private.
       select: {
-        id: true,
-        name: true,
-        address: true,
-        phone: true,
-        email: true,
-        website: true,
-        logoUrl: true,
-        facebookUrl: true,
-        businessHours: true,
-        notes: true,
-        createdAt: true,
-        updatedAt: true,
+        id: true, name: true, address: true, phone: true, email: true, website: true,
+        logoUrl: true, facebookUrl: true, googleMapsUrl: true, latitude: true, longitude: true,
+        businessHours: true, notes: true, createdAt: true, updatedAt: true,
       },
     });
   }
