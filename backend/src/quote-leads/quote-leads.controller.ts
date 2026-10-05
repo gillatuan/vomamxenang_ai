@@ -1,4 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -15,6 +16,7 @@ class CrmDto {
   @IsOptional() @IsString() followUpAt?: string | null;
 }
 class NoteDto { @IsString() @MaxLength(2000) content!: string; }
+type AuthenticatedRequest = Request & { user: { sub: string; userId: string; email: string; role: string } };
 
 @Controller('quote-leads')
 export class QuoteLeadsController {
@@ -32,11 +34,11 @@ export class QuoteLeadsController {
   @Get('assignees') assignees() { return this.service.assignees(); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Patch(':id/status') updateStatus(@Req() req: any, @Param('id') id: string, @Body() body: StatusDto) { return this.service.updateStatus(id, body.status, req.user.sub); }
+  @Patch(':id/status') updateStatus(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() body: StatusDto) { return this.service.updateStatus(id, body.status, req.user.sub); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Patch(':id/crm') updateCrm(@Req() req: any, @Param('id') id: string, @Body() body: CrmDto) { return this.service.updateCrm(id, body, req.user.sub); }
+  @Patch(':id/crm') updateCrm(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() body: CrmDto) { return this.service.updateCrm(id, body, req.user.sub); }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
-  @Post(':id/notes') addNote(@Req() req: any, @Param('id') id: string, @Body() body: NoteDto) { return this.service.addNote(id, body.content, req.user.sub); }
+  @Post(':id/notes') addNote(@Req() req: AuthenticatedRequest, @Param('id') id: string, @Body() body: NoteDto) { return this.service.addNote(id, body.content, req.user.sub); }
 }
