@@ -168,6 +168,18 @@ jobs:
         env:
           BACKEND_URL: ${{ steps.deploy_backend.outputs.url }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        shell: bash
         run: |
-          vercel curl "$BACKEND_URL/api/v1/store-info/public" -- --fail --silent --show-error >/dev/null
-          vercel curl "$BACKEND_URL/api/v1/products" -- --fail --silent --show-error >/dev/null
+          smoke() {
+            local path="$1"
+            local body
+            echo "Smoke GET $path"
+            if ! body="$(vercel curl "$BACKEND_URL$path" -- --fail-with-body --silent --show-error)"; then
+              echo "::error::Production smoke failed for $path"
+              printf '%s\n' "$body"
+              return 1
+            fi
+            printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{JSON.parse(s)})'
+          }
+          smoke "/api/v1/store-info/public"
+          smoke "/api/v1/products"
