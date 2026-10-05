@@ -1,10 +1,18 @@
 import { Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { IsIn } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateQuoteLeadDto } from './dto/create-quote-lead.dto';
 import { QuoteLeadsService } from './quote-leads.service';
+
+const quoteLeadStatuses = ['NEW', 'CONTACTED', 'QUOTED', 'WON', 'LOST'] as const;
+type QuoteLeadStatusValue = typeof quoteLeadStatuses[number];
+class UpdateQuoteLeadStatusDto {
+  @IsIn(quoteLeadStatuses)
+  status!: QuoteLeadStatusValue;
+}
 
 @Controller('quote-leads')
 export class QuoteLeadsController {
@@ -22,7 +30,7 @@ export class QuoteLeadsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: 'NEW'|'CONTACTED'|'QUOTED'|'WON'|'LOST') {
-    return this.service.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body() body: UpdateQuoteLeadStatusDto) {
+    return this.service.updateStatus(id, body.status);
   }
 }
