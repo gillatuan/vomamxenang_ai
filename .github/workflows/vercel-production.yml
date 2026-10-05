@@ -64,10 +64,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-          cache-dependency-path: frontend/yarn.lock
       - run: corepack enable
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: node --test tests/*.test.cjs
       - run: yarn lint
       - run: yarn tsc --noEmit -p tsconfig.json
