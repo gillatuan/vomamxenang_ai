@@ -13,7 +13,7 @@ export class ProductsService {
       where,
       orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
-      select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true },
+      select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true, stocks: { select: { quantity: true } } },
     });
   }
 
@@ -22,6 +22,7 @@ export class ProductsService {
       where: { status: 'PUBLISHED', OR: [{ id }, { slug: id }, { aliases: { has: id } }] },
       select: {
         id: true, sku: true, type: true, name: true, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true,
+        stocks: { select: { quantity: true } },
         productComments: {
           include: { user: { select: { id: true, email: true } } },
         },
