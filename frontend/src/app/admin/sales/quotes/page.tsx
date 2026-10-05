@@ -11,7 +11,7 @@ export default function QuoteLeadsPage(){
  const [rows,setRows]=useState<QuoteLead[]>([]),[assignees,setAssignees]=useState<{id:string;email:string;role:string}[]>([]);
  const [error,setError]=useState(""),[statusFilter,setStatusFilter]=useState<QuoteLeadStatus|""| "OVERDUE">(""),[assigneeFilter,setAssigneeFilter]=useState("");
  const [notes,setNotes]=useState<Record<string,string>>({});
- const load=()=>quoteLeadsAPI.getAll(statusFilter==="OVERDUE"?{overdue:true}:{status:statusFilter||undefined,assigneeId:assigneeFilter||undefined}).then(r=>setRows(r.data)).catch(()=>setError("Không tải được lead."));
+ const load=()=>quoteLeadsAPI.getAll(statusFilter==="OVERDUE"?{overdue:true,assigneeId:assigneeFilter||undefined}:{status:statusFilter||undefined,assigneeId:assigneeFilter||undefined}).then(r=>setRows(r.data)).catch(()=>setError("Không tải được lead."));
  useEffect(()=>{quoteLeadsAPI.assignees().then(r=>setAssignees(r.data)).catch(()=>{});},[]);
  useEffect(()=>{load();},[statusFilter,assigneeFilter]);
  const overdueCount=useMemo(()=>rows.filter(r=>open(r.status)&&r.followUpAt&&new Date(r.followUpAt)<new Date()).length,[rows]);
