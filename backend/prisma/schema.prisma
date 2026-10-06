@@ -151,6 +151,12 @@ enum InventoryTransactionStatus {
   CONFIRMED
 }
 
+enum StockReservationStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+}
+
 model User {
   id                String             @id @default(uuid())
   email             String             @unique
@@ -292,6 +298,7 @@ model Product {
   caseStudies       CaseStudy[]
   conversionEvents  ConversionEvent[]
   salesQuoteItems   SalesQuoteItem[]
+  stockReservations StockReservation[]
 
   @@index([categoryId])
 }
@@ -311,6 +318,7 @@ model WheelRim {
   txDetails    TransactionDetail[]
   assemblyLogs AssemblyLog[]
   orderItems   OrderItem[]
+  stockReservations StockReservation[]
 }
 
 model Warehouse {
@@ -336,6 +344,7 @@ model Location {
   stockRecords Stock[]
   txDetails    TransactionDetail[]
   orderItems   OrderItem[]
+  stockReservations StockReservation[]
 }
 
 // Bảng trung gian quản lý tồn kho thực tế tại từng vị trí cột/kệ cụ thể
@@ -507,6 +516,7 @@ model Order {
   salesQuote      SalesQuote?
   fulfillment     InventoryTransaction?
   payments        OrderPayment[]
+  stockReservations StockReservation[]
 
   @@index([paymentDueAt, status])
 }
@@ -556,6 +566,27 @@ model InventoryTransaction {
   orderId     String?             @unique
   order       Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
   details     TransactionDetail[]
+}
+
+model StockReservation {
+  id          String                 @id @default(cuid())
+  orderId     String
+  order       Order                  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product?               @relation(fields: [productId], references: [id], onDelete: Restrict)
+  wheelRimId  String?
+  wheelRim    WheelRim?              @relation(fields: [wheelRimId], references: [id], onDelete: Restrict)
+  locationId  String
+  location    Location               @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  quantity    Int
+  status      StockReservationStatus @default(ACTIVE)
+  createdAt   DateTime               @default(now())
+  consumedAt  DateTime?
+  releasedAt  DateTime?
+
+  @@unique([orderId, productId, wheelRimId, locationId])
+  @@index([locationId, productId, wheelRimId, status])
+  @@index([orderId, status])
 }
 
 model Stock {
