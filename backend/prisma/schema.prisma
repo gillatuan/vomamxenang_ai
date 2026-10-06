@@ -583,10 +583,12 @@ model StockReservation {
   createdAt   DateTime               @default(now())
   consumedAt  DateTime?
   releasedAt  DateTime?
+  expiresAt    DateTime?
 
   @@unique([orderId, productId, wheelRimId, locationId])
   @@index([locationId, productId, wheelRimId, status])
   @@index([orderId, status])
+  @@index([status, expiresAt])
 }
 
 model Stock {
