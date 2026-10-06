@@ -99,6 +99,41 @@ jobs:
           })().finally(() => prisma.$disconnect());
           NODE
 
+      - name: Audit legacy 130000 database effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { PrismaClient } = require('@prisma/client');
+          const prisma = new PrismaClient();
+          (async () => {
+            const row = await prisma.$queryRawUnsafe(`
+              SELECT migration_name, started_at, finished_at, rolled_back_at, applied_steps_count, checksum, logs
+              FROM "_prisma_migrations"
+              WHERE migration_name = '20261004130000_product_category_relation'
+              ORDER BY started_at
+            `);
+            const column = await prisma.$queryRawUnsafe(`
+              SELECT column_name, data_type, is_nullable
+              FROM information_schema.columns
+              WHERE table_schema='public' AND table_name='Product' AND column_name='categoryId'
+            `);
+            const indexes = await prisma.$queryRawUnsafe(`
+              SELECT indexname, indexdef FROM pg_indexes
+              WHERE schemaname='public' AND tablename='Product' AND indexname='Product_categoryId_idx'
+            `);
+            const fk = await prisma.$queryRawUnsafe(`
+              SELECT conname, pg_get_constraintdef(oid) AS definition
+              FROM pg_constraint
+              WHERE conname='Product_categoryId_fkey'
+            `);
+            console.log('Legacy 130000 ledger:', row);
+            console.log('Current categoryId column:', column);
+            console.log('Current category index:', indexes);
+            console.log('Current category FK:', fk);
+          })().finally(() => prisma.$disconnect());
+          NODE
+
       - name: Verify production migration ledger is readable
         run: |
           node - <<'NODE'
