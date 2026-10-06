@@ -64,6 +64,38 @@ jobs:
             echo "::error::Unexpected prisma migrate status failure."
             exit "$status"
           fi
+      - name: Audit product-category migration alias
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { PrismaClient } = require('@prisma/client');
+          const crypto = require('crypto');
+          const fs = require('fs');
+          const prisma = new PrismaClient();
+          (async () => {
+            const rows = await prisma.$queryRawUnsafe(
+              `SELECT migration_name, checksum, finished_at, rolled_back_at, logs
+                 FROM "_prisma_migrations"
+                WHERE migration_name IN ('20261004130000_product_category_relation','20261004140000_product_category_relation')
+                ORDER BY migration_name`
+            );
+            const sql = fs.readFileSync('prisma/migrations/20261004140000_product_category_relation/migration.sql','utf8');
+            const localChecksum = crypto.createHash('sha256').update(sql).digest('hex');
+            console.log('Local 140000 checksum:', localChecksum);
+            for (const row of rows) {
+              console.log({
+                migration_name: row.migration_name,
+                checksum: row.checksum,
+                finished: Boolean(row.finished_at),
+                rolled_back: Boolean(row.rolled_back_at),
+                has_logs: Boolean(row.logs),
+                checksum_matches_local_140000: row.checksum === localChecksum,
+              });
+            }
+          })().finally(() => prisma.$disconnect());
+          NODE
+
       - name: Verify production migration ledger is readable
         run: |
           node - <<'NODE'
