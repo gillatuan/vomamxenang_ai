@@ -58,7 +58,7 @@ async function inventoryAggregateSafety() {
 async function reservationConcurrencySafety() {
   const f=await fixture();
   try {
-    const user=await prisma.user.create({data:{email:`${f.key}-user@example.test`,passwordHash:'x',role:'ADMIN'}});
+    const user=await prisma.user.create({data:{email:`${f.key}-user@example.test`,password:'x',role:'ADMIN_MANAGER'}});
     const makeQuote=async(suffix:string)=>{
       const q=await prisma.salesQuote.create({data:{code:`BG-${f.key}-${suffix}`,clientId:f.client.id,createdById:user.id,customerName:'Phase2',phone:'000',subtotal:400,total:400,status:'ACCEPTED',items:{create:{productId:f.product.id,description:'Phase2 product',quantity:4,unitPrice:100,lineTotal:400}}},include:{items:true}});
       return q;
