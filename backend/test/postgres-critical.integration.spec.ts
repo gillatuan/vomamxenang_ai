@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { BadRequestException } from '@nestjs/common';
 import { InventoryService } from '../src/inventory/inventory.service';
 import { OrdersService } from '../src/orders/orders.service';
+import { SalesQuotesService } from '../src/sales-quotes/sales-quotes.service';
 
 const prisma = new PrismaClient();
 const uid = () => `p2-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -54,6 +55,30 @@ async function inventoryAggregateSafety() {
   } finally { await cleanup(f); }
 }
 
+async function reservationConcurrencySafety() {
+  const f=await fixture();
+  try {
+    const user=await prisma.user.create({data:{email:`${f.key}-user@example.test`,passwordHash:'x',role:'ADMIN'}});
+    const makeQuote=async(suffix:string)=>{
+      const q=await prisma.salesQuote.create({data:{code:`BG-${f.key}-${suffix}`,clientId:f.client.id,createdById:user.id,customerName:'Phase2',phone:'000',subtotal:400,total:400,status:'ACCEPTED',items:{create:{productId:f.product.id,description:'Phase2 product',quantity:4,unitPrice:100,lineTotal:400}}},include:{items:true}});
+      return q;
+    };
+    const [q1,q2]=await Promise.all([makeQuote('A'),makeQuote('B')]);
+    const service=new SalesQuotesService(prisma as any);
+    const results=await Promise.allSettled([
+      service.convertToOrder(q1.id,f.client.id,[{itemId:q1.items[0].id,locationId:f.location.id}]),
+      service.convertToOrder(q2.id,f.client.id,[{itemId:q2.items[0].id,locationId:f.location.id}]),
+    ]);
+    assert.equal(results.filter(x=>x.status==='fulfilled').length,1,'only one competing order may reserve stock');
+    const active=await prisma.stockReservation.aggregate({where:{productId:f.product.id,status:'ACTIVE'},_sum:{quantity:true}});
+    assert.equal(active._sum.quantity,4,'active reservations must never exceed available stock');
+    await prisma.stockReservation.deleteMany({where:{productId:f.product.id}});
+    await prisma.salesQuoteItem.deleteMany({where:{salesQuote:{code:{startsWith:`BG-${f.key}`}}}});
+    await prisma.salesQuote.deleteMany({where:{code:{startsWith:`BG-${f.key}`}}});
+    await prisma.user.delete({where:{id:user.id}});
+  } finally { await cleanup(f); }
+}
+
 async function webhookSafety() {
   // Webhook behavior is owned by OrdersService.handleStripeWebhook.
   // Controller-level raw-body/signature wiring is covered separately; this integration
@@ -65,6 +90,7 @@ async function main(){
   await prisma.$connect();
   try {
     await inventoryAggregateSafety();
+    await reservationConcurrencySafety();
     await webhookSafety();
     console.log('PostgreSQL critical integration tests passed');
   } finally { await prisma.$disconnect(); }
