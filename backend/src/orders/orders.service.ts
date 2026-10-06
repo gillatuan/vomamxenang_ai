@@ -212,23 +212,38 @@ export class OrdersService {
       }
     }
 
-    const order = await this.prisma.order.create({
-      data: {
-        client: { connect: { id: client.id } },
-        totalAmount: total,
-        status: 'PENDING',
-        items: {
-          create: checkoutItems.map((checkout) => ({
-            productId: checkout.item.productId,
-            wheelRimId: checkout.item.wheelRimId,
-            locationId: checkout.item.locationId!,
-            quantity: checkout.item.quantity,
-            price: checkout.price,
-          })),
+    const demand = new Map<string, { productId?: string; wheelRimId?: string; locationId: string; quantity: number }>();
+    for (const checkout of checkoutItems) {
+      const item = checkout.item;
+      if ((!item.productId && !item.wheelRimId) || (item.productId && item.wheelRimId) || !Number.isInteger(item.quantity) || item.quantity < 1) {
+        throw new BadRequestException('Invalid checkout stock item');
+      }
+      const key = `${item.productId ?? ''}:${item.wheelRimId ?? ''}:${item.locationId}`;
+      const current = demand.get(key);
+      demand.set(key, { productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: (current?.quantity ?? 0) + item.quantity });
+    }
+
+    const order = await this.prisma.$transaction(async tx => {
+      for (const required of demand.values()) {
+        await tx.$queryRaw`SELECT id FROM "StockLocation" WHERE "locationId" = ${required.locationId} AND "productId" IS NOT DISTINCT FROM ${required.productId ?? null} AND "wheelRimId" IS NOT DISTINCT FROM ${required.wheelRimId ?? null} FOR UPDATE`;
+        const stock = await tx.stockLocation.findFirst({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId }, select: { quantity: true } });
+        const reserved = await tx.stockReservation.aggregate({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId, status: 'ACTIVE' }, _sum: { quantity: true } });
+        if ((stock?.quantity ?? 0) - (reserved._sum.quantity ?? 0) < required.quantity) {
+          throw new BadRequestException('Insufficient available stock for checkout');
+        }
+      }
+      const created = await tx.order.create({
+        data: {
+          client: { connect: { id: client.id } },
+          totalAmount: total,
+          status: 'PENDING',
+          items: { create: checkoutItems.map(checkout => ({ productId: checkout.item.productId, wheelRimId: checkout.item.wheelRimId, locationId: checkout.item.locationId, quantity: checkout.item.quantity, price: checkout.price })) },
         },
-      },
-      include: { items: true },
-    });
+        include: { items: true },
+      });
+      await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity })) });
+      return created;
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     const stripe = getStripeClient();
     const baseUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
