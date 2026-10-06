@@ -112,6 +112,12 @@ export class OrdersService {
       if (order.fulfillment) return order.fulfillment;
       if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot be fulfilled');
       if (!order.items.length) throw new BadRequestException('Order has no items');
+      const activeReservations = await tx.stockReservation.findMany({ where: { orderId: order.id, status: 'ACTIVE' } });
+      if (activeReservations.length) {
+        const reservedQuantity = activeReservations.reduce((sum, reservation) => sum + reservation.quantity, 0);
+        const orderedQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+        if (reservedQuantity !== orderedQuantity) throw new BadRequestException('Order reservation is inconsistent with fulfillment demand');
+      }
       const demand = new Map<string, { productId?: string; wheelRimId?: string; locationId: string; quantity: number }>();
       for (const item of order.items) {
         const key = `${item.productId ?? ''}:${item.wheelRimId ?? ''}:${item.locationId}`;
