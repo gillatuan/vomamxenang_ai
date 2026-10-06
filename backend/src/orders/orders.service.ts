@@ -11,7 +11,7 @@ export class OrdersService {
 
   private checkoutReservationExpiry() {
     const minutes = Number(process.env.CHECKOUT_RESERVATION_TTL_MINUTES ?? 30);
-    const safeMinutes = Number.isFinite(minutes) && minutes >= 5 && minutes <= 1440 ? minutes : 30;
+    const safeMinutes = Number.isFinite(minutes) && minutes >= 30 && minutes <= 1440 ? minutes : 30;
     return new Date(Date.now() + safeMinutes * 60_000);
   }
 
@@ -24,7 +24,7 @@ export class OrdersService {
       const orderIds = [...new Set(expired.map(x => x.orderId))];
       if (!orderIds.length) return { releasedOrders: 0, releasedReservations: 0 };
       const released = await tx.stockReservation.updateMany({
-        where: { orderId: { in: orderIds }, status: 'ACTIVE', expiresAt: { lte: now } },
+        where: { orderId: { in: orderIds }, status: 'ACTIVE' },
         data: { status: 'RELEASED', releasedAt: now },
       });
       await tx.order.updateMany({ where: { id: { in: orderIds }, status: OrderStatus.PENDING }, data: { status: OrderStatus.FAILED } });
@@ -51,6 +51,7 @@ export class OrdersService {
       if (existing) return { received: true };
       const order = await tx.order.findUnique({ where: { id: orderId }, include: { payments: true } });
       if (!order || order.stripeSessionId !== session.id) throw new BadRequestException('Stripe session does not match order');
+      if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed order cannot receive Stripe payment');
       const paid = order.payments.reduce((sum, payment) => sum + payment.amount, 0);
       const stripeAmount = session.currency === 'vnd' ? (session.amount_total ?? 0) : (session.amount_total ?? 0) / 100;
       const amount = Math.min(Math.max(0, order.totalAmount - paid), stripeAmount);
@@ -113,16 +114,22 @@ export class OrdersService {
       if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot be fulfilled');
       if (!order.items.length) throw new BadRequestException('Order has no items');
       const activeReservations = await tx.stockReservation.findMany({ where: { orderId: order.id, status: 'ACTIVE' } });
-      if (activeReservations.length) {
-        const reservedQuantity = activeReservations.reduce((sum, reservation) => sum + reservation.quantity, 0);
-        const orderedQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
-        if (reservedQuantity !== orderedQuantity) throw new BadRequestException('Order reservation is inconsistent with fulfillment demand');
-      }
       const demand = new Map<string, { productId?: string; wheelRimId?: string; locationId: string; quantity: number }>();
       for (const item of order.items) {
         const key = `${item.productId ?? ''}:${item.wheelRimId ?? ''}:${item.locationId}`;
         const current = demand.get(key);
         demand.set(key, { productId: item.productId ?? undefined, wheelRimId: item.wheelRimId ?? undefined, locationId: item.locationId, quantity: (current?.quantity ?? 0) + item.quantity });
+      }
+      if (activeReservations.length) {
+        const reservationDemand = new Map<string, number>();
+        for (const reservation of activeReservations) {
+          const key = `${reservation.productId ?? ''}:${reservation.wheelRimId ?? ''}:${reservation.locationId}`;
+          reservationDemand.set(key, (reservationDemand.get(key) ?? 0) + reservation.quantity);
+        }
+        if (reservationDemand.size !== demand.size) throw new BadRequestException('Order reservation is inconsistent with fulfillment demand');
+        for (const [key, required] of demand) {
+          if (reservationDemand.get(key) !== required.quantity) throw new BadRequestException('Order reservation is inconsistent with fulfillment demand');
+        }
       }
       for (const required of demand.values()) {
         const stock = await tx.stockLocation.findFirst({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId }, select: { quantity: true } });
@@ -252,6 +259,7 @@ export class OrdersService {
       demand.set(key, { productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: (current?.quantity ?? 0) + item.quantity });
     }
 
+    const reservationExpiresAt = this.checkoutReservationExpiry();
     const order = await this.prisma.$transaction(async tx => {
       for (const required of demand.values()) {
         await tx.$queryRaw`SELECT id FROM "StockLocation" WHERE "locationId" = ${required.locationId} AND "productId" IS NOT DISTINCT FROM ${required.productId ?? null} AND "wheelRimId" IS NOT DISTINCT FROM ${required.wheelRimId ?? null} FOR UPDATE`;
@@ -270,7 +278,7 @@ export class OrdersService {
         },
         include: { items: true },
       });
-      await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity, expiresAt: this.checkoutReservationExpiry() })) });
+      await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity, expiresAt: reservationExpiresAt })) });
       return created;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
@@ -290,6 +298,7 @@ export class OrdersService {
         quantity: checkout.item.quantity,
       })),
       metadata: { orderId: order.id },
+      expires_at: Math.floor(reservationExpiresAt.getTime() / 1000),
       success_url: `${baseUrl}/checkout/success`,
       cancel_url: `${baseUrl}/checkout/cancel`,
       });
@@ -301,7 +310,16 @@ export class OrdersService {
       throw error;
     }
 
-    await this.prisma.order.update({ where: { id: order.id }, data: { stripeSessionId: session.id } });
+    try {
+      await this.prisma.order.update({ where: { id: order.id }, data: { stripeSessionId: session.id } });
+    } catch (error) {
+      try { await stripe.checkout.sessions.expire(session.id); } catch {}
+      await this.prisma.$transaction(async tx => {
+        await tx.stockReservation.updateMany({ where: { orderId: order.id, status: 'ACTIVE' }, data: { status: 'RELEASED', releasedAt: new Date() } });
+        await tx.order.update({ where: { id: order.id }, data: { status: OrderStatus.FAILED } });
+      });
+      throw error;
+    }
     return { url: session.url };
   }
 }
