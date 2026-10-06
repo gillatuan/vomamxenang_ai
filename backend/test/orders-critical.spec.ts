@@ -12,7 +12,12 @@ async function main() {
     },
     orderItem:{deleteMany:(x:any)=>Promise.resolve(x)},
     stockLocation:{findFirst:async()=>({quantity:5})},
-    stockReservation:{aggregate:async()=>({_sum:{quantity:0}}),createMany:async(args:any)=>args},
+    stockReservation:{
+      aggregate:async()=>({_sum:{quantity:0}}),
+      createMany:async(args:any)=>args,
+      findMany:async()=>[],
+      updateMany:async(args:any)=>{updates.push(args);return {count:1};},
+    },
     $queryRaw:async()=>[],
     $transaction:async(x:any)=>typeof x==='function'?x(prisma):Promise.all(x),
     product:{findMany:async()=>[]},wheelRim:{findMany:async()=>[]},
@@ -36,6 +41,14 @@ async function main() {
     assert.equal(out.url,'https://example.test/checkout');
     const create=updates.find(x=>x.data?.stripeSessionId==='cs_test');
     assert.ok(create,'checkout session id must be persisted');
+  } finally { stripe.getStripeClient=original; }
+
+  // Stripe session failure must compensate the order reservation.
+  stripe.getStripeClient=()=>({checkout:{sessions:{create:async()=>{throw new Error('stripe unavailable');}}}});
+  try {
+    await assert.rejects(()=>service.createCheckoutSession({items:[{productId:'P1',locationId:'L1',quantity:1}],clientId:'c1'}, {}));
+    assert.ok(updates.some(x=>x.data?.status==='RELEASED'),'failed checkout must release ACTIVE reservations');
+    assert.ok(updates.some(x=>x.data?.status==='FAILED'),'failed checkout must fail the orphan order');
   } finally { stripe.getStripeClient=original; }
   console.log('orders/pricing critical regression tests passed');
 }

@@ -9,6 +9,29 @@ import { Client } from '@prisma/client';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
+  private checkoutReservationExpiry() {
+    const minutes = Number(process.env.CHECKOUT_RESERVATION_TTL_MINUTES ?? 30);
+    const safeMinutes = Number.isFinite(minutes) && minutes >= 5 && minutes <= 1440 ? minutes : 30;
+    return new Date(Date.now() + safeMinutes * 60_000);
+  }
+
+  async releaseExpiredReservations(now = new Date()) {
+    return this.prisma.$transaction(async tx => {
+      const expired = await tx.stockReservation.findMany({
+        where: { status: 'ACTIVE', expiresAt: { lte: now }, order: { status: OrderStatus.PENDING, payments: { none: {} }, fulfillment: null } },
+        select: { orderId: true },
+      });
+      const orderIds = [...new Set(expired.map(x => x.orderId))];
+      if (!orderIds.length) return { releasedOrders: 0, releasedReservations: 0 };
+      const released = await tx.stockReservation.updateMany({
+        where: { orderId: { in: orderIds }, status: 'ACTIVE', expiresAt: { lte: now } },
+        data: { status: 'RELEASED', releasedAt: now },
+      });
+      await tx.order.updateMany({ where: { id: { in: orderIds }, status: OrderStatus.PENDING }, data: { status: OrderStatus.FAILED } });
+      return { releasedOrders: orderIds.length, releasedReservations: released.count };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+
   async findAll() {
     return this.prisma.order.findMany({ include: { client: true, payments: { orderBy: { receivedAt: 'desc' }, include: { createdBy: { select: { id: true, email: true } } } }, fulfillment: { select: { id: true, code: true, status: true, confirmedAt: true } }, items: { include: { product: true, wheelRim: true, location: true } } }, orderBy: { createdAt: 'desc' } });
   }
@@ -89,6 +112,12 @@ export class OrdersService {
       if (order.fulfillment) return order.fulfillment;
       if (order.status === OrderStatus.FAILED) throw new BadRequestException('Failed orders cannot be fulfilled');
       if (!order.items.length) throw new BadRequestException('Order has no items');
+      const activeReservations = await tx.stockReservation.findMany({ where: { orderId: order.id, status: 'ACTIVE' } });
+      if (activeReservations.length) {
+        const reservedQuantity = activeReservations.reduce((sum, reservation) => sum + reservation.quantity, 0);
+        const orderedQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+        if (reservedQuantity !== orderedQuantity) throw new BadRequestException('Order reservation is inconsistent with fulfillment demand');
+      }
       const demand = new Map<string, { productId?: string; wheelRimId?: string; locationId: string; quantity: number }>();
       for (const item of order.items) {
         const key = `${item.productId ?? ''}:${item.wheelRimId ?? ''}:${item.locationId}`;
@@ -241,13 +270,15 @@ export class OrdersService {
         },
         include: { items: true },
       });
-      await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity })) });
+      await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity, expiresAt: this.checkoutReservationExpiry() })) });
       return created;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     const stripe = getStripeClient();
     const baseUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
-    const session = await stripe.checkout.sessions.create({
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: checkoutItems.map((checkout) => ({
@@ -261,7 +292,14 @@ export class OrdersService {
       metadata: { orderId: order.id },
       success_url: `${baseUrl}/checkout/success`,
       cancel_url: `${baseUrl}/checkout/cancel`,
-    });
+      });
+    } catch (error) {
+      await this.prisma.$transaction(async tx => {
+        await tx.stockReservation.updateMany({ where: { orderId: order.id, status: 'ACTIVE' }, data: { status: 'RELEASED', releasedAt: new Date() } });
+        await tx.order.update({ where: { id: order.id }, data: { status: OrderStatus.FAILED } });
+      });
+      throw error;
+    }
 
     await this.prisma.order.update({ where: { id: order.id }, data: { stripeSessionId: session.id } });
     return { url: session.url };
