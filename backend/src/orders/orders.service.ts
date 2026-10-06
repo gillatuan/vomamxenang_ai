@@ -9,6 +9,15 @@ import { Client } from '@prisma/client';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
+  private async serializable<T>(work: (tx: Prisma.TransactionClient) => Promise<T>, maxAttempts = 3) {
+    for (let attempt = 1; ; attempt++) {
+      try { return await this.prisma.$transaction(work, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }); }
+      catch (error) {
+        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2034' || attempt >= maxAttempts) throw error;
+      }
+    }
+  }
+
   private checkoutReservationExpiry() {
     const minutes = Number(process.env.CHECKOUT_RESERVATION_TTL_MINUTES ?? 30);
     const safeMinutes = Number.isFinite(minutes) && minutes >= 30 && minutes <= 1440 ? minutes : 30;
@@ -16,7 +25,7 @@ export class OrdersService {
   }
 
   async releaseExpiredReservations(now = new Date()) {
-    return this.prisma.$transaction(async tx => {
+    return this.serializable(async tx => {
       const expired = await tx.stockReservation.findMany({
         where: { status: 'ACTIVE', expiresAt: { lte: now }, order: { status: OrderStatus.PENDING, payments: { none: {} }, fulfillment: null } },
         select: { orderId: true },
@@ -29,7 +38,7 @@ export class OrdersService {
       });
       await tx.order.updateMany({ where: { id: { in: orderIds }, status: OrderStatus.PENDING }, data: { status: OrderStatus.FAILED } });
       return { releasedOrders: orderIds.length, releasedReservations: released.count };
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    });
   }
 
   async findAll() {
@@ -260,7 +269,7 @@ export class OrdersService {
     }
 
     const reservationExpiresAt = this.checkoutReservationExpiry();
-    const order = await this.prisma.$transaction(async tx => {
+    const order = await this.serializable(async tx => {
       for (const required of demand.values()) {
         await tx.$queryRaw`SELECT id FROM "StockLocation" WHERE "locationId" = ${required.locationId} AND "productId" IS NOT DISTINCT FROM ${required.productId ?? null} AND "wheelRimId" IS NOT DISTINCT FROM ${required.wheelRimId ?? null} FOR UPDATE`;
         const stock = await tx.stockLocation.findFirst({ where: { locationId: required.locationId, productId: required.productId, wheelRimId: required.wheelRimId }, select: { quantity: true } });
@@ -280,7 +289,7 @@ export class OrdersService {
       });
       await tx.stockReservation.createMany({ data: [...demand.values()].map(required => ({ orderId: created.id, productId: required.productId, wheelRimId: required.wheelRimId, locationId: required.locationId, quantity: required.quantity, expiresAt: reservationExpiresAt })) });
       return created;
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    });
 
     const stripe = getStripeClient();
     const baseUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
