@@ -6,6 +6,7 @@ async function main() {
   const updates:any[]=[];
   const prisma:any={
     order:{
+      updateMany:async(args:any)=>{updates.push(args);return {count:1};},
       findUnique: async ({where}:any)=>where.id==='missing'?null:where.id==='paid'?{status:'PAID',stripeSessionId:'cs_1'}:{status:'PENDING',stripeSessionId:null},
       update:async(args:any)=>{updates.push(args);return args;},
       create:async({data}:any)=>({id:'o1',...data,items:data.items.create})
