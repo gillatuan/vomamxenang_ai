@@ -38,6 +38,7 @@ export class SalesQuotesService {
     orderItems.push({productId,locationId,quantity:item.quantity,price:item.unitPrice});
    }
    for(const required of demand.values()){
+    await tx.$queryRaw`SELECT id FROM "StockLocation" WHERE "locationId" = ${required.locationId} AND "productId" = ${required.productId} FOR UPDATE`;
     const stock=await tx.stockLocation.findFirst({where:{locationId:required.locationId,productId:required.productId},select:{quantity:true}});
     const reserved=await tx.stockReservation.aggregate({where:{locationId:required.locationId,productId:required.productId,status:'ACTIVE'},_sum:{quantity:true}});
     const available=(stock?.quantity??0)-(reserved._sum.quantity??0);
@@ -47,7 +48,7 @@ export class SalesQuotesService {
    await tx.stockReservation.createMany({data:[...demand.values()].map(required=>({orderId:order.id,productId:required.productId,locationId:required.locationId,quantity:required.quantity}))});
    await tx.salesQuote.update({where:{id},data:{clientId,orderId:order.id,convertedAt:new Date()}});
    return order;
-  });
+  },{isolationLevel:'Serializable'});
  }
  async updateStatus(id:string,status:SalesQuoteStatus,userId:string){
   return this.prisma.$transaction(async tx=>{const current=await tx.salesQuote.findUnique({where:{id},select:{leadId:true,status:true,validUntil:true}});if(!current)throw new BadRequestException('Không tìm thấy báo giá.');
