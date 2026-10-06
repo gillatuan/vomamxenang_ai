@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - feature/p2-business-operations
+      - feature/p2-1-stock-lifecycle
     paths:
       - "frontend/**"
       - "backend/**"
       - ".github/workflows/**"
+      - "docs/p2-1-*.md"
 
 permissions:
   contents: read
