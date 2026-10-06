@@ -11,7 +11,10 @@ async function main() {
       create:async({data}:any)=>({id:'o1',...data,items:data.items.create})
     },
     orderItem:{deleteMany:(x:any)=>Promise.resolve(x)},
-    $transaction:async(x:any[])=>Promise.all(x),
+    stockLocation:{findFirst:async()=>({quantity:5})},
+    stockReservation:{aggregate:async()=>({_sum:{quantity:0}}),createMany:async(args:any)=>args},
+    $queryRaw:async()=>[],
+    $transaction:async(x:any)=>typeof x==='function'?x(prisma):Promise.all(x),
     product:{findMany:async()=>[]},wheelRim:{findMany:async()=>[]},
     client:{findUnique:async()=>null,upsert:async()=>({id:'guest',type:'RETAIL'})}
   };
