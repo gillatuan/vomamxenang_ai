@@ -4,6 +4,7 @@ import { OrdersService } from '../src/orders/orders.service';
 
 async function main() {
   const updates:any[]=[];
+  let transactionAttempts=0;
   const prisma:any={
     order:{
       updateMany:async(args:any)=>{updates.push(args);return {count:1};},
@@ -20,11 +21,18 @@ async function main() {
       updateMany:async(args:any)=>{updates.push(args);return {count:1};},
     },
     $queryRaw:async()=>[],
-    $transaction:async(x:any)=>typeof x==='function'?x(prisma):Promise.all(x),
+    $transaction:async(x:any)=>{transactionAttempts++;return typeof x==='function'?x(prisma):Promise.all(x);},
     product:{findMany:async()=>[]},wheelRim:{findMany:async()=>[]},
     client:{findUnique:async()=>null,upsert:async()=>({id:'guest',type:'RETAIL'})}
   };
   const service=new OrdersService(prisma);
+  // Serializable operations retry transient Prisma P2034 conflicts, but only up to the bounded limit.
+  const retryPrisma:any={...prisma,$transaction:async(x:any)=>{transactionAttempts++;if(transactionAttempts<3){const e:any=new Error('write conflict');e.code='P2034';Object.setPrototypeOf(e,require('@prisma/client').Prisma.PrismaClientKnownRequestError.prototype);throw e;}return x(retryPrisma);}};
+  const retryService=new OrdersService(retryPrisma);
+  transactionAttempts=0;
+  await retryService.releaseExpiredReservations(new Date());
+  assert.equal(transactionAttempts,3,'P2034 serialization conflicts must retry with a bounded attempt count');
+  transactionAttempts=0;
   await assert.rejects(()=>service.updateStatus('missing','PENDING' as any),BadRequestException);
   await assert.rejects(()=>service.updateStatus('paid','CANCELLED' as any),BadRequestException);
   await assert.rejects(()=>service.deleteDraft('paid'),BadRequestException);
