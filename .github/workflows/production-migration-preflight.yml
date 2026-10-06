@@ -1,0 +1,83 @@
+name: Production migration preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_ref:
+        description: Git ref whose Prisma migrations/schema should be checked
+        required: true
+        default: feature/p2-1-stock-lifecycle
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-migration-preflight
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Read-only production migration preflight
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.migration_ref }}
+      - name: Report audited revision
+        run: echo "Auditing ref=${{ inputs.migration_ref }} sha=$(git rev-parse HEAD)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - name: Require dedicated migration credential
+        shell: bash
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Production secret PRODUCTION_MIGRATION_DATABASE_URL is not configured."
+            exit 1
+          fi
+      - name: Validate Prisma schema
+        run: yarn prisma validate
+      - name: Inspect production migration status (read only)
+        shell: bash
+        run: |
+          set +e
+          output="$(./node_modules/.bin/prisma migrate status 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          # Prisma exits non-zero when unapplied migrations exist; that is expected
+          # during preflight. Connection/history errors must still fail.
+          if printf '%s' "$output" | grep -Eqi 'P100[0-9]|P300[0-9]|failed migration|diverg|not found|permission denied|authentication failed|connect'; then
+            echo "::error::Production migration history/connection is not safe to continue."
+            exit 1
+          fi
+          if [ "$status" -ne 0 ] && ! printf '%s' "$output" | grep -Eqi 'following migration.*not yet been applied|migrations have not yet been applied|pending'; then
+            echo "::error::Unexpected prisma migrate status failure."
+            exit "$status"
+          fi
+      - name: Verify production migration ledger is readable
+        run: |
+          node - <<'NODE'
+          const { PrismaClient } = require('@prisma/client');
+          const prisma = new PrismaClient();
+          (async () => {
+            const rows = await prisma.$queryRawUnsafe(
+              'SELECT migration_name, finished_at, rolled_back_at FROM "_prisma_migrations" ORDER BY started_at'
+            );
+            const failed = rows.filter(r => !r.finished_at && !r.rolled_back_at);
+            console.log(`Applied migration ledger entries: ${rows.length}`);
+            if (failed.length) {
+              console.error('Unresolved migration entries:', failed.map(r => r.migration_name).join(', '));
+              process.exitCode = 1;
+            }
+          })().finally(() => prisma.$disconnect());
+          NODE
