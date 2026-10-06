@@ -55,7 +55,7 @@ export class OrdersService {
     const session = event.data.object;
     const orderId = session.metadata?.orderId;
     if (!orderId || session.payment_status !== 'paid') return { received: true };
-    return this.prisma.$transaction(async (tx) => {
+    return this.serializable(async (tx) => {
       const existing = await tx.orderPayment.findUnique({ where: { externalId: session.id } });
       if (existing) return { received: true };
       const order = await tx.order.findUnique({ where: { id: orderId }, include: { payments: true } });
@@ -67,7 +67,7 @@ export class OrdersService {
       if (amount > 0) await tx.orderPayment.create({ data: { orderId, amount, method: PaymentMethod.STRIPE, externalId: session.id, reference: session.payment_intent ? String(session.payment_intent) : session.id, receivedAt: new Date(), createdById: null } });
       if (paid + amount >= order.totalAmount) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.PAID } });
       return { received: true };
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    });
   }
 
   async updatePaymentDueDate(id: string, paymentDueDate: string | null) {
@@ -129,7 +129,8 @@ export class OrdersService {
         const current = demand.get(key);
         demand.set(key, { productId: item.productId ?? undefined, wheelRimId: item.wheelRimId ?? undefined, locationId: item.locationId, quantity: (current?.quantity ?? 0) + item.quantity });
       }
-      if (activeReservations.length) {
+      if (!activeReservations.length) throw new BadRequestException('Order has no active stock reservation');
+      {
         const reservationDemand = new Map<string, number>();
         for (const reservation of activeReservations) {
           const key = `${reservation.productId ?? ''}:${reservation.wheelRimId ?? ''}:${reservation.locationId}`;
