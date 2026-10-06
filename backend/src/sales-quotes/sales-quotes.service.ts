@@ -37,8 +37,14 @@ export class SalesQuotesService {
     const productId=item.productId!;const key=`${productId}:${locationId}`;const current=demand.get(key);demand.set(key,{productId,locationId,quantity:(current?.quantity??0)+item.quantity,description:item.description});
     orderItems.push({productId,locationId,quantity:item.quantity,price:item.unitPrice});
    }
-   for(const required of demand.values()){const stock=await tx.stockLocation.findFirst({where:{locationId:required.locationId,productId:required.productId},select:{quantity:true}});if(!stock||stock.quantity<required.quantity)throw new BadRequestException(`Không đủ tồn kho cho ${required.description} tại vị trí đã chọn.`);}
+   for(const required of demand.values()){
+    const stock=await tx.stockLocation.findFirst({where:{locationId:required.locationId,productId:required.productId},select:{quantity:true}});
+    const reserved=await tx.stockReservation.aggregate({where:{locationId:required.locationId,productId:required.productId,status:'ACTIVE'},_sum:{quantity:true}});
+    const available=(stock?.quantity??0)-(reserved._sum.quantity??0);
+    if(available<required.quantity)throw new BadRequestException(`Không đủ tồn kho khả dụng cho ${required.description} tại vị trí đã chọn.`);
+   }
    const order=await tx.order.create({data:{clientId,totalAmount:quote.total,status:'PENDING',items:{create:orderItems}},include:{items:true}});
+   await tx.stockReservation.createMany({data:[...demand.values()].map(required=>({orderId:order.id,productId:required.productId,locationId:required.locationId,quantity:required.quantity}))});
    await tx.salesQuote.update({where:{id},data:{clientId,orderId:order.id,convertedAt:new Date()}});
    return order;
   });
