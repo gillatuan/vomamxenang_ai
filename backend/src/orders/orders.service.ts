@@ -100,7 +100,8 @@ export class OrdersService {
         if (!stock || stock.quantity < required.quantity) throw new BadRequestException('Insufficient stock to create fulfillment');
       }
       try {
-        return await tx.inventoryTransaction.create({ data: { code: `EXPORT-ORDER-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`, type: 'EXPORT', partnerName: order.client.name, userId, orderId: order.id, details: { create: order.items.map(item => ({ productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: item.quantity, price: item.price })) } }, include: { details: true } });
+        const fulfillment = await tx.inventoryTransaction.create({ data: { code: `EXPORT-ORDER-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`, type: 'EXPORT', partnerName: order.client.name, userId, orderId: order.id, details: { create: order.items.map(item => ({ productId: item.productId, wheelRimId: item.wheelRimId, locationId: item.locationId, quantity: item.quantity, price: item.price })) } }, include: { details: true } });
+        return fulfillment;
       } catch (error: unknown) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           const existing = await tx.inventoryTransaction.findUnique({ where: { orderId: order.id }, include: { details: true } });
@@ -116,7 +117,16 @@ export class OrdersService {
     if (!order) throw new BadRequestException('Order not found');
     if (order.status === OrderStatus.PAID) throw new BadRequestException('A paid order status can only be changed by the payment webhook');
     if (order.fulfillment || order.payments.length) throw new BadRequestException('Orders with fulfillment or payments cannot change status manually');
-    return this.prisma.order.update({ where: { id }, data: { status } });
+    return this.prisma.$transaction(async tx => {
+      const updated = await tx.order.update({ where: { id }, data: { status } });
+      if (status === OrderStatus.FAILED) {
+        await tx.stockReservation.updateMany({
+          where: { orderId: id, status: 'ACTIVE' },
+          data: { status: 'RELEASED', releasedAt: new Date() },
+        });
+      }
+      return updated;
+    });
   }
 
   async deleteDraft(id: string) {
