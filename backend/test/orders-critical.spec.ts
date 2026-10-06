@@ -66,6 +66,11 @@ async function main() {
   const releaseExpired=updates.find(x=>x.where?.orderId?.in);
   assert.equal(releaseExpired?.where?.expiresAt,undefined,'expiry recovery must release every ACTIVE reservation on the failed order');
 
+  // Fulfillment must never bypass reservation integrity: an order without ACTIVE reservations is rejected.
+  prisma.order.findUnique=async()=>({id:'o-fulfill',status:'PENDING',client:{name:'Client'},items:[{productId:'P1',wheelRimId:null,locationId:'L1',quantity:1,price:90}],fulfillment:null});
+  prisma.stockReservation.findMany=async()=>[];
+  await assert.rejects(()=>service.createFulfillment('o-fulfill','u1'),BadRequestException);
+
   // Stripe session failure must compensate the order reservation.
   stripe.getStripeClient=()=>({checkout:{sessions:{create:async()=>{throw new Error('stripe unavailable');}}}});
   try {
