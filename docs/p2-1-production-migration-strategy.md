@@ -19,3 +19,8 @@ Stock reservation will be introduced additively. The first reservation release m
 ## Current boundary
 
 CI proves the full migration chain on a fresh PostgreSQL database. It does not mutate production. Until a dedicated production migration credential/policy is configured, production migration execution remains an explicit release step rather than being hidden inside Vercel deployment.
+
+
+## Final integration audit checkpoint
+
+P2.1 reservation/Stripe lifecycle hardening completed through PR #82. This audit PR intentionally changes documentation only so the full PR integration workflow runs against the merged integration head, including migration safety, fresh PostgreSQL migration/drift checks, backend PostgreSQL concurrency tests, frontend verification, and backend build. Production promotion remains blocked until the separate production migration preflight is completed.
