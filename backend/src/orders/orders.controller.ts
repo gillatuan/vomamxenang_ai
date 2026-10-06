@@ -49,6 +49,11 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN_MANAGER')
+  @Post('reservations/release-expired')
+  releaseExpiredReservations() { return this.service.releaseExpiredReservations(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN_MANAGER')
   @Get('receivables')
   receivables() { return this.service.receivables(); }
 
