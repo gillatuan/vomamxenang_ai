@@ -6,6 +6,7 @@ async function main() {
   const updates:any[]=[];
   const prisma:any={
     order:{
+      updateMany:async(args:any)=>{updates.push(args);return {count:1};},
       findUnique: async ({where}:any)=>where.id==='missing'?null:where.id==='paid'?{status:'PAID',stripeSessionId:'cs_1'}:{status:'PENDING',stripeSessionId:null},
       update:async(args:any)=>{updates.push(args);return args;},
       create:async({data}:any)=>({id:'o1',...data,items:data.items.create})
@@ -35,13 +36,27 @@ async function main() {
   process.env.STRIPE_SECRET_KEY='sk_test_placeholder';
   const stripe=require('../src/stripe');
   const original=stripe.getStripeClient;
-  stripe.getStripeClient=()=>({checkout:{sessions:{create:async(args:any)=>{assert.equal(args.line_items[0].price_data.unit_amount,90);return{id:'cs_test',url:'https://example.test/checkout'};}}}});
+  stripe.getStripeClient=()=>({checkout:{sessions:{
+    create:async(args:any)=>{
+      assert.equal(args.line_items[0].price_data.unit_amount,90);
+      assert.ok(Number.isInteger(args.expires_at),'Stripe expiry must match reservation lifecycle');
+      return{id:'cs_test',url:'https://example.test/checkout'};
+    },
+    expire:async()=>({id:'cs_test'})
+  }}});
   try {
     const out=await service.createCheckoutSession({items:[{productId:'P1',locationId:'L1',quantity:2}],clientId:'c1'}, {});
     assert.equal(out.url,'https://example.test/checkout');
     const create=updates.find(x=>x.data?.stripeSessionId==='cs_test');
     assert.ok(create,'checkout session id must be persisted');
   } finally { stripe.getStripeClient=original; }
+
+  // All reservations for an expired order must be released together, even when only one line has reached expiry.
+  prisma.stockReservation.findMany=async()=>[{orderId:'o1'}];
+  updates.length=0;
+  await service.releaseExpiredReservations(new Date());
+  const releaseExpired=updates.find(x=>x.where?.orderId?.in);
+  assert.equal(releaseExpired?.where?.expiresAt,undefined,'expiry recovery must release every ACTIVE reservation on the failed order');
 
   // Stripe session failure must compensate the order reservation.
   stripe.getStripeClient=()=>({checkout:{sessions:{create:async()=>{throw new Error('stripe unavailable');}}}});
