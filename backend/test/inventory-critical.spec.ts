@@ -18,9 +18,10 @@ async function main() {
   };
   const prisma:any={
     inventoryTransaction:{
-      findUnique: async ({where}:any) => where.id==='missing'?null:{id:where.id,type:where.id.includes('receipt')?'IMPORT':'EXPORT',status:'DRAFT',details:detailsById[where.id]},
+      findUnique: async ({where}:any) => where.id==='missing'?null:{id:where.id,type:where.id.includes('receipt')?'IMPORT':'EXPORT',status:'DRAFT',orderId:where.id==='issue'?'O1':null,details:detailsById[where.id]},
       updateMany: async (args:any)=>{updates.push(args);return {count:1};},
     },
+    stockReservation:{updateMany:async(args:any)=>{updates.push(args);return {count:1};}},
     stockLocation:{
       findFirst: async ({where}:any)=> where.productId==='P2'?{id:'stock-p2',quantity:1}:{id:'stock-p1',quantity:5},
       update: (args:any)=>{updates.push(args);return Promise.resolve(args);},
@@ -42,7 +43,8 @@ async function main() {
   await service.confirmReceipt('receipt');
   assert.deepEqual(updates.at(-1).data,{quantity:{increment:2}});
   await service.confirmIssue('issue');
-  assert.deepEqual(updates.at(-1).data,{quantity:{decrement:3}});
+  assert.deepEqual(updates.find(x=>x.data?.quantity?.decrement===3)?.data,{quantity:{decrement:3}});
+  assert.equal(updates.at(-1).data.status,'CONSUMED');
 
   updates.length=0; txCalls.length=0;
   await assert.rejects(()=>service.confirmReceipt('multi-receipt'),BadRequestException);
