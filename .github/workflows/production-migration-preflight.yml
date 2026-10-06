@@ -55,10 +55,16 @@ jobs:
           status=$?
           set -e
           printf '%s\n' "$output"
-          # Prisma exits non-zero when unapplied migrations exist; that is expected
-          # during preflight. Connection/history errors must still fail.
-          if printf '%s' "$output" | grep -Eqi 'P100[0-9]|P300[0-9]|failed migration|diverg|not found|permission denied|authentication failed|connect'; then
+          # Pending migrations and the one audited legacy database-only migration are expected.
+          # Connection errors, failed migrations, and any other database-only migration remain unsafe.
+          sanitized="$(printf '%s\\n' "$output" | grep -v '20261004130000_product_category_relation' || true)"
+          if printf '%s' "$sanitized" | grep -Eqi 'P100[0-9]|P300[0-9]|failed migration|permission denied|authentication failed|connect'; then
             echo "::warning::Production migration history/connection requires review; continuing read-only audits."
+            echo "unsafe=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if printf '%s' "$sanitized" | grep -Eqi 'migrations from the database are not found locally:'; then
+            echo "::warning::Unknown database-only migration detected."
             echo "unsafe=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -131,6 +137,9 @@ jobs:
             console.log('Current categoryId column:', column);
             console.log('Current category index:', indexes);
             console.log('Current category FK:', fk);
+            const ok = row.length === 1 && row[0].checksum === '43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a' && Boolean(row[0].finished_at) && !row[0].rolled_back_at && Number(row[0].applied_steps_count) === 1 && column.length === 1 && indexes.length === 1 && fk.length === 1;
+            if (!ok) throw new Error('Legacy 130000 verification failed');
+            console.log('Legacy 130000 verification: PASS');
           })().finally(() => prisma.$disconnect());
           NODE
 
