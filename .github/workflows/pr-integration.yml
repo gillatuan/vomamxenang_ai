@@ -68,6 +68,12 @@ jobs:
           node-version: 20
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - name: Audit changed migration SQL for production safety
+        shell: bash
+        working-directory: .
+        run: |
+          mapfile -t migrations < <(git diff --name-only --diff-filter=AM "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- 'backend/prisma/migrations/*/migration.sql')
+          node backend/scripts/audit-migration-safety.cjs "${migrations[@]}"
       - name: Validate Prisma schema
         run: yarn prisma validate
       - name: Typecheck backend
