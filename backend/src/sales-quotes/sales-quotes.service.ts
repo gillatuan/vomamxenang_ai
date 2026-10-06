@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { SalesQuoteStatus } from '@prisma/client';
+import { Prisma, SalesQuoteStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type QuoteItemInput={productId?:string;description:string;quantity:number;unitPrice:number};
@@ -8,6 +8,7 @@ export type CreateSalesQuoteInput={leadId?:string;clientId?:string;customerName:
 @Injectable()
 export class SalesQuotesService {
  constructor(private prisma:PrismaService){}
+ private async serializable<T>(work:(tx:Prisma.TransactionClient)=>Promise<T>,maxAttempts=3){for(let attempt=1;;attempt++){try{return await this.prisma.$transaction(work,{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});}catch(error){if(!(error instanceof Prisma.PrismaClientKnownRequestError)||error.code!=='P2034'||attempt>=maxAttempts)throw error;}}}
  findAll(){return this.prisma.salesQuote.findMany({orderBy:{createdAt:'desc'},include:{lead:{select:{id:true,name:true,status:true}},client:{select:{id:true,name:true}},order:{select:{id:true,code:true,status:true}},createdBy:{select:{id:true,email:true}},items:{include:{product:{select:{id:true,sku:true,name:true}}}}}})}
  async create(input:CreateSalesQuoteInput,userId:string){
   if(!input.items?.length)throw new BadRequestException('Báo giá cần ít nhất một dòng sản phẩm.');
@@ -23,7 +24,7 @@ export class SalesQuotesService {
   return this.prisma.salesQuote.create({data:{code,leadId:input.leadId,clientId:input.clientId,createdById:userId,customerName:input.customerName.trim(),phone:input.phone.trim(),company:input.company?.trim(),subtotal,discount,total:subtotal-discount,note:input.note?.trim(),validUntil,items:{create:items}},include:{items:{include:{product:{select:{id:true,sku:true,name:true}}}},lead:true}});
  }
  async convertToOrder(id:string,clientId:string,locations:{itemId:string;locationId:string}[]){
-  return this.prisma.$transaction(async tx=>{
+  return this.serializable(async tx=>{
    const quote=await tx.salesQuote.findUnique({where:{id},include:{items:true}});
    if(!quote)throw new BadRequestException('Không tìm thấy báo giá.');
    if(quote.status!==SalesQuoteStatus.ACCEPTED)throw new BadRequestException('Chỉ báo giá đã chấp nhận mới có thể tạo đơn hàng.');
@@ -48,7 +49,7 @@ export class SalesQuotesService {
    await tx.stockReservation.createMany({data:[...demand.values()].map(required=>({orderId:order.id,productId:required.productId,locationId:required.locationId,quantity:required.quantity}))});
    await tx.salesQuote.update({where:{id},data:{clientId,orderId:order.id,convertedAt:new Date()}});
    return order;
-  },{isolationLevel:'Serializable'});
+  });
  }
  async updateStatus(id:string,status:SalesQuoteStatus,userId:string){
   return this.prisma.$transaction(async tx=>{const current=await tx.salesQuote.findUnique({where:{id},select:{leadId:true,status:true,validUntil:true}});if(!current)throw new BadRequestException('Không tìm thấy báo giá.');
