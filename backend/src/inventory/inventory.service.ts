@@ -188,6 +188,12 @@ export class InventoryService {
           throw new BadRequestException('Insufficient stock for the chosen location');
         }
       }
+      if (transaction.orderId) {
+        await tx.stockReservation.updateMany({
+          where: { orderId: transaction.orderId, status: 'ACTIVE' },
+          data: { status: 'CONSUMED', consumedAt: new Date() },
+        });
+      }
     });
 
     const confirmed = await this.findIssueById(id);
