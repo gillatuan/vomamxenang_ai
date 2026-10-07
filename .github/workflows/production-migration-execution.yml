@@ -12,11 +12,6 @@ on:
         description: Type MIGRATE-PRODUCTION to authorize production schema migration
         required: true
         type: string
-      backup_confirmed:
-        description: Confirm a current production backup/restore point exists
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -35,19 +30,26 @@ jobs:
         working-directory: backend
     env:
       DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      PRISMA_MANAGEMENT_TOKEN: ${{ secrets.PRISMA_MANAGEMENT_TOKEN }}
+      PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
       EXPECTED_REF: feature/p2-1-stock-lifecycle
       EXPECTED_LAST_PENDING: 20261006074500_add_reservation_expiry
       LEGACY_MIGRATION: 20261004130000_product_category_relation
       LEGACY_CHECKSUM: 43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Require explicit authorization
         shell: bash
         run: |
           set -euo pipefail
           [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
-          [ "${{ inputs.backup_confirmed }}" = "true" ] || { echo "::error::A current production backup/restore point must be confirmed"; exit 1; }
           [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
+
+      - name: Verify provider-managed backup gate
+        shell: bash
+        run: node scripts/verify-production-backup-gate.cjs
 
       - uses: actions/checkout@v4
         with:
