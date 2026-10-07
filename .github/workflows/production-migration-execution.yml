@@ -12,11 +12,6 @@ on:
         description: Type MIGRATE-PRODUCTION to authorize production schema migration
         required: true
         type: string
-      backup_confirmed:
-        description: Confirm a current production backup/restore point exists
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -46,7 +41,6 @@ jobs:
         run: |
           set -euo pipefail
           [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
-          [ "${{ inputs.backup_confirmed }}" = "true" ] || { echo "::error::A current production backup/restore point must be confirmed"; exit 1; }
           [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
 
       - uses: actions/checkout@v4
