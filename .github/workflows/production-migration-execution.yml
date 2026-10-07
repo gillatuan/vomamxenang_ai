@@ -45,6 +45,10 @@ jobs:
           [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
           [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
 
+      - name: Verify provider-managed backup gate
+        shell: bash
+        run: node scripts/verify-production-backup-gate.cjs
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.migration_ref }}
@@ -79,10 +83,6 @@ jobs:
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Verify provider-managed backup gate
-        shell: bash
-        run: node scripts/verify-production-backup-gate.cjs
 
       - name: Verify production legacy invariant
         shell: bash
