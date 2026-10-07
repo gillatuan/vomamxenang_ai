@@ -30,6 +30,8 @@ jobs:
         working-directory: backend
     env:
       DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      PRISMA_MANAGEMENT_TOKEN: ${{ secrets.PRISMA_MANAGEMENT_TOKEN }}
+      PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
       EXPECTED_REF: feature/p2-1-stock-lifecycle
       EXPECTED_LAST_PENDING: 20261006074500_add_reservation_expiry
       LEGACY_MIGRATION: 20261004130000_product_category_relation
@@ -77,6 +79,10 @@ jobs:
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Verify provider-managed backup gate
+        shell: bash
+        run: node scripts/verify-production-backup-gate.cjs
 
       - name: Verify production legacy invariant
         shell: bash
