@@ -1,0 +1,135 @@
+name: Production migration execution
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_ref:
+        description: Audited Git ref containing the migrations to deploy
+        required: true
+        default: feature/p2-1-stock-lifecycle
+        type: string
+      confirmation:
+        description: Type MIGRATE-PRODUCTION to authorize production schema migration
+        required: true
+        type: string
+      backup_confirmed:
+        description: Confirm a current production backup/restore point exists
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Protected production migration
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      EXPECTED_REF: feature/p2-1-stock-lifecycle
+      EXPECTED_LAST_PENDING: 20261006074500_add_reservation_expiry
+      LEGACY_MIGRATION: 20261004130000_product_category_relation
+      LEGACY_CHECKSUM: 43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a
+
+    steps:
+      - name: Require explicit authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
+          [ "${{ inputs.backup_confirmed }}" = "true" ] || { echo "::error::A current production backup/restore point must be confirmed"; exit 1; }
+          [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.migration_ref }}
+
+      - name: Report migration revision
+        run: echo "Migration ref=${{ inputs.migration_ref }} sha=$(git rev-parse HEAD)"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+
+      - name: Require direct PostgreSQL credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${DATABASE_URL:-}" || { echo "::error::Production secret DIRECT_DATABASE_URL is required"; exit 1; }
+          case "$DATABASE_URL" in postgresql://*|postgres://*) ;; *) echo "::error::DIRECT_DATABASE_URL must be PostgreSQL"; exit 1;; esac
+          [[ "$DATABASE_URL" != *"accelerate.prisma-data.net"* ]] || { echo "::error::Prisma Accelerate is forbidden for migration execution"; exit 1; }
+
+      - name: Validate Prisma schema
+        run: yarn prisma validate
+
+      - name: Verify audited migration set
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "prisma/migrations/$EXPECTED_LAST_PENDING/migration.sql"
+          node scripts/audit-migration-safety.cjs
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Verify production legacy invariant
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "SELECT checksum FROM \"_prisma_migrations\" WHERE migration_name='$LEGACY_MIGRATION' AND finished_at IS NOT NULL AND rolled_back_at IS NULL ORDER BY started_at DESC LIMIT 1")"
+          [ "$actual" = "$LEGACY_CHECKSUM" ] || { echo "::error::Legacy production migration invariant changed"; exit 1; }
+
+      - name: Capture migration status before deploy
+        shell: bash
+        run: |
+          set +e
+          output="$(./node_modules/.bin/prisma migrate status 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          printf '%s\n' "$output" | grep -Fq "$EXPECTED_LAST_PENDING" || { echo "::error::Expected audited pending migration set not found"; exit 1; }
+          sanitized="$(printf '%s\n' "$output" | grep -v "$LEGACY_MIGRATION" || true)"
+          if printf '%s' "$sanitized" | grep -Eqi 'P100[0-9]|P300[0-9]|failed migration|permission denied|authentication failed|connect'; then
+            echo "::error::Unsafe production migration state"; exit 1
+          fi
+          if printf '%s' "$sanitized" | grep -Eqi 'migrations from the database are not found locally:'; then
+            echo "::error::Unknown database-only migration detected"; exit 1
+          fi
+          [ "$status" -eq 0 ] || printf '%s' "$output" | grep -Eqi 'not yet been applied|pending' || { echo "::error::Unexpected migration status"; exit 1; }
+
+      - name: Deploy audited migrations
+        run: ./node_modules/.bin/prisma migrate deploy
+
+      - name: Verify migration status after deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(./node_modules/.bin/prisma migrate status 2>&1 || true)"
+          printf '%s\n' "$output"
+          printf '%s' "$output" | grep -Fq 'Database schema is up to date' || { echo "::error::Production migration status is not up to date"; exit 1; }
+          sanitized="$(printf '%s\n' "$output" | grep -v "$LEGACY_MIGRATION" || true)"
+          if printf '%s' "$sanitized" | grep -Eqi 'P100[0-9]|P300[0-9]|failed migration|permission denied|authentication failed'; then
+            echo "::error::Post-deploy migration verification failed"; exit 1
+          fi
+
+      - name: Verify schema drift
+        run: ./node_modules/.bin/prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
+
+      - name: Verify P2.1 reservation schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT "status", count(*) FROM "StockReservation" GROUP BY "status";'
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='StoreInfo' AND column_name IN ('googleMapsUrl','latitude','longitude');" | grep -qx '3'
