@@ -38,6 +38,8 @@ jobs:
       LEGACY_CHECKSUM: 43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Require explicit authorization
         shell: bash
         run: |
