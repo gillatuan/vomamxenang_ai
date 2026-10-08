@@ -9,7 +9,7 @@ on:
         default: feature/p2-1-stock-lifecycle
         type: string
       confirmation:
-        description: Type MIGRATE-PRODUCTION to authorize production schema migration
+        description: VERIFY-BACKUP-ONLY checks backup without migration; MIGRATE-PRODUCTION deploys
         required: true
         type: string
 
@@ -21,7 +21,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  verify_backup_only:
+    name: Verify production backup only (read-only)
+    if: ${{ inputs.confirmation == 'VERIFY-BACKUP-ONLY' }}
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      PRISMA_MANAGEMENT_TOKEN: ${{ secrets.PRISMA_MANAGEMENT_TOKEN }}
+      PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify provider-managed backup gate (no migration)
+        run: node scripts/verify-production-backup-gate.cjs
+
   migrate:
+    if: ${{ inputs.confirmation == 'MIGRATE-PRODUCTION' }}
     name: Protected production migration
     runs-on: ubuntu-latest
     environment: Production
