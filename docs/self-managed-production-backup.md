@@ -1,16 +1,19 @@
-# Self-managed backup setup (Prisma Free)
+# AWS Free Tier-oriented production backup setup
 
-The production migration workflow must fail closed until an encrypted offsite PostgreSQL dump is verified.
+Use S3 **SSE-S3 (AES256)**, not a customer-managed KMS key. SSE-S3 avoids the fixed monthly customer-managed KMS key charge. S3 usage can still incur charges depending on account eligibility, storage and requests.
 
-Configure GitHub **Production** environment:
-- Secret: `DIRECT_DATABASE_URL` (direct PostgreSQL connection, least privilege for dump and migration)
-- Secret: `PRODUCTION_BACKUP_AWS_ROLE_ARN` (AWS OIDC role scoped to one private backup bucket)
-- Variable: `PRODUCTION_BACKUP_AWS_REGION`
-- Variable: `PRODUCTION_BACKUP_BUCKET`
-- Variable: `PRODUCTION_BACKUP_KMS_KEY_ID`
+## AWS console configuration
 
-S3 bucket: block public access, enable versioning, apply retention/object-lock policy, restrict read/delete, use SSE-KMS and scoped KMS permissions. Never upload dumps as GitHub Actions artifacts or commit them.
+1. Create a private S3 bucket in the closest appropriate region; block all public access, enable bucket versioning and default SSE-S3 encryption.
+2. Add a lifecycle expiration rule appropriate to the recovery requirement (for example, 7 days). Estimate storage and request charges; configure AWS Budgets alerts.
+3. Create an AWS IAM OIDC identity provider for `https://token.actions.githubusercontent.com` (audience `sts.amazonaws.com`).
+4. Create a role trusted **only** by the repository GitHub Actions `Production` environment subject `repo:gillatuan/vomamxenang_ai:environment:Production`, and audience `sts.amazonaws.com`. Scope S3 permissions to `production/postgres/*` in this bucket. Permit PutObject, GetObject and HeadObject; do not grant DeleteObject or wildcard administrator permissions.
+5. Set GitHub Production environment secret `PRODUCTION_BACKUP_AWS_ROLE_ARN`, variable `PRODUCTION_BACKUP_AWS_REGION`, variable `PRODUCTION_BACKUP_BUCKET`, and secret `DIRECT_DATABASE_URL`. Never commit credentials.
 
-Run the backup script only after configuring these resources. It checks a custom-format dump with `pg_restore --list`, stores it with KMS encryption and verifies object metadata. A restore drill to an isolated temporary PostgreSQL instance is recommended to prove restorability.
+## Verification
 
-**Important:** The existing migration workflow still uses provider-managed backup verification until its workflow changes are reviewed and merged. Never bypass that gate to run migrations. The new script by itself does not authorize production migration.
+Run the backup script using the AWS OIDC credentials in a protected GitHub Actions job. Verify `pg_restore --list` and S3 object encryption/checksum metadata. **A full restore drill into an isolated temporary PostgreSQL instance is required to establish actual restorability**, and must not target production. The backup gate must fail closed if any check fails.
+
+## Status
+
+The script exists on the feature branch. The migration workflow integration and live AWS/restore verification are pending; do not merge or run migrations until complete.
