@@ -14,14 +14,21 @@ async function main() {
   }
   const payload = await response.json();
   const items = Array.isArray(payload) ? payload : (payload.data ?? payload.backups ?? []);
-  const ready = items.filter((b) => ["ready", "completed", "success"].includes(String(b.status).toLowerCase()));
+  if (!Array.isArray(items)) {
+    console.error("::error::Unexpected Prisma backup API response shape");
+    process.exit(1);
+  }
+  const statuses = [...new Set(items.map((b) => String(b?.status ?? "missing").toLowerCase()))];
+  console.log(`Prisma backup inventory: count=${items.length}; statuses=${statuses.join(",") || "none"}`);
+  const ready = items.filter((b) => ["ready", "completed", "success"].includes(String(b?.status).toLowerCase()));
   ready.sort((a,b) => new Date(b.createdAt ?? b.created_at) - new Date(a.createdAt ?? a.created_at));
   if (!ready.length) {
-    console.error("::error::No completed provider-managed production backup found");
+    console.error("::error::No completed provider-managed backup found; check inventory and database identity");
     process.exit(1);
   }
   const latest = ready[0];
   const createdAt = latest.createdAt ?? latest.created_at;
+  console.log(`Latest accepted backup timestamp: ${createdAt ?? "missing"}`);
   const ageHours = (Date.now() - new Date(createdAt).getTime()) / 3600000;
   if (!Number.isFinite(ageHours) || ageHours < 0 || ageHours > maxAgeHours) {
     console.error(`::error::Latest production backup is not within ${maxAgeHours} hours`);
