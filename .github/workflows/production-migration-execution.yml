@@ -34,6 +34,8 @@ jobs:
       PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
     steps:
       - uses: actions/checkout@v4
+      - name: Check backup gate script syntax
+        run: node --check scripts/verify-production-backup-gate.cjs
       - name: Verify provider-managed backup gate (no migration)
         run: node scripts/verify-production-backup-gate.cjs
 
@@ -63,6 +65,9 @@ jobs:
           set -euo pipefail
           [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
           [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
+
+      - name: Check backup gate script syntax
+        run: node --check scripts/verify-production-backup-gate.cjs
 
       - name: Verify provider-managed backup gate
         shell: bash
