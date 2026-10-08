@@ -4,7 +4,6 @@ set -Eeuo pipefail
 umask 077
 : "${DATABASE_URL:?DIRECT_DATABASE_URL is required}"
 : "${PRODUCTION_BACKUP_BUCKET:?PRODUCTION_BACKUP_BUCKET is required}"
-: "${PRODUCTION_BACKUP_KMS_KEY_ID:?PRODUCTION_BACKUP_KMS_KEY_ID is required}"
 case "$DATABASE_URL" in postgresql://*|postgres://*) ;; *) echo "::error::A direct PostgreSQL URL is required"; exit 1;; esac
 if [[ "$DATABASE_URL" == *"accelerate.prisma-data.net"* ]]; then echo "::error::Accelerate URL is not supported"; exit 1; fi
 for cmd in pg_dump pg_restore aws sha256sum; do command -v "$cmd" >/dev/null || { echo "::error::Missing $cmd"; exit 1; }; done
@@ -22,17 +21,16 @@ grep -q 'TABLE DATA' "$workdir/toc" || { echo "::error::Backup has no TABLE DATA
 checksum="$(sha256sum "$archive" | awk '{print $1}')"
 echo "Uploading encrypted backup to private S3 storage"
 aws s3api put-object --bucket "$PRODUCTION_BACKUP_BUCKET" --key "$key" \
-  --body "$archive" --server-side-encryption aws:kms \
-  --ssekms-key-id "$PRODUCTION_BACKUP_KMS_KEY_ID" \
+  --body "$archive" --server-side-encryption AES256 \
   --metadata "sha256=$checksum" --output json > "$workdir/upload.json"
 aws s3api head-object --bucket "$PRODUCTION_BACKUP_BUCKET" --key "$key" > "$workdir/head.json"
 node -e '
 const fs=require("fs");
 const head=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
 const checksum=process.argv[2];
-if(head.ServerSideEncryption!=="aws:kms" || head.Metadata?.sha256!==checksum || !(head.ContentLength>0)) process.exit(1);
+if(head.ServerSideEncryption!=="AES256" || head.Metadata?.sha256!==checksum || !(head.ContentLength>0)) process.exit(1);
 ' "$workdir/head.json" "$checksum" || { echo "::error::Stored backup metadata verification failed"; exit 1; }
-echo "Self-managed backup gate PASS: S3 object verified, encrypted with KMS, pg_restore TOC readable."
+echo "Self-managed backup gate PASS: S3 object verified, encrypted with SSE-S3, pg_restore TOC readable."
 echo "Backup location: s3://$PRODUCTION_BACKUP_BUCKET/$key"
 echo "SHA256: $checksum"
 echo "::notice::A full test restore into an isolated database is still recommended before high-risk schema changes."
