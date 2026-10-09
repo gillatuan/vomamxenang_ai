@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Box, Button, Chip, FormControl, InputLabel, Link, MenuItem, Paper, Select, Stack, TextField, Typography } from "@mui/material";
 import { QuoteLead, QuoteLeadStatus, quoteLeadsAPI } from "@/lib/api-client";
 
@@ -14,9 +14,9 @@ export default function QuoteLeadsPage(){
  const [rows,setRows]=useState<QuoteLead[]>([]),[assignees,setAssignees]=useState<{id:string;email:string;role:string}[]>([]);
  const [error,setError]=useState(""),[statusFilter,setStatusFilter]=useState<PipelineFilter>(""),[assigneeFilter,setAssigneeFilter]=useState("");
  const [notes,setNotes]=useState<Record<string,string>>({});
- const load=()=>quoteLeadsAPI.getAll(statusFilter==="OVERDUE"?{overdue:true,assigneeId:assigneeFilter||undefined}:{status:statusFilter||undefined,assigneeId:assigneeFilter||undefined}).then(r=>setRows(r.data)).catch(()=>setError("Không tải được lead."));
+ const load=useCallback(()=>quoteLeadsAPI.getAll(statusFilter==="OVERDUE"?{overdue:true,assigneeId:assigneeFilter||undefined}:{status:statusFilter||undefined,assigneeId:assigneeFilter||undefined}).then(r=>setRows(r.data)).catch(()=>setError("Không tải được lead.")),[statusFilter,assigneeFilter]);
  useEffect(()=>{quoteLeadsAPI.assignees().then(r=>setAssignees(r.data)).catch(()=>{});},[]);
- useEffect(()=>{load();},[statusFilter,assigneeFilter]);
+ useEffect(()=>{load();},[load]);
  const overdueCount=useMemo(()=>rows.filter(r=>open(r.status)&&r.followUpAt&&new Date(r.followUpAt)<new Date()).length,[rows]);
  const patch=async(id:string,data:{assigneeId?:string|null;followUpAt?:string|null})=>{try{await quoteLeadsAPI.updateCrm(id,data);load();}catch{setError("Không cập nhật được CRM.");}};
  const status=async(id:string,value:QuoteLeadStatus)=>{try{await quoteLeadsAPI.updateStatus(id,value);load();}catch{setError("Không cập nhật được trạng thái.");}};
