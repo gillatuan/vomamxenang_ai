@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
 import { ConversionEventType } from '@prisma/client';
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -15,7 +15,7 @@ class EventDto {
 }
 @Controller('conversion-analytics')
 export class ConversionAnalyticsController {
-  constructor(private s: ConversionAnalyticsService) {}
+  constructor(@Inject(ConversionAnalyticsService) private s: ConversionAnalyticsService) {}
   @Post('event') event(@Body() d: EventDto) { return this.s.create(d); }
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMIN_MANAGER')
   @Get('report') report() { return this.s.report(); }

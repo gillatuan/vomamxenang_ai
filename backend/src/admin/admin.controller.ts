@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -12,7 +12,11 @@ import { CachePurgeScope, CacheRevalidationService } from './cache-revalidation.
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  constructor(private readonly dashboard: AdminDashboardService, private readonly management: AdminManagementService, private readonly cache: CacheRevalidationService) {}
+  constructor(
+    @Inject(AdminDashboardService) private readonly dashboard: AdminDashboardService,
+    @Inject(AdminManagementService) private readonly management: AdminManagementService,
+    @Inject(CacheRevalidationService) private readonly cache: CacheRevalidationService,
+  ) {}
 
   @Get('management/products')
   products() { return this.management.products(); }
