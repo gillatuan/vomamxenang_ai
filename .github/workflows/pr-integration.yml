@@ -68,6 +68,8 @@ jobs:
           node-version: 20
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - name: Validate PostgreSQL backup drill script
+        run: bash -n scripts/self-managed-production-backup.sh
       - name: Validate Prisma schema
         run: yarn prisma validate
       - name: Typecheck backend
