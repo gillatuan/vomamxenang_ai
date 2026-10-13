@@ -24,15 +24,31 @@ function validate(env) {
   return { name };
 }
 function run(command, args, url, input) {
-  const r = spawnSync(command, args, { env: { ...process.env, PGDATABASE: url, PGCONNECT_TIMEOUT: '15', PGOPTIONS: '-c statement_timeout=600000 -c timezone=UTC' }, input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
+  const r = spawnSync(command, args, { env: pgEnv(url), input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
   // PostgreSQL errors may contain connection credentials or private row data.
   if (r.error || r.status !== 0) throw new Error(`${command} failed; no credentials or database output logged`);
   return r.stdout;
 }
+function pgEnv(value) {
+  const env = { ...process.env };
+  // Avoid inherited service/host defaults redirecting an explicitly selected DB.
+  for (const key of Object.keys(env)) if (key.startsWith('PG')) delete env[key];
+  if (!value) return env;
+  const u = new URL(value);
+  Object.assign(env, { PGHOST: u.hostname.replace(/^\[|\]$/g, ''), PGPORT: u.port || '5432', PGUSER: decodeURIComponent(u.username), PGPASSWORD: decodeURIComponent(u.password), PGDATABASE: decodeURIComponent(u.pathname.slice(1)), PGCONNECT_TIMEOUT: '15' });
+  const options = { sslmode: 'PGSSLMODE', sslrootcert: 'PGSSLROOTCERT', sslcert: 'PGSSLCERT', sslkey: 'PGSSLKEY', sslpassword: 'PGSSLPASSWORD', channel_binding: 'PGCHANNELBINDING', target_session_attrs: 'PGTARGETSESSIONATTRS', gssencmode: 'PGGSSENCMODE', application_name: 'PGAPPNAME', connect_timeout: 'PGCONNECT_TIMEOUT' };
+  for (const [key, value] of u.searchParams) {
+    if (key === 'options') continue;
+    if (!options[key]) throw new Error('Unsupported PostgreSQL connection parameter');
+    env[options[key]] = value;
+  }
+  env.PGOPTIONS = `${u.searchParams.get('options') || ''} -c statement_timeout=600000 -c timezone=UTC`;
+  return env;
+}
 const query = (url, sql) => run('psql', ['-XqAt', '-F', '\t', '-v', 'ON_ERROR_STOP=1'], url, sql);
 const quote = value => '"' + value.replaceAll('"', '""') + '"';
 async function snapshot(url) {
-  const child = spawn('psql', ['-XqAt', '-v', 'ON_ERROR_STOP=1'], { env: { ...process.env, PGDATABASE: url, PGCONNECT_TIMEOUT: '15' }, stdio: ['pipe', 'pipe', 'ignore'] });
+  const child = spawn('psql', ['-XqAt', '-v', 'ON_ERROR_STOP=1'], { env: pgEnv(url), stdio: ['pipe', 'pipe', 'ignore'] });
   child.stdin.on('error', () => {});
   const lines = readline.createInterface({ input: child.stdout });
   const id = await new Promise((resolve, reject) => {
@@ -125,5 +141,5 @@ async function main() {
     if (created) query(env.TEMP_RESTORE_ADMIN_URL, `DROP DATABASE ${quote(name)}`);
   }
 }
-module.exports = { validate };
+module.exports = { validate, pgEnv };
 if (require.main === module) main().catch(() => { console.error('Database backup gate FAILED. Private output withheld; production was not modified.'); process.exitCode = 1; });
