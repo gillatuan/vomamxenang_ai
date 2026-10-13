@@ -24,7 +24,7 @@ function validate(env) {
   return { name };
 }
 function run(command, args, url, input) {
-  const r = spawnSync(command, args, { env: { ...process.env, PGDATABASE: url, PGCONNECT_TIMEOUT: '15', PGOPTIONS: '-c statement_timeout=600000' }, input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
+  const r = spawnSync(command, args, { env: { ...process.env, PGDATABASE: url, PGCONNECT_TIMEOUT: '15', PGOPTIONS: '-c statement_timeout=600000 -c timezone=UTC' }, input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
   // PostgreSQL errors may contain connection credentials or private row data.
   if (r.error || r.status !== 0) throw new Error(`${command} failed; no credentials or database output logged`);
   return r.stdout;
@@ -64,11 +64,15 @@ async function main() {
   const repo = path.resolve(__dirname, '../..');
   if (root === repo || root.startsWith(repo + path.sep)) throw new Error('BACKUP_DIR must be outside the repository');
   fs.mkdirSync(root, { recursive: true, mode: 0o700 });
+  const realRoot = fs.realpathSync(root), realRepo = fs.realpathSync(repo);
+  if (realRoot === realRepo || realRoot.startsWith(realRepo + path.sep)) throw new Error('BACKUP_DIR symlink resolves inside repository');
   const dir = fs.mkdtempSync(path.join(root, new Date().toISOString().replaceAll(':', '-') + '-'));
   fs.chmodSync(dir, 0o700);
   const write = (name, data) => fs.writeFileSync(path.join(dir, name), data, { mode: 0o600 });
   let created = false, prodSnapshot, localSnapshot;
   try {
+    const identitySql = 'SELECT inet_server_addr(), inet_server_port(), current_database()';
+    if (query(env.PRODUCTION_DATABASE_URL, identitySql) === query(env.LOCAL_DATABASE_URL, identitySql)) throw new Error('Production and local connections resolve to the same database');
     // CREATE intentionally fails if the target already exists; never DROP an unowned DB.
     query(env.TEMP_RESTORE_ADMIN_URL, `CREATE DATABASE ${quote(name)} TEMPLATE template0`);
     created = true;
