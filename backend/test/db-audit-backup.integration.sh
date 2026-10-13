@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-export PGDATABASE="$DATABASE_URL"
+export PGDATABASE="${DATABASE_URL##*/}" PGHOST=localhost PGPORT=5432 PGUSER=postgres PGPASSWORD=postgres
 psql -X -v ON_ERROR_STOP=1 <<'SQL'
 CREATE DATABASE vmx_backup_source;
 CREATE DATABASE vmx_backup_local;
@@ -12,7 +12,7 @@ export TEMP_RESTORE_ADMIN_URL="$DATABASE_URL"
 export TEMP_RESTORE_DATABASE_URL='postgresql://postgres:postgres@localhost:5432/vmx_restore_ci'
 export BACKUP_DIR="$(mktemp -d)"
 for url in "$PRODUCTION_DATABASE_URL" "$LOCAL_DATABASE_URL"; do
-  printf '%b\n' "$fixture" | PGDATABASE="$url" psql -X -v ON_ERROR_STOP=1 >/dev/null
+  printf '%b\n' "$fixture" | PGDATABASE="${url##*/}" psql -X -v ON_ERROR_STOP=1 >/dev/null
 done
 bash scripts/db-audit-backup.sh
 test "$(find "$BACKUP_DIR" -name verified.json | wc -l)" -eq 1
