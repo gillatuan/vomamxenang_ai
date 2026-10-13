@@ -25,6 +25,11 @@ jobs:
       run:
         working-directory: backend
     steps:
+      - name: Require separately reviewed recovery with verified backup
+        if: inputs.resolution != 'preflight-only'
+        run: |
+          echo '::error::Mutation recovery is retired until a reviewed recovery plan includes a durable verified backup. Use preflight-only.'
+          exit 1
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -51,3 +56,4 @@ jobs:
       - name: Verify drift
         if: inputs.resolution != 'preflight-only'
         run: yarn prisma:migrate:drift-check
+

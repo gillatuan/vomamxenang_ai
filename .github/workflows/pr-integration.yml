@@ -70,6 +70,12 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Validate PostgreSQL backup drill script
         run: bash -n scripts/self-managed-production-backup.sh
+      - name: Test backup target safety
+        run: node --test test/db-audit-backup.test.cjs
+      - name: Install PostgreSQL client for restore test
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Exercise backup and restore against PostgreSQL
+        run: bash test/db-audit-backup.integration.sh
       - name: Validate Prisma schema
         run: yarn prisma validate
       - name: Typecheck backend
@@ -81,3 +87,4 @@ jobs:
       - name: Run backend verification suite
         run: yarn test:ci
       - run: yarn build
+
