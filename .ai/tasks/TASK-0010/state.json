@@ -1,0 +1,57 @@
+{
+  "taskId": "TASK-0010",
+  "title": "P1 database audit and verified private backup gate",
+  "status": "qa",
+  "owner": "qa",
+  "risk": {
+    "database": true,
+    "destructiveDatabase": false,
+    "security": true,
+    "production": true
+  },
+  "artifacts": {
+    "requirement": ".ai/tasks/TASK-0010/requirement.md",
+    "plan": ".ai/tasks/TASK-0010/plan.md",
+    "architecture": ".ai/tasks/TASK-0010/architecture.md",
+    "review": ".ai/tasks/TASK-0010/review.md",
+    "qa": ".ai/tasks/TASK-0010/qa.md"
+  },
+  "history": [
+    {
+      "from": null,
+      "to": "requirement",
+      "by": "planner",
+      "evidence": "requirement.md"
+    },
+    {
+      "from": "requirement",
+      "to": "planning",
+      "by": "planner",
+      "evidence": "plan.md"
+    },
+    {
+      "from": "planning",
+      "to": "architecture",
+      "by": "architect",
+      "evidence": "architecture.md"
+    },
+    {
+      "from": "architecture",
+      "to": "development",
+      "by": "developer",
+      "evidence": "Implementation on PR #97"
+    },
+    {
+      "from": "development",
+      "to": "review",
+      "by": "reviewer",
+      "evidence": "review.md"
+    },
+    {
+      "from": "review",
+      "to": "qa",
+      "by": "qa",
+      "evidence": "qa.md"
+    }
+  ]
+}

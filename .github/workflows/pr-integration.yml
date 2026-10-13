@@ -18,6 +18,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify-db-backup:
+    name: PR verify database backup and restore
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vomamxenang_backup_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vomamxenang_backup_ci
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Test backup target safety
+        run: node --test test/db-audit-backup.test.cjs
+      - name: Install PostgreSQL client for restore test
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Exercise backup and restore against PostgreSQL
+        run: bash test/db-audit-backup.integration.sh
+
   verify-frontend:
     name: PR verify frontend
     runs-on: ubuntu-latest
@@ -70,12 +104,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Validate PostgreSQL backup drill script
         run: bash -n scripts/self-managed-production-backup.sh
-      - name: Test backup target safety
-        run: node --test test/db-audit-backup.test.cjs
-      - name: Install PostgreSQL client for restore test
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Exercise backup and restore against PostgreSQL
-        run: bash test/db-audit-backup.integration.sh
       - name: Validate Prisma schema
         run: yarn prisma validate
       - name: Typecheck backend
