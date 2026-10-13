@@ -4,6 +4,7 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 const readline = require('node:readline');
+let phase = 'configuration';
 
 function validate(env) {
   const keys = ['PRODUCTION_DATABASE_URL', 'LOCAL_DATABASE_URL', 'TEMP_RESTORE_ADMIN_URL', 'TEMP_RESTORE_DATABASE_URL'];
@@ -87,14 +88,18 @@ async function main() {
   const write = (name, data) => fs.writeFileSync(path.join(dir, name), data, { mode: 0o600 });
   let created = false, prodSnapshot, localSnapshot;
   try {
+    phase = 'database identity';
     const identitySql = 'SELECT inet_server_addr(), inet_server_port(), current_database()';
     if (query(env.PRODUCTION_DATABASE_URL, identitySql) === query(env.LOCAL_DATABASE_URL, identitySql)) throw new Error('Production and local connections resolve to the same database');
     // CREATE intentionally fails if the target already exists; never DROP an unowned DB.
+    phase = 'isolated target creation';
     query(env.TEMP_RESTORE_ADMIN_URL, `CREATE DATABASE ${quote(name)} TEMPLATE template0`);
     created = true;
+    phase = 'source snapshots';
     prodSnapshot = await snapshot(env.PRODUCTION_DATABASE_URL);
     localSnapshot = await snapshot(env.LOCAL_DATABASE_URL);
     const archive = path.join(dir, 'production.dump');
+    phase = 'archive dump';
     run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', `--snapshot=${prodSnapshot.id}`, `--file=${archive}`], env.PRODUCTION_DATABASE_URL);
     if (!fs.statSync(archive).size) throw new Error('Empty backup');
     write('restore-toc.txt', run('pg_restore', ['--list', archive]));
@@ -102,6 +107,7 @@ async function main() {
     for await (const chunk of fs.createReadStream(archive)) digest.update(chunk);
     const checksum = digest.digest('hex');
     write('production.dump.sha256', checksum + '  production.dump\n');
+    phase = 'source inventory';
     const prod = inventory(env.PRODUCTION_DATABASE_URL, prodSnapshot.id);
     const local = inventory(env.LOCAL_DATABASE_URL, localSnapshot.id);
     for (const [label, url, snap] of [['production', env.PRODUCTION_DATABASE_URL, prodSnapshot], ['local', env.LOCAL_DATABASE_URL, localSnapshot]]) {
@@ -109,7 +115,10 @@ async function main() {
     }
     prodSnapshot.close(); prodSnapshot = null;
     localSnapshot.close(); localSnapshot = null;
-    run('pg_restore', ['--no-owner', '--no-acl', '--exit-on-error', archive], env.TEMP_RESTORE_DATABASE_URL);
+    phase = 'isolated restore';
+    // pg_restore requires -d to execute a restore; credentials stay in env.
+    run('pg_restore', ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error', archive], env.TEMP_RESTORE_DATABASE_URL);
+    phase = 'restore inventory verification';
     const restored = inventory(env.TEMP_RESTORE_DATABASE_URL);
     for (const key of Object.keys(prod)) {
       write(`production-${key}.txt`, prod[key]); write(`local-${key}.txt`, local[key]); write(`restored-${key}.txt`, restored[key]);
@@ -142,4 +151,4 @@ async function main() {
   }
 }
 module.exports = { validate, pgEnv };
-if (require.main === module) main().catch(() => { console.error('Database backup gate FAILED. Private output withheld; production was not modified.'); process.exitCode = 1; });
+if (require.main === module) main().catch(() => { console.error(`Database backup gate FAILED at ${phase}. Private output withheld; production was not modified.`); process.exitCode = 1; });
