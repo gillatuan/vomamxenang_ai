@@ -32,7 +32,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
 import CloseIcon from "@mui/icons-material/Close";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PublicHeader } from "@/components/PublicHeader";
@@ -47,6 +47,7 @@ type ProductCategory = { id: string; name: string };
 function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [categoryError, setCategoryError] = useState(false);
   const [categoryId, setCategoryId] = useState("");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
@@ -69,7 +70,16 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const categoryFromUrl = searchParams.get("category") || "";
   const watermark = useStoreWatermark();
 
-  useEffect(() => { categoriesAPI.getPublic().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
+  const loadCategories = useCallback(() => {
+    setCategoryError(false);
+    categoriesAPI.getPublic()
+      .then(res => {
+        if (!Array.isArray(res.data)) throw new Error('Invalid category response');
+        setCategories(res.data);
+      })
+      .catch(() => setCategoryError(true));
+  }, []);
+  useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
   useEffect(() => { setConditionFilter(condition || ""); }, [condition]);
   useEffect(() => {
@@ -130,6 +140,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
         <Box component="section" aria-label="Danh mục sản phẩm" sx={{ mb: 3 }}>
+          {categoryError && <Alert severity="warning" action={<Button color="inherit" size="small" onClick={loadCategories}>Thử lại</Button>}>Chưa tải được danh mục. Bạn vẫn có thể xem và tìm sản phẩm.</Alert>}
           {categories.length > 0 && <Tabs textColor="primary" indicatorColor="primary" value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom:"1px solid", borderColor:"divider", "& .MuiTab-root":{fontWeight:800,fontSize:{xs:".85rem",md:"1rem"},px:{xs:2,md:3}} }}>
             <Tab value="" label="Tất cả" />
             {categories.map(category=><Tab key={category.id} value={category.id} label={category.name}/>)}

@@ -1,3 +1,4 @@
+import { fallbackCatalogCategories } from './catalog-categories';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -11,6 +12,14 @@ export class CategoryService {
     return this.prisma.category.create({
       data: createCategoryDto,
     });
+  }
+
+  async findPublic() {
+    const rows = await this.prisma.category.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    });
+    return rows.length ? rows : fallbackCatalogCategories.map(row => ({ ...row }));
   }
 
   async findAll() {
