@@ -7,7 +7,8 @@ const readline = require('node:readline');
 let phase = 'configuration';
 
 function validate(env) {
-  const keys = ['PRODUCTION_DATABASE_URL', 'LOCAL_DATABASE_URL', 'TEMP_RESTORE_ADMIN_URL', 'TEMP_RESTORE_DATABASE_URL'];
+  const productionOnly = env.BACKUP_MODE === 'production-only';
+  const keys = ['PRODUCTION_DATABASE_URL', ...(productionOnly ? [] : ['LOCAL_DATABASE_URL']), 'TEMP_RESTORE_ADMIN_URL', 'TEMP_RESTORE_DATABASE_URL'];
   const urls = keys.map(key => {
     try {
       const u = new URL(env[key]);
@@ -15,13 +16,15 @@ function validate(env) {
       return u;
     } catch { throw new Error(`Invalid direct PostgreSQL configuration: ${key}`); }
   });
-  const [prod, local, admin, restore] = urls;
+  const connections = Object.fromEntries(keys.map((key, index) => [key, urls[index]]));
+  const prod = connections.PRODUCTION_DATABASE_URL, local = connections.LOCAL_DATABASE_URL;
+  const admin = connections.TEMP_RESTORE_ADMIN_URL, restore = connections.TEMP_RESTORE_DATABASE_URL;
   const db = u => decodeURIComponent(u.pathname.slice(1));
   const endpoint = u => `${u.hostname}:${u.port || '5432'}`;
   const name = db(restore);
-  if (!/^vmx_restore_[a-z0-9_]+$/.test(name) || name === db(prod) || name === db(local) || name === db(admin)) throw new Error('Restore database must have a unique vmx_restore_ name');
+  if (!/^vmx_restore_[a-z0-9_]+$/.test(name) || name === db(prod) || (local && name === db(local)) || name === db(admin)) throw new Error('Restore database must have a unique vmx_restore_ name');
   if (!['localhost', '127.0.0.1', '[::1]'].includes(restore.hostname) || endpoint(admin) !== endpoint(restore)) throw new Error('Restore/admin must use the same isolated loopback PostgreSQL server');
-  if (endpoint(prod) === endpoint(local) && db(prod) === db(local)) throw new Error('Production and local databases must differ');
+  if (local && endpoint(prod) === endpoint(local) && db(prod) === db(local)) throw new Error('Production and local databases must differ');
   return { name };
 }
 function run(command, args, url, input) {
@@ -100,6 +103,7 @@ function inventory(url, snapshotId) {
 async function main() {
   const env = process.env;
   const { name } = validate(env);
+  const productionOnly = env.BACKUP_MODE === 'production-only';
   const root = path.resolve(env.BACKUP_DIR || path.join(os.homedir(), 'vomamxenang-private-backups'));
   const repo = path.resolve(__dirname, '../..');
   if (root === repo || root.startsWith(repo + path.sep)) throw new Error('BACKUP_DIR must be outside the repository');
@@ -115,17 +119,19 @@ async function main() {
     const identitySql = 'SELECT inet_server_addr(), inet_server_port(), current_database()';
     phase = 'production connection identity';
     const productionIdentity = query(env.PRODUCTION_DATABASE_URL, identitySql);
-    phase = 'reference connection identity';
-    const localIdentity = query(env.LOCAL_DATABASE_URL, identitySql);
-    phase = 'distinct database identity';
-    if (productionIdentity === localIdentity) throw new Error('Production and local connections resolve to the same database');
+    if (!productionOnly) {
+      phase = 'reference connection identity';
+      const localIdentity = query(env.LOCAL_DATABASE_URL, identitySql);
+      phase = 'distinct database identity';
+      if (productionIdentity === localIdentity) throw new Error('Production and local connections resolve to the same database');
+    }
     // CREATE intentionally fails if the target already exists; never DROP an unowned DB.
     phase = 'isolated target creation';
     query(env.TEMP_RESTORE_ADMIN_URL, `CREATE DATABASE ${quote(name)} TEMPLATE template0`);
     created = true;
     phase = 'source snapshots';
     prodSnapshot = await snapshot(env.PRODUCTION_DATABASE_URL);
-    localSnapshot = await snapshot(env.LOCAL_DATABASE_URL);
+    localSnapshot = productionOnly ? null : await snapshot(env.LOCAL_DATABASE_URL);
     const archive = path.join(dir, 'production.dump');
     phase = 'archive dump';
     run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', `--snapshot=${prodSnapshot.id}`, `--file=${archive}`], env.PRODUCTION_DATABASE_URL);
@@ -137,27 +143,30 @@ async function main() {
     write('production.dump.sha256', checksum + '  production.dump\n');
     phase = 'source inventory';
     const prod = inventory(env.PRODUCTION_DATABASE_URL, prodSnapshot.id);
-    const local = inventory(env.LOCAL_DATABASE_URL, localSnapshot.id);
-    for (const [label, url, snap] of [['production', env.PRODUCTION_DATABASE_URL, prodSnapshot], ['local', env.LOCAL_DATABASE_URL, localSnapshot]]) {
+    const local = localSnapshot ? inventory(env.LOCAL_DATABASE_URL, localSnapshot.id) : null;
+    for (const [label, url, snap] of [['production', env.PRODUCTION_DATABASE_URL, prodSnapshot], ...(localSnapshot ? [['local', env.LOCAL_DATABASE_URL, localSnapshot]] : [])]) {
       write(`${label}-schema.sql`, run('pg_dump', ['--schema-only', '--no-owner', '--no-acl', `--snapshot=${snap.id}`], url));
     }
     prodSnapshot.close(); prodSnapshot = null;
-    localSnapshot.close(); localSnapshot = null;
+    localSnapshot?.close(); localSnapshot = null;
     phase = 'isolated restore';
     // pg_restore requires -d to execute a restore; credentials stay in env.
     run('pg_restore', ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error', archive], env.TEMP_RESTORE_DATABASE_URL);
     phase = 'restore inventory verification';
     const restored = inventory(env.TEMP_RESTORE_DATABASE_URL);
     for (const key of Object.keys(prod)) {
-      write(`production-${key}.txt`, prod[key]); write(`local-${key}.txt`, local[key]); write(`restored-${key}.txt`, restored[key]);
+      write(`production-${key}.txt`, prod[key]); if (local) write(`local-${key}.txt`, local[key]); write(`restored-${key}.txt`, restored[key]);
       if (prod[key] !== restored[key]) throw new Error(`Restore verification failed: ${key}`);
+      if (!local) continue;
       const diff = spawnSync('diff', ['-u', path.join(dir, `local-${key}.txt`), path.join(dir, `production-${key}.txt`)], { encoding: 'utf8' });
       if (diff.error || ![0, 1].includes(diff.status)) throw new Error('Comparison failed');
       write(`${key}.diff`, diff.stdout);
     }
-    const diff = spawnSync('diff', ['-u', path.join(dir, 'local-schema.sql'), path.join(dir, 'production-schema.sql')], { encoding: 'utf8' });
-    if (diff.error || ![0, 1].includes(diff.status)) throw new Error('Schema comparison failed');
-    write('schema.diff', diff.stdout);
+    if (local) {
+      const diff = spawnSync('diff', ['-u', path.join(dir, 'local-schema.sql'), path.join(dir, 'production-schema.sql')], { encoding: 'utf8' });
+      if (diff.error || ![0, 1].includes(diff.status)) throw new Error('Schema comparison failed');
+      write('schema.diff', diff.stdout);
+    }
     const seedFiles = path.join(repo, 'backend/prisma/seeds/production');
     const expected = fs.readdirSync(seedFiles).filter(f => f.endsWith('.seed.ts')).flatMap(f => [...fs.readFileSync(path.join(seedFiles, f), 'utf8').matchAll(/key:\s*['"]([^'"]+)['"]/g)].map(m => m[1]));
     write('seed-status.json', JSON.stringify({ expected, pending: expected.filter(k => !prod.seeds.trim().split('\n').includes(k)), unknown: prod.seeds.trim().split('\n').filter(k => k && !expected.includes(k)) }, null, 2));
@@ -171,7 +180,7 @@ async function main() {
       unresolved: ledger.filter(row => !row[2] && !row[3]).map(row => row[0]),
       checksumMismatch: applied.filter(row => migrationFiles.includes(row[0]) && crypto.createHash('sha256').update(fs.readFileSync(path.join(migrationRoot, row[0], 'migration.sql'))).digest('hex') !== row[1]).map(row => row[0]),
     }, null, 2));
-    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true, comparisons: Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) }, null, 2));
+    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true, localComparison: local ? 'completed' : 'not-run', comparisons: local ? Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) : null }, null, 2));
     console.log(`Backup and snapshot-consistent restore verification PASS: ${dir}`);
   } finally {
     prodSnapshot?.close(); localSnapshot?.close();

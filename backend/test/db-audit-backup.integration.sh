@@ -29,4 +29,8 @@ chmod +x "$fake_bin/pg_restore"
 if PATH="$fake_bin:$PATH" bash scripts/db-audit-backup.sh; then echo 'Expected restore failure'; exit 1; fi
 test "$(find "$BACKUP_DIR" -name verified.json | wc -l)" -eq 1
 test "$(psql -XAt -c "SELECT count(*) FROM pg_database WHERE datname='vmx_restore_ci'")" -eq 0
+# Production-only verification must succeed even with no usable reference URL.
+BACKUP_MODE=production-only LOCAL_DATABASE_URL=invalid bash scripts/db-audit-backup.sh
+test "$(find "$BACKUP_DIR" -name verified.json | wc -l)" -eq 2
+test "$(psql -XAt -c "SELECT count(*) FROM pg_database WHERE datname='vmx_restore_ci'")" -eq 0
 rm -rf "$fake_bin" "$BACKUP_DIR"

@@ -44,10 +44,11 @@ jobs:
       - name: Verify production backup and isolated restore
         env:
           PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-          LOCAL_DATABASE_URL: ${{ secrets.LOCAL_DATABASE_URL }}
+          BACKUP_MODE: production-only
           TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
           TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_verify
           AUDITED_SHA: ${{ github.sha }}
         run: bash scripts/db-audit-backup.sh
       - name: Retention boundary
         run: echo 'Verification-only backup is ephemeral on this runner. Migration requires a fresh durable backup on a persistent operator machine or self-hosted runner.'
+
