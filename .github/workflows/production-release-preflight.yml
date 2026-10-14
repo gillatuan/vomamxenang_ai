@@ -1,0 +1,27 @@
+name: Production release read-only preflight
+on:
+  push:
+    branches: [fix/production-release-preflight]
+    paths: [backend/scripts/production-release-preflight.cjs, .github/workflows/production-release-preflight.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Read-only migration and seed inventory
+        env:
+          PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          BACKUP_DIR: ${{ vars.PRODUCTION_BACKUP_DIR }}
+          AUDITED_SHA: ${{ github.sha }}
+        run: node scripts/production-release-preflight.cjs
