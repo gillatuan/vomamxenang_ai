@@ -183,3 +183,4 @@ jobs:
           }
           smoke "/api/v1/store-info/public"
           smoke "/api/v1/products"
+          smoke "/api/v1/categories/public"
