@@ -1,0 +1,1 @@
+Local: 4 Node safety tests PASS, Node/Bash syntax PASS, workflow YAML parses. GitHub CI run 38433347019 in progress on 20ce671; real PostgreSQL restore/failure fixtures and existing integration suites required. Real production credentials/backup not accessed.

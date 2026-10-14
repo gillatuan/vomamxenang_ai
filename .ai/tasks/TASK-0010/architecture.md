@@ -1,0 +1,1 @@
+Node standard library orchestrates PostgreSQL clients. Exported snapshots bind source dump and inventories. Private archives remain outside checkout. Only newly created loopback restore DBs can be dropped. Hosted verification is ephemeral; migrations require self-hosted persistent retention.
