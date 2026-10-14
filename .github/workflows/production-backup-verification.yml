@@ -1,0 +1,53 @@
+name: Production backup verification
+on:
+  push:
+    branches: [feature/p1-local-production-db-backup-audit]
+    paths:
+      - backend/scripts/db-audit-backup.cjs
+      - backend/test/db-audit-backup.test.cjs
+      - .github/workflows/production-backup-verification.yml
+permissions:
+  contents: read
+concurrency:
+  group: production-backup-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    name: Read-only production backup and isolated restore
+    runs-on: ubuntu-latest
+    environment: Production
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Test safe connection diagnostics
+        run: node --test test/db-audit-backup.test.cjs
+      - name: Install PostgreSQL clients
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Verify production backup and isolated restore
+        env:
+          PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          LOCAL_DATABASE_URL: ${{ secrets.LOCAL_DATABASE_URL }}
+          TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_verify
+          AUDITED_SHA: ${{ github.sha }}
+        run: bash scripts/db-audit-backup.sh
+      - name: Retention boundary
+        run: echo 'Verification-only backup is ephemeral on this runner. Migration requires a fresh durable backup on a persistent operator machine or self-hosted runner.'

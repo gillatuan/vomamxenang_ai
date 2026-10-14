@@ -27,8 +27,26 @@ function validate(env) {
 function run(command, args, url, input) {
   const r = spawnSync(command, args, { env: pgEnv(url), input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
   // PostgreSQL errors may contain connection credentials or private row data.
-  if (r.error || r.status !== 0) throw new Error(`${command} failed; no credentials or database output logged`);
+  if (r.error || r.status !== 0) throw new Error(`POSTGRES_${classifyFailure(r.stderr || '')}`);
   return r.stdout;
+}
+function classifyFailure(stderr) {
+  if (/password authentication failed|no password supplied|authentication failed/i.test(stderr)) return 'AUTHENTICATION_FAILED';
+  if (/could not translate host name|name or service not known/i.test(stderr)) return 'DNS_FAILED';
+  if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out/i.test(stderr)) return 'CONNECTION_FAILED';
+  if (/SSL|certificate|TLS/i.test(stderr)) return 'TLS_FAILED';
+  if (/permission denied|must be|insufficient privilege/i.test(stderr)) return 'PERMISSION_DENIED';
+  if (/database .* does not exist/i.test(stderr)) return 'DATABASE_NOT_FOUND';
+  return 'CLIENT_FAILED';
+}
+function safeFailure(error) {
+  const message = error?.message || '';
+  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_FAILED)$/.test(message)) return message;
+  if (message === 'Production and local connections resolve to the same database' || message === 'Production and local databases must differ') return 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE';
+  if (message === 'Unsupported PostgreSQL connection parameter') return 'UNSUPPORTED_CONNECTION_PARAMETER';
+  if (message === 'Only public Prisma schema is supported') return 'UNSUPPORTED_SCHEMA';
+  if (message.startsWith('Invalid direct PostgreSQL configuration: ')) return 'INVALID_DIRECT_POSTGRESQL_URL';
+  return 'VERIFICATION_FAILED';
 }
 function pgEnv(value) {
   const env = { ...process.env };
@@ -40,6 +58,11 @@ function pgEnv(value) {
   const options = { sslmode: 'PGSSLMODE', sslrootcert: 'PGSSLROOTCERT', sslcert: 'PGSSLCERT', sslkey: 'PGSSLKEY', sslpassword: 'PGSSLPASSWORD', channel_binding: 'PGCHANNELBINDING', target_session_attrs: 'PGTARGETSESSIONATTRS', gssencmode: 'PGGSSENCMODE', application_name: 'PGAPPNAME', connect_timeout: 'PGCONNECT_TIMEOUT' };
   for (const [key, value] of u.searchParams) {
     if (key === 'options') continue;
+    if (key === 'schema') {
+      if (value !== 'public') throw new Error('Only public Prisma schema is supported');
+      continue;
+    }
+    if (['connection_limit', 'pool_timeout', 'pgbouncer', 'statement_cache_size', 'socket_timeout'].includes(key)) continue;
     if (!options[key]) throw new Error('Unsupported PostgreSQL connection parameter');
     env[options[key]] = value;
   }
@@ -90,7 +113,12 @@ async function main() {
   try {
     phase = 'database identity';
     const identitySql = 'SELECT inet_server_addr(), inet_server_port(), current_database()';
-    if (query(env.PRODUCTION_DATABASE_URL, identitySql) === query(env.LOCAL_DATABASE_URL, identitySql)) throw new Error('Production and local connections resolve to the same database');
+    phase = 'production connection identity';
+    const productionIdentity = query(env.PRODUCTION_DATABASE_URL, identitySql);
+    phase = 'reference connection identity';
+    const localIdentity = query(env.LOCAL_DATABASE_URL, identitySql);
+    phase = 'distinct database identity';
+    if (productionIdentity === localIdentity) throw new Error('Production and local connections resolve to the same database');
     // CREATE intentionally fails if the target already exists; never DROP an unowned DB.
     phase = 'isolated target creation';
     query(env.TEMP_RESTORE_ADMIN_URL, `CREATE DATABASE ${quote(name)} TEMPLATE template0`);
@@ -150,5 +178,5 @@ async function main() {
     if (created) query(env.TEMP_RESTORE_ADMIN_URL, `DROP DATABASE ${quote(name)}`);
   }
 }
-module.exports = { validate, pgEnv };
-if (require.main === module) main().catch(() => { console.error(`Database backup gate FAILED at ${phase}. Private output withheld; production was not modified.`); process.exitCode = 1; });
+module.exports = { validate, pgEnv, classifyFailure, safeFailure };
+if (require.main === module) main().catch(error => { console.error(`Database backup gate FAILED at ${phase}; reason=${safeFailure(error)}. Private output withheld; production was not modified.`); process.exitCode = 1; });
