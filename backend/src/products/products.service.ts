@@ -1,4 +1,5 @@
 import { saveContent } from '../content/content-alias';
+import { catalogProductType } from '../category/catalog-categories';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -8,7 +9,13 @@ export class ProductsService {
 
   async findAll(filters: { condition?: string; categoryId?: string; q?: string; sort?: string; brand?: string; size?: string; tireType?: string; rimType?: string; minPrice?: number; maxPrice?: number }) {
     const { condition, categoryId, q, sort, brand, size, tireType, rimType, minPrice, maxPrice } = filters;
-    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...(categoryId ? { categoryId } : {}), ...(brand ? { brand } : {}), ...(size ? { size } : {}), ...(tireType ? { tireType } : {}), ...(rimType ? { rimType } : {}), ...((minPrice != null || maxPrice != null) ? { sellingPrice: { ...(minPrice != null ? { gte: minPrice } : {}), ...(maxPrice != null ? { lte: maxPrice } : {}) } } : {}), ...(q ? { OR: [{ name: { contains: q, mode: 'insensitive' as const } }, { sku: { contains: q, mode: 'insensitive' as const } }, { brand: { contains: q, mode: 'insensitive' as const } }, { size: { contains: q, mode: 'insensitive' as const } }] } : {}) };
+    const fallbackType = categoryId ? catalogProductType(categoryId) : undefined;
+    // Include legacy unassigned products without rewriting their category IDs.
+    // AND keeps category grouping separate from the text-search OR clauses.
+    const categoryFilter = fallbackType
+      ? { AND: [{ OR: [{ categoryId }, { categoryId: null, type: fallbackType }] }] }
+      : categoryId ? { categoryId } : {};
+    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...categoryFilter, ...(brand ? { brand } : {}), ...(size ? { size } : {}), ...(tireType ? { tireType } : {}), ...(rimType ? { rimType } : {}), ...((minPrice != null || maxPrice != null) ? { sellingPrice: { ...(minPrice != null ? { gte: minPrice } : {}), ...(maxPrice != null ? { lte: maxPrice } : {}) } } : {}), ...(q ? { OR: [{ name: { contains: q, mode: 'insensitive' as const } }, { sku: { contains: q, mode: 'insensitive' as const } }, { brand: { contains: q, mode: 'insensitive' as const } }, { size: { contains: q, mode: 'insensitive' as const } }] } : {}) };
     return this.prisma.product.findMany({
       where,
       orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
