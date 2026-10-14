@@ -30,7 +30,7 @@ export class CategoryController {
   // Catalog navigation is public; operational category details remain protected.
   @Get('public')
   async publicList() {
-    const categories = await this.categoryService.findAll();
+    const categories = await this.categoryService.findPublic();
     return categories.map(({ id, name }) => ({ id, name }));
   }
 
