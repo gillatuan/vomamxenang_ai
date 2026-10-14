@@ -69,7 +69,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const categoryFromUrl = searchParams.get("category") || "";
   const watermark = useStoreWatermark();
 
-  useEffect(() => { categoriesAPI.getAll().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
+  useEffect(() => { categoriesAPI.getPublic().then(res=>setCategories(res.data)).catch(()=>undefined); }, []);
   useEffect(() => { setCategoryId(categoryFromUrl); }, [categoryFromUrl]);
   useEffect(() => { setConditionFilter(condition || ""); }, [condition]);
   useEffect(() => {
