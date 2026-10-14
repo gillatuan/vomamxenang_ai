@@ -19,11 +19,16 @@ try {
   const mismatches = active.filter(r => files.includes(r.migration_name) && crypto.createHash('sha256').update(fs.readFileSync(path.join(root, r.migration_name, 'migration.sql'))).digest('hex') !== r.checksum).map(r => r.migration_name);
   const unresolved = migrations.filter(r => !r.finished && !r.rolled_back).map(r => r.migration_name);
   const unknown = active.filter(r => !files.includes(r.migration_name)).map(r => ({ name: r.migration_name, verifiedLegacy: r.migration_name === '20261004130000_product_category_relation' && r.checksum === '43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a' }));
+  const legacyRow = active.find(r => r.migration_name === '20260601000000_fix_legacy_schema');
+  const legacyHistory = {
+    matchesOriginalSql: legacyRow?.checksum === '0338dd4804e34c607cb9840eb07bab2222e4afd71d0557cb660c678e00000014',
+    matchesCorrectedSql: legacyRow?.checksum === '06495db607252113d975ce13b8a37f23141f24ad1e6acd7ff14e1abba5a0057f',
+  };
   const hasSeeds = query('SELECT to_json(to_regclass(\'public."SeedHistory"\') IS NOT NULL)');
   const appliedSeeds = hasSeeds ? query('SELECT COALESCE(json_agg(key ORDER BY key), \'[]\'::json) FROM public."SeedHistory"') : [];
   const seedRoot = path.join(__dirname, '../prisma/seeds/production');
   const expectedSeeds = fs.readdirSync(seedRoot).filter(f => f.endsWith('.seed.ts')).flatMap(f => [...fs.readFileSync(path.join(seedRoot, f), 'utf8').matchAll(/key:\\s*['"]([^'"]+)['"]/g)].map(m => m[1]));
-  console.log(JSON.stringify({ revision: process.env.AUDITED_SHA, pendingMigrations: pending, checksumMismatches: mismatches, unresolvedMigrations: unresolved, databaseOnlyMigrations: unknown, seedHistoryExists: hasSeeds, pendingSeeds: expectedSeeds.filter(k => !appliedSeeds.includes(k)), durableBackupPathConfigured: Boolean(process.env.BACKUP_DIR), mutationExecuted: false }, null, 2));
+  console.log(JSON.stringify({ revision: process.env.AUDITED_SHA, pendingMigrations: pending, legacyHistory, checksumMismatches: mismatches, unresolvedMigrations: unresolved, databaseOnlyMigrations: unknown, seedHistoryExists: hasSeeds, pendingSeeds: expectedSeeds.filter(k => !appliedSeeds.includes(k)), durableBackupPathConfigured: Boolean(process.env.BACKUP_DIR), mutationExecuted: false }, null, 2));
   if (mismatches.length || unresolved.length || unknown.some(r => !r.verifiedLegacy)) process.exitCode = 1;
 } catch (error) {
   const safe = ['AUTHENTICATION_FAILED', 'DNS_FAILED', 'CONNECTION_FAILED', 'TLS_FAILED', 'PERMISSION_DENIED', 'DATABASE_NOT_FOUND', 'CLIENT_FAILED'];
