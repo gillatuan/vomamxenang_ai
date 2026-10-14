@@ -19,7 +19,7 @@ try {
   const mismatches = active.filter(r => files.includes(r.migration_name) && crypto.createHash('sha256').update(fs.readFileSync(path.join(root, r.migration_name, 'migration.sql'))).digest('hex') !== r.checksum).map(r => r.migration_name);
   const unresolved = migrations.filter(r => !r.finished && !r.rolled_back).map(r => r.migration_name);
   const unknown = active.filter(r => !files.includes(r.migration_name)).map(r => ({ name: r.migration_name, verifiedLegacy: r.migration_name === '20261004130000_product_category_relation' && r.checksum === '43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a' }));
-  const hasSeeds = query('SELECT to_regclass(\'public."SeedHistory"\') IS NOT NULL');
+  const hasSeeds = query('SELECT to_json(to_regclass(\'public."SeedHistory"\') IS NOT NULL)');
   const appliedSeeds = hasSeeds ? query('SELECT COALESCE(json_agg(key ORDER BY key), \'[]\'::json) FROM public."SeedHistory"') : [];
   const seedRoot = path.join(__dirname, '../prisma/seeds/production');
   const expectedSeeds = fs.readdirSync(seedRoot).filter(f => f.endsWith('.seed.ts')).flatMap(f => [...fs.readFileSync(path.join(seedRoot, f), 'utf8').matchAll(/key:\\s*['"]([^'"]+)['"]/g)].map(m => m[1]));
