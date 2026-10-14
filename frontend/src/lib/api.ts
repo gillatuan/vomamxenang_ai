@@ -32,8 +32,13 @@ apiClient.interceptors.response.use(
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
-        const loginPath = window.location.pathname.startsWith("/admin") ? "/admin/login" : "/auth/login";
-        if (window.location.pathname !== loginPath) window.location.href = loginPath;
+        const pathname = window.location.pathname;
+        const isProtectedPage = ["/admin", "/dashboard"].some(
+          prefix => pathname === prefix || pathname.startsWith(prefix + "/")
+        );
+        if (isProtectedPage && pathname !== "/admin/login") {
+          window.location.href = "/admin/login";
+        }
       }
     }
     return Promise.reject(error);

@@ -27,6 +27,13 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
+  // Catalog navigation is public; operational category details remain protected.
+  @Get('public')
+  async publicList() {
+    const categories = await this.categoryService.findAll();
+    return categories.map(({ id, name }) => ({ id, name }));
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
