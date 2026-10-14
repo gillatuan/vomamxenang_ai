@@ -34,6 +34,8 @@ function run(command, args, url, input) {
   return r.stdout;
 }
 function classifyFailure(stderr) {
+  if (/server version mismatch|server version:.*pg_dump version|aborting because of server version/i.test(stderr)) return 'CLIENT_VERSION_MISMATCH';
+  if (/invalid snapshot|snapshot.*does not exist|SET TRANSACTION SNAPSHOT/i.test(stderr)) return 'SNAPSHOT_IMPORT_FAILED';
   if (/password authentication failed|no password supplied|authentication failed/i.test(stderr)) return 'AUTHENTICATION_FAILED';
   if (/could not translate host name|name or service not known/i.test(stderr)) return 'DNS_FAILED';
   if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out/i.test(stderr)) return 'CONNECTION_FAILED';
@@ -44,7 +46,7 @@ function classifyFailure(stderr) {
 }
 function safeFailure(error) {
   const message = error?.message || '';
-  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_FAILED)$/.test(message)) return message;
+  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_VERSION_MISMATCH|SNAPSHOT_IMPORT_FAILED|CLIENT_FAILED)$/.test(message)) return message;
   if (message === 'Production and local connections resolve to the same database' || message === 'Production and local databases must differ') return 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE';
   if (message === 'Unsupported PostgreSQL connection parameter') return 'UNSUPPORTED_CONNECTION_PARAMETER';
   if (message === 'Only public Prisma schema is supported') return 'UNSUPPORTED_SCHEMA';
@@ -119,6 +121,9 @@ async function main() {
     const identitySql = 'SELECT inet_server_addr(), inet_server_port(), current_database()';
     phase = 'production connection identity';
     const productionIdentity = query(env.PRODUCTION_DATABASE_URL, identitySql);
+    const serverVersion = query(env.PRODUCTION_DATABASE_URL, 'SHOW server_version_num').trim();
+    if (/^\\d+$/.test(serverVersion)) console.log(`Production PostgreSQL major=${Math.floor(Number(serverVersion) / 10000)}`);
+    console.log(run('pg_dump', ['--version']).trim());
     if (!productionOnly) {
       phase = 'reference connection identity';
       const localIdentity = query(env.LOCAL_DATABASE_URL, identitySql);
