@@ -8,6 +8,10 @@ on:
         required: true
         default: feature/p2-1-stock-lifecycle
         type: string
+      audited_sha:
+        description: Full 40-character SHA of the reviewed migration revision
+        required: true
+        type: string
       confirmation:
         description: VERIFY-BACKUP-ONLY checks backup without migration; MIGRATE-PRODUCTION deploys
         required: true
@@ -29,56 +33,99 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
-      PRISMA_MANAGEMENT_TOKEN: ${{ secrets.PRISMA_MANAGEMENT_TOKEN }}
-      PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      LOCAL_DATABASE_URL: ${{ secrets.LOCAL_DATABASE_URL }}
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_gate
+      AUDITED_SHA: ${{ inputs.audited_sha }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check backup gate script syntax
-        run: node --check scripts/verify-production-backup-gate.cjs
-      - name: Verify provider-managed backup gate (no migration)
-        run: node scripts/verify-production-backup-gate.cjs
+        with:
+          ref: ${{ inputs.audited_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify audited revision
+        run: |
+          [[ "$AUDITED_SHA" =~ ^[0-9a-f]{40}$ ]] && [ "$(git rev-parse HEAD)" = "$AUDITED_SHA" ]
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Backup and restore verification (no migration)
+        run: bash scripts/db-audit-backup.sh
+      - name: Explain verification-only retention
+        run: echo 'Restore verified; this hosted runner backup is ephemeral. Migration requires a new backup on the persistent self-hosted runner.'
 
   migrate:
     if: ${{ inputs.confirmation == 'MIGRATE-PRODUCTION' }}
     name: Protected production migration
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, production-db-backup]
     environment: Production
     defaults:
       run:
         working-directory: backend
     env:
       DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-      PRISMA_MANAGEMENT_TOKEN: ${{ secrets.PRISMA_MANAGEMENT_TOKEN }}
-      PRISMA_DATABASE_ID: ${{ vars.PRISMA_DATABASE_ID }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      LOCAL_DATABASE_URL: ${{ secrets.LOCAL_DATABASE_URL }}
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_gate
+      AUDITED_SHA: ${{ inputs.audited_sha }}
+      BACKUP_DIR: ${{ vars.PRODUCTION_BACKUP_DIR }}
+      CONFIRMATION: ${{ inputs.confirmation }}
+      MIGRATION_REF: ${{ inputs.migration_ref }}
       EXPECTED_REF: feature/p2-1-stock-lifecycle
       EXPECTED_LAST_PENDING: 20261006074500_add_reservation_expiry
       LEGACY_MIGRATION: 20261004130000_product_category_relation
       LEGACY_CHECKSUM: 43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.audited_sha }}
 
       - name: Require explicit authorization
         shell: bash
         run: |
           set -euo pipefail
-          [ "${{ inputs.confirmation }}" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
-          [ "${{ inputs.migration_ref }}" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
+          [ "$CONFIRMATION" = "MIGRATE-PRODUCTION" ] || { echo "::error::Confirmation must be MIGRATE-PRODUCTION"; exit 1; }
+          [ "$MIGRATION_REF" = "$EXPECTED_REF" ] || { echo "::error::Only the audited P2.1 integration ref is authorized"; exit 1; }
 
-      - name: Check backup gate script syntax
-        run: node --check scripts/verify-production-backup-gate.cjs
-
-      - name: Verify provider-managed backup gate
-        shell: bash
-        run: node scripts/verify-production-backup-gate.cjs
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.migration_ref }}
-
-      - name: Report migration revision
-        run: echo "Migration ref=${{ inputs.migration_ref }} sha=$(git rev-parse HEAD)"
+      - name: Require pinned audited revision and durable backup directory
+        run: |
+          set -euo pipefail
+          [[ "$AUDITED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [ "$(git rev-parse HEAD)" = "$AUDITED_SHA" ]
+          [ -n "$BACKUP_DIR" ] && [[ "$BACKUP_DIR" = /* ]]
+          [ "${RUNNER_ENVIRONMENT:-}" = self-hosted ]
 
       - uses: actions/setup-node@v4
         with:
@@ -107,6 +154,9 @@ jobs:
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create durable backup and verify isolated restore
+        run: bash scripts/db-audit-backup.sh
 
       - name: Verify production legacy invariant
         shell: bash
@@ -157,3 +207,4 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT "status", count(*) FROM "StockReservation" GROUP BY "status";'
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='StoreInfo' AND column_name IN ('googleMapsUrl','latitude','longitude');" | grep -qx '3'
+

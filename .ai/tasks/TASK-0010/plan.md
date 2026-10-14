@@ -1,0 +1,1 @@
+Implement consistent-snapshot audit; protect temporary target lifecycle; integrate persistent backup gate into pinned-revision workflow; exercise safety and failure cases in PostgreSQL CI; document operational prerequisites.
