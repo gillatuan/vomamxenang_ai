@@ -37,3 +37,11 @@ test('diagnostics classify errors without revealing secrets', () => {
   assert.equal(safeFailure(new Error('Production and local connections resolve to the same database')), 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE');
   assert.equal(safeFailure(new Error('postgresql://user:secret@host/db')), 'VERIFICATION_FAILED');
 });
+
+
+test('production-only mode permits absent reference without relaxing restore isolation', () => {
+  const env = { ...config(), BACKUP_MODE: 'production-only', LOCAL_DATABASE_URL: '' };
+  assert.equal(validate(env).name, 'vmx_restore_test');
+  assert.throws(() => validate({ ...env, TEMP_RESTORE_DATABASE_URL: 'postgresql://a@localhost/prod' }));
+  assert.throws(() => validate({ ...env, BACKUP_MODE: undefined }));
+});
