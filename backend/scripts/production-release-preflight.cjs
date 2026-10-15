@@ -30,7 +30,8 @@ try {
   const hasSeeds = query('SELECT to_json(to_regclass(\'public."SeedHistory"\') IS NOT NULL)');
   const appliedSeeds = hasSeeds ? query('SELECT COALESCE(json_agg(key ORDER BY key), \'[]\'::json) FROM public."SeedHistory"') : [];
   const seedRoot = path.join(__dirname, '../prisma/seeds/production');
-  const expectedSeeds = fs.readdirSync(seedRoot).filter(f => f.endsWith('.seed.ts')).flatMap(f => [...fs.readFileSync(path.join(seedRoot, f), 'utf8').matchAll(/key:\\s*['"]([^'"]+)['"]/g)].map(m => m[1]));
+  const expectedSeeds = fs.readdirSync(seedRoot).filter(f => f.endsWith('.seed.ts')).flatMap(f => [...fs.readFileSync(path.join(seedRoot, f), 'utf8').matchAll(/key:\s*['"]([^'"]+)['"]/g)].map(m => m[1]));
+  if (!expectedSeeds.length) throw new Error('EMPTY_SEED_REGISTRY');
   console.log(JSON.stringify({ revision: process.env.AUDITED_SHA, pendingMigrations: pending, legacyHistory, checksumMismatches: mismatches, unresolvedMigrations: unresolved, databaseOnlyMigrations: unknown, seedHistoryExists: hasSeeds, pendingSeeds: expectedSeeds.filter(k => !appliedSeeds.includes(k)), durableBackupPathConfigured: Boolean(process.env.BACKUP_DIR), mutationExecuted: false }, null, 2));
   if (mismatches.length || unresolved.length || unknown.some(r => !r.verifiedLegacy)) process.exitCode = 1;
 } catch (error) {
