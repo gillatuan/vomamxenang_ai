@@ -1,5 +1,10 @@
-name: Private encrypted production backup (prepared)
+name: Private encrypted production backup
 on:
+  push:
+    branches: [fix/production-release-preflight]
+    paths:
+      - backend/backup-recipient-public.pem
+      - .github/workflows/private-production-backup.yml
   workflow_dispatch:
     inputs:
       confirmation:
@@ -13,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   verify:
-    if: ${{ inputs.confirmation == 'SAVE-ENCRYPTED-BACKUP' }}
+    if: ${{ github.event_name == 'push' || inputs.confirmation == 'SAVE-ENCRYPTED-BACKUP' }}
     name: Read-only production backup and isolated restore
     runs-on: ubuntu-24.04
     environment: Production
