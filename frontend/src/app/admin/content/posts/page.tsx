@@ -3,6 +3,7 @@ import ContentSeoFields from "@/components/ContentSeoFields";
 import type { SeoMetadata } from "@/lib/api-client";
 import RichTextEditor from "@/components/RichTextEditor";
 import RichTextContent from "@/components/RichTextContent";
+import { ContentImage } from "@/components/ContentImage";
 import { richTextPlain } from "@/lib/rich-text";
 import { ImageUploadField, PendingImage } from "@/components/admin/ImageUploadField";
 import apiClient from "@/lib/api";
@@ -31,6 +32,11 @@ export default function PostsAdminPage() {
   const [form, setForm] = useState<PostForm>(emptyForm);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
 
+  const changeImage = (image: PendingImage | null) => {
+    setPendingImage(image);
+    if (!image) setForm(current => ({ ...current, seo: { ...current.seo, imageUrl: "" } }));
+  };
+
   const load = () => {
     setLoading(true);
     setError(null);
@@ -46,12 +52,21 @@ export default function PostsAdminPage() {
   };
 
   const save = async (status: ContentStatus) => {
+    if (!form.title.trim() || !richTextPlain(form.content.trim())) {
+      setError("Vui lòng nhập tiêu đề và nội dung bài viết.");
+      return;
+    }
     try {
       let imageUrl = form.seo.imageUrl || "";
-      if (pendingImage) { const body=new FormData(); body.append("file",pendingImage.file,pendingImage.file.name);
-        const upload=await apiClient.post<{url:string}>("/admin/media/image",body,{headers:{"Content-Type":undefined},transformRequest:[(data)=>data]}); imageUrl=upload.data.url; }
-    const data = { slug: form.slug, seo: { ...form.seo, imageUrl, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
-    if (!data.title || !richTextPlain(data.content)) { setError("Vui lòng nhập tiêu đề và nội dung bài viết."); return; }
+      if (pendingImage) {
+        const body = new FormData();
+        body.append("file", pendingImage.file, pendingImage.file.name);
+        const upload = await apiClient.post<{ url: string }>("/admin/media/image", body, {
+          headers: { "Content-Type": undefined }, transformRequest: [(data) => data],
+        });
+        imageUrl = upload.data.url;
+      }
+      const data = { slug: form.slug, seo: { ...form.seo, imageUrl, keywords: (form.seo.keywords || []).map(word => word.trim()).filter(Boolean) }, title: form.title.trim(), content: form.content.trim(), videoUrl: form.videoUrl.trim() || undefined, status };
       if (editing) await postsAPI.update(editing.id, data); else await postsAPI.create(data);
       setOpen(false);
       setPendingImage(null);
@@ -73,6 +88,9 @@ export default function PostsAdminPage() {
   };
 
   const columns: GridColDef<Post>[] = [
+    { field: "image", headerName: "Image", width: 100, sortable: false, filterable: false, renderCell: (params: GridRenderCellParams<Post>) =>
+      params.row.seo?.imageUrl ? <ContentImage src={params.row.seo.imageUrl} alt={params.row.seo.imageAlt || params.row.title} kind="post" sx={{ width: 64, height: 48, borderRadius: 1 }} /> : <Box component="span" sx={{ color: "text.secondary", fontSize: 12 }}>Chưa có ảnh</Box>
+    },
     { field: "title", headerName: "Tiêu đề", flex: 1.4 },
     // { field: "content", headerName: "Nội dung", flex: 2.4, valueGetter: (_, row) => richTextPlain(row.content).slice(0, 180) },
     { field: "status", headerName: "Trạng thái", width: 130, renderCell: (params: GridRenderCellParams<Post>) => {
@@ -94,15 +112,16 @@ export default function PostsAdminPage() {
     <AdminPageHeader title="Bài viết" actions={<Button variant="contained" startIcon={<AddIcon />} onClick={() => openEditor()}>Tạo bài viết</Button>} />
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     <AdminGridState loading={loading} error={Boolean(error)} empty={!loading && !error && !rows.length} />
-    {!loading && !error && rows.length > 0 && <DataGrid autoHeight rows={rows} columns={columns} disableRowSelectionOnClick />}
+    {!loading && !error && rows.length > 0 && <DataGrid autoHeight rows={rows} columns={columns} rowHeight={64} disableRowSelectionOnClick />}
     <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
       <DialogTitle>{editing ? "Chỉnh sửa bài viết" : "Tạo bài viết"}</DialogTitle>
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <TextField autoFocus required fullWidth label="Tiêu đề" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} sx={{ mt: 1, mb: 2 }} />
+        <Box sx={{ mb: 2 }}>
+          <ImageUploadField key={editing?.id || "new-post"} label="Ảnh bài viết" value={form.seo.imageUrl || ""} onChange={changeImage} />
+        </Box>
         <ContentSeoFields id={editing?.id} kind="blog" title={form.title} content={form.content} slug={form.slug} seo={form.seo} onChange={(data) => setForm(current => ({ ...current, ...data }))} onContentChange={(content) => setForm(current => ({ ...current, content }))} />
-        <ImageUploadField label="Ảnh đại diện bài viết" value={form.seo.imageUrl || ""} onChange={setPendingImage} />
-        <Box sx={{ mb: 2 }} />
         <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>
@@ -114,7 +133,7 @@ export default function PostsAdminPage() {
     </Dialog>
     <Dialog open={Boolean(viewing)} onClose={() => setViewing(null)} maxWidth="md" fullWidth>
       <DialogTitle>{viewing?.title}</DialogTitle>
-      <DialogContent><RichTextContent value={viewing?.content} />{viewing?.videoUrl && <Box sx={{ mt: 2 }}><a href={viewing.videoUrl} target="_blank" rel="noreferrer">Mở video đính kèm</a></Box>}</DialogContent>
+      <DialogContent>{viewing?.seo?.imageUrl && <ContentImage src={viewing.seo.imageUrl} alt={viewing.seo.imageAlt || viewing.title} kind="post" sx={{ maxHeight: 320, objectFit: "contain", mb: 2 }} />}<RichTextContent value={viewing?.content} />{viewing?.videoUrl && <Box sx={{ mt: 2 }}><a href={viewing.videoUrl} target="_blank" rel="noreferrer">Mở video đính kèm</a></Box>}</DialogContent>
       <DialogActions><Button onClick={() => setViewing(null)}>Đóng</Button><Button variant="contained" onClick={() => { if (viewing) { setViewing(null); openEditor(viewing); } }}>Chỉnh sửa</Button></DialogActions>
     </Dialog>
   </Box>;
