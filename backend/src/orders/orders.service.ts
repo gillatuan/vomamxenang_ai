@@ -129,7 +129,7 @@ export class OrdersService {
     ]);
   }
 
-  async createCheckoutSession(body: {items:Array<{productId?:string;wheelRimId?:string;locationId:string;quantity:number}>;clientId?:string;customerType?:'RETAIL'|'B2B_TIER1'|'B2B_TIER2'}, req: AuthenticatedRequest) {
+  async createCheckoutSession(body: {items:Array<{productId?:string;wheelRimId?:string;locationId?:string;quantity:number}>;clientId?:string;customerType?:'RETAIL'|'B2B_TIER1'|'B2B_TIER2'}, req: AuthenticatedRequest) {
     const items = body.items;
     const customerType = body.customerType ?? 'RETAIL';
 
@@ -196,7 +196,31 @@ export class OrdersService {
 
     const total = checkoutItems.reduce((sum, item) => sum + item.price * item.item.quantity, 0);
 
+    // The public checkout does not expose warehouse location IDs. For test-only
+    // staging sessions, choose a real location with sufficient stock server-side.
+    // Production intentionally keeps its original explicit-location requirement.
+    const stagingDatabase = (() => {
+      try {
+        const database = decodeURIComponent(new URL(process.env.DATABASE_URL || '').pathname.slice(1));
+        return /(^|[_-])(staging|demo|test|sandbox)([_-]|$)/i.test(database);
+      } catch { return false; }
+    })();
+    const demoCheckoutAllowed = process.env.APP_ENV === 'staging'
+      && process.env.ALLOW_DEMO_CHECKOUT === 'YES'
+      && stagingDatabase;
+    if (demoCheckoutAllowed && !process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
+      throw new BadRequestException('Demo checkout requires Stripe test-mode credentials');
+    }
+
     for (const checkout of checkoutItems) {
+      if (!checkout.item.locationId && demoCheckoutAllowed && checkout.item.productId) {
+        const candidate = await this.prisma.stockLocation.findFirst({
+          where: { productId: checkout.item.productId, quantity: { gte: checkout.item.quantity } },
+          orderBy: { quantity: 'desc' },
+          select: { locationId: true },
+        });
+        if (candidate) checkout.item.locationId = candidate.locationId;
+      }
       if (!checkout.item.locationId) {
         throw new BadRequestException('Each order line requires locationId for stock deduction');
       }
