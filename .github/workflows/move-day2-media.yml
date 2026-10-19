@@ -1,0 +1,44 @@
+name: Move approved Day 2 media off Git
+on:
+  push:
+    branches: [ops/move-day2-media-off-git]
+    paths:
+      - backend/scripts/move-day2-media.cjs
+      - .github/workflows/move-day2-media.yml
+permissions:
+  contents: read
+concurrency:
+  group: production-content-day2
+  cancel-in-progress: false
+jobs:
+  move:
+    runs-on: ubuntu-24.04
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+        working-directory: backend
+      - run: npm install --global vercel@58.9.2
+      - name: Load website storage configuration privately
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+        run: |
+          umask 077
+          vercel env pull "$RUNNER_TEMP/day2-media.env" --environment=production --yes --token="$VERCEL_TOKEN"
+      - name: Verify free storage, copy media, then update article references
+        env:
+          MEDIA_ENV_FILE: ${{ runner.temp }}/day2-media.env
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          CONFIRMATION: MOVE-DAY2-MEDIA-OFF-GIT
+        run: node backend/scripts/move-day2-media.cjs
+      - name: Remove temporary configuration
+        if: always()
+        run: node -e 'require("fs").rmSync(process.env.RUNNER_TEMP+"/day2-media.env",{force:true})'
