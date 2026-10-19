@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/p2-business-operations
+      - feature/ui-redesign
     paths:
       - "frontend/**"
       - "backend/**"
