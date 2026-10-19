@@ -1,7 +1,7 @@
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { createHash } = require('node:crypto');
-const { put, list, head } = require('@vercel/blob');
+const { put, list } = require('@vercel/blob');
 const { PrismaClient } = require('@prisma/client');
 const base = '/images/campaigns/chuyen-kho-2026/day-2/';
 const names = ['kho-lop-theo-cum-01.jpg', 'kho-cu-mam-lop-01.jpg', 'kho-cu-mam-lop-02.jpg', 'cot-lop-sau-sap-xep-01.jpg', 'loi-di-kho-sau-sap-xep-01.jpg', 'IMG_3267.jpeg', 'IMG_3268.jpeg', 'IMG_3260.mp4', 'IMG_3261.mp4', 'IMG_3264.mp4'];
@@ -36,9 +36,10 @@ async function main() {
   console.log('VERCEL_PLAN=' + (['hobby','pro','enterprise'].includes(plan) ? plan : 'unknown'));
   if (plan !== 'hobby') throw Error('FREE_PLAN_REQUIRED_NO_UPLOAD_PERFORMED');
   let cursor, bytes = 0, count = 0;
+  const existing = new Map();
   do {
     const page = await list({ limit: 1000, ...(cursor ? { cursor } : {}) });
-    for (const item of page.blobs) { bytes += item.size; count++; }
+    for (const item of page.blobs) { bytes += item.size; count++; existing.set(item.pathname, item); }
     if (count > 10000) throw Error('STORAGE_PREFLIGHT_LIMIT');
     cursor = page.hasMore ? page.cursor : undefined;
   } while (cursor);
@@ -51,8 +52,7 @@ async function main() {
   for (const file of files) {
     const hash = digest(file.bytes);
     const pathname = 'content/chuyen-kho-2026/day-2/' + hash.slice(0,16) + '-' + file.name;
-    let blob;
-    try { blob = await head(pathname); } catch (error) { if (error.name !== 'BlobNotFoundError') throw error; }
+    let blob = existing.get(pathname);
     if (!blob) blob = await put(pathname, file.bytes, { access: 'public', addRandomSuffix: false, contentType: file.name.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg' });
     if (!/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(blob.url)) throw Error('UNEXPECTED_STORAGE_URL');
     const response = await fetch(blob.url);
