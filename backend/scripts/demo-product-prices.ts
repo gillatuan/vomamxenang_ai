@@ -41,7 +41,7 @@ const pneumaticPrices: Record<string, number> = {
 // Keep rims and unrecognised sizes unpriced rather than guessing.
 
 export function canonicalSize(value: string | null): string {
-  const size = (value || '').trim().toUpperCase().replace(/×/g, 'X').replace(/\\s/g, '');
+  const size = (value || '').trim().toUpperCase().replace(/×/g, 'X').replace(/\s/g, '');
   // Do not conflate different rim/tire specifications.
   return size;
 }
