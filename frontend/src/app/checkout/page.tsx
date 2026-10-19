@@ -31,6 +31,7 @@ export default function CheckoutPage() {
     <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Sản phẩm", path: "/products" }, { name: "Thanh toán", path: "/checkout" }]} />
     <Typography variant="h4" fontWeight={700} gutterBottom>Thanh toán</Typography>
     <Stepper activeStep={activeStep} alternativeLabel sx={{ my: 4 }}>{steps.map((step) => <Step key={step}><StepLabel>{step}</StepLabel></Step>)}</Stepper>
+    {process.env.NEXT_PUBLIC_DEMO_PRICING === "true" && <Alert severity="warning" sx={{ mb: 2 }}>Môi trường kiểm thử với giá mẫu. Chỉ dùng Stripe TEST MODE và thông tin khách hàng giả lập. Không thực hiện giao dịch thật.</Alert>}
     {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
     <Box sx={{ minHeight: 220 }}>
       {activeStep === 0 && <>{items.map((item) => <Box key={item.id} sx={{ display: "flex", justifyContent: "space-between", py: 1, borderBottom: "1px solid", borderColor: "divider" }}><span>{item.name} × {item.quantity}</span><b>{((item.sellingPrice || 0) * item.quantity).toLocaleString()} ₫</b></Box>)}<Typography variant="h6" sx={{ mt: 2 }}>Tổng cộng: {total().toLocaleString()} ₫</Typography></>}
