@@ -1,5 +1,5 @@
-import { homeDesign } from "@/app/home-design";
 "use client";
+import { homeDesign } from "@/app/home-design";
 
 import {
   AppBar,
