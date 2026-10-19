@@ -1,14 +1,31 @@
 import sanitizeHtml from "sanitize-html";
 import { marked } from "marked";
 
+function safeMediaSource(src: string = "") {
+  if (src.startsWith("/") && !src.startsWith("//") && !src.includes("\\")) return true;
+  try { return new URL(src).protocol === "https:"; } catch { return false; }
+}
+
 // Accept existing plain text/Markdown as well as HTML saved by the editor.
 export function richTextHtml(value: string = "") {
   return sanitizeHtml(marked.parse(value, { async: false, breaks: true }), {
-    allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "h2", "h3", "h4", "ul", "ol", "li", "blockquote", "pre", "code", "hr", "a"],
-    allowedAttributes: { a: ["href", "title", "rel"], ol: ["start"] },
+    allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "h2", "h3", "h4", "ul", "ol", "li", "blockquote", "pre", "code", "hr", "a", "figure", "figcaption", "img", "video"],
+    allowedAttributes: {
+      a: ["href", "title", "rel"], ol: ["start"],
+      img: ["src", "alt", "loading", "decoding"],
+      video: ["src", "poster", "controls", "preload", "playsinline"],
+    },
     allowedSchemes: ["http", "https", "mailto", "tel"],
     allowProtocolRelative: false,
-    transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }) },
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }),
+      img: (_tag, attrs) => ({ tagName: "img", attribs: { ...attrs, loading: "lazy", decoding: "async" } }),
+      video: (_tag, attrs) => ({
+        tagName: "video",
+        attribs: { ...attrs, ...(attrs.poster && !safeMediaSource(attrs.poster) ? { poster: "" } : {}), controls: "", preload: "metadata", playsinline: "" },
+      }),
+    },
+    exclusiveFilter: frame => ["img", "video"].includes(frame.tag) && !safeMediaSource(frame.attribs.src),
   });
 }
 
@@ -27,5 +44,7 @@ export const richTextStyles = {
   "& pre": { bgcolor: "action.hover", p: 2, overflowX: "auto" },
   "& figure": { m: "24px 0" },
   "& figure img": { display: "block", width: "100%", height: "auto", borderRadius: 2 },
+  "& img": { maxWidth: "100%", height: "auto" },
+  "& video": { display: "block", width: "100%", maxHeight: "75vh", bgcolor: "black", borderRadius: 2 },
   "& figcaption": { mt: 1, color: "text.secondary", fontSize: 14 },
 };
