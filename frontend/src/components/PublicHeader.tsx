@@ -1,4 +1,5 @@
 "use client";
+import { homeDesign } from "@/app/home-design";
 
 import {
   AppBar,
@@ -47,13 +48,13 @@ export function PublicHeader() {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar position="sticky" elevation={0} sx={{ bgcolor: "#fff", color: homeDesign.colors.ink, borderBottom: `1px solid ${homeDesign.colors.border}` }}>
         <Toolbar
           sx={{
             minHeight: { xs: 64, md: 78 },
             gap: { xs: 1, md: 1 },
             px: { xs: 2, md: 5 },
-            maxWidth: 1600,
+            maxWidth: homeDesign.containerWidth,
             width: "100%",
             mx: "auto",
           }}
@@ -64,11 +65,11 @@ export function PublicHeader() {
             aria-label="Võ Mâm Xe Nâng - Trang chủ"
             sx={{
               mr: "auto",
-              color: "text.primary",
+              color: homeDesign.colors.ink,
               textDecoration: "none",
-              fontSize: { xs: "1rem", sm: "1.08rem", md: "1.25rem" },
+              fontSize: { xs: ".95rem", sm: "1.05rem", md: "1.15rem" },
               fontWeight: 800,
-              letterSpacing: { xs: "0.06em", md: "0.08em" },
+              letterSpacing: { xs: ".025em", md: ".035em" },
               textTransform: "uppercase",
               whiteSpace: "nowrap",
             }}
@@ -134,7 +135,7 @@ export function PublicHeader() {
         PaperProps={{
           sx: {
             width: "min(88vw, 380px)",
-            bgcolor: "background.default",
+            bgcolor: "#fff",
             borderLeft: "1px solid",
             borderColor: "divider",
           },
@@ -170,7 +171,7 @@ export function PublicHeader() {
                     display: "flex",
                     alignItems: "center",
                     gap: 1.5,
-                    color: active ? "secondary.main" : "text.primary",
+                    color: active ? homeDesign.colors.accent : homeDesign.colors.ink,
                     textDecoration: "none",
                     borderBottom: "1px solid",
                     borderColor: "divider",
@@ -222,10 +223,10 @@ const navLinkSx = {
   minWidth: "auto",
   px: { md: 1.35 },
   py: 0.9,
-  color: "#1a1a1a",
-  fontSize: "1.1rem",
-  letterSpacing: "0.1em",
-  fontWeight: 800,
+  color: homeDesign.colors.ink,
+  fontSize: ".84rem",
+  letterSpacing: ".01em",
+  fontWeight: 700,
   whiteSpace: "nowrap",
   "&:hover": { backgroundColor: "transparent", color: "secondary.main", textDecoration: "underline", textUnderlineOffset: "5px" },
 };
@@ -234,14 +235,14 @@ const accountButtonSx = {
   ml: 0.75,
   px: 1.5,
   py: 0.7,
-  borderColor: "#1a1a1a",
+  borderColor: homeDesign.colors.border,
   color: "#1a1a1a",
-  borderRadius: 0,
+  borderRadius: 8,
   fontWeight: 700,
-  fontSize: "0.74rem",
-  letterSpacing: "0.08em",
+  fontSize: ".78rem",
+  letterSpacing: ".01em",
   whiteSpace: "nowrap",
-  "&:hover": { borderColor: "#1a1a1a", backgroundColor: "#1a1a1a", color: "#fff" },
+  "&:hover": { borderColor: "#1a1a1a", backgroundColor: homeDesign.colors.ink, color: "#fff" },
 };
 
 const mobileAccountSx = {

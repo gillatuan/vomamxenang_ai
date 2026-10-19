@@ -1,4 +1,5 @@
 "use client";
+import { homeDesign } from "@/app/home-design";
 import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
 
 import {
@@ -133,13 +134,13 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   return (
     <>
       <PublicHeader />
-      <Box component="main"><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 6, md: 10 }, pb: { xs: 4, md: 6 } }}>
+      <Box component="main"><Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, pt: { xs: 5, md: 9 }, pb: { xs: 7, md: 12 } }}>
         <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Sản phẩm", path: "/products" }]} />
-        <Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>DANH MỤC SẢN PHẨM</Typography>
-        <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Thiết bị sẵn sàng cho mọi ca làm việc.</Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: 6 }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
+        <Typography sx={{ fontSize: { xs: ".75rem", md: ".8rem" }, letterSpacing: ".12em", fontWeight: 800, lineHeight: 1.5, color: homeDesign.colors.accent, mb: 1.5 }}>DANH MỤC SẢN PHẨM</Typography>
+        <Typography component="h1" variant="h2" sx={{ fontSize: { xs: "2.1rem", md: "3.2rem" }, fontWeight: 750, lineHeight: 1.15, letterSpacing: "-.035em", color: homeDesign.colors.ink, mb: 2 }}>Vỏ xe nâng, mâm xe nâng phù hợp mọi nhu cầu.</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: { xs: 4, md: 6 } }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
 
-        <Box component="section" aria-label="Danh mục sản phẩm" sx={{ mb: 3 }}>
+        <Box component="section" aria-label="Danh mục sản phẩm" sx={{ mb: 4, p: { xs: 2, md: 3 }, bgcolor: "#fff", border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3 }}>
           {categoryError && <Alert severity="warning" action={<Button color="inherit" size="small" onClick={loadCategories}>Thử lại</Button>}>Chưa tải được danh mục. Bạn vẫn có thể xem và tìm sản phẩm.</Alert>}
           {categories.length > 0 && <Tabs textColor="primary" indicatorColor="primary" value={categoryId} onChange={(_,value)=>setCategoryId(value)} variant="scrollable" scrollButtons="auto" sx={{ borderBottom:"1px solid", borderColor:"divider", "& .MuiTab-root":{fontWeight:800,fontSize:{xs:".85rem",md:"1rem"},px:{xs:2,md:3}} }}>
             <Tab value="" label="Tất cả" />
@@ -163,7 +164,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
               {sizeFilter && <Chip label={`Kích thước: ${sizeFilter}`} onDelete={()=>setSizeFilter("")} />}
               {conditionFilter && <Chip label={conditionFilter==="USED"?"Đã qua sử dụng":"Mới"} onDelete={()=>setConditionFilter("")} />}
               {(appliedPriceRange[0] > PRICE_MIN || appliedPriceRange[1] < PRICE_MAX) && <Chip label={`${appliedPriceRange[0].toLocaleString("vi-VN")} ₫ – ${appliedPriceRange[1].toLocaleString("vi-VN")} ₫`} onDelete={()=>{setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}} />}
-              <Button size="small" sx={{color:"primary.main",fontWeight:800}} onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
+              <Button size="small" variant="outlined" sx={{ minHeight: 36, px: 2, borderRadius: 2, borderColor: homeDesign.colors.border, color: homeDesign.colors.ink, bgcolor: "#fff", fontWeight: 700, textTransform: "none", "&:hover": { borderColor: homeDesign.colors.ink, bgcolor: homeDesign.colors.surface } }} onClick={()=>{setCategoryId("");setTireTypeFilter("");setRimTypeFilter("");setBrandFilter("");setSizeFilter("");setConditionFilter("");setPriceRange([PRICE_MIN,PRICE_MAX]);setAppliedPriceRange([PRICE_MIN,PRICE_MAX]);}}>Xóa tất cả</Button>
             </Stack>
           )}
 
@@ -219,25 +220,25 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         <Grid container spacing={{ xs: 2, md: 3 }}>
           {pagedProducts.map((product) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
-              <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "transparent", "&:hover img": { transform: "scale(1.035)" } }}>
-                <ProductImage src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 280, md: 350 } }} />
-                <CardContent sx={{ flexGrow: 1, px: 0, pt: 2.25, pb: 1 }}>
-                  <Typography component="h2" variant="h5">{product.name}</Typography>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "#fff", border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3, overflow: "hidden", transition: "box-shadow .2s ease, transform .2s ease", "&:hover": { transform: "translateY(-3px)", boxShadow: "0 16px 36px rgba(23,50,77,.1)" }, "&:hover img": { transform: "scale(1.035)" } }}>
+                <ProductImage src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 240, md: 290 }, objectFit: "contain", bgcolor: homeDesign.colors.surface }} />
+                <CardContent sx={{ flexGrow: 1, px: 2.5, pt: 2.5, pb: 1.5 }}>
+                  <Typography component="h2" variant="h5" sx={{ fontSize: { xs: "1.15rem", md: "1.25rem" }, fontWeight: 700, lineHeight: 1.4, color: homeDesign.colors.ink }}>{product.name}</Typography>
                   <Chip
                     size="small"
                     sx={{ mt: 1 }}
                     color={product.condition === "USED" ? "warning" : "success"}
                     label={product.condition === "USED" ? "CŨ / LƯỚT" : "MỚI 100%"}
                   />
-                  <Typography variant="body2" color="textSecondary" sx={{ maxHeight: "5.5rem", overflow: "hidden", textOverflow: "ellipsis", mt: 1, lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ maxHeight: "5.5rem", overflow: "hidden", textOverflow: "ellipsis", mt: 1.5, lineHeight: 1.7 }}>
                     {productSeoDescription(product)}
                   </Typography>
                   <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
                     {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ px: 0, pb: 0, gap: 1 }}>
-                  <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: "primary.main", fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "4px", marginRight: "auto" }}>
+                <CardActions sx={{ px: 2.5, pb: 2.5, pt: 1, gap: 1, flexWrap: "wrap" }}>
+                  <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: homeDesign.colors.ink, fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "4px", marginRight: "auto" }}>
                     Xem chi tiết
                   </Button>
                   {product.sellingPrice ? (
@@ -262,7 +263,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
           ))}
         </Grid>
         {!loading && visibleProducts.length === 0 && <Typography sx={{py:6,textAlign:"center"}}>Không tìm thấy sản phẩm phù hợp.</Typography>}
-        {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large" sx={{"& .MuiPaginationItem-root":{color:"primary.main"},"& .Mui-selected":{bgcolor:"#ed6c02 !important",color:"#fff","&:hover":{bgcolor:"#d86100 !important"}}}}/></Box>}
+        {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large" sx={{ "& .MuiPaginationItem-root": { color: homeDesign.colors.ink }, "& .Mui-selected": { bgcolor: `${homeDesign.colors.accent} !important`, color: homeDesign.colors.ink } }}/></Box>}
       </Container></Box>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>

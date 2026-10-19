@@ -1,4 +1,6 @@
 "use client";
+import { sizeToSlug, uniqueProductSizes } from "@/lib/seo/size-seo";
+import { homeDesign } from "./home-design";
 import { ContentImage } from "@/components/ContentImage";
 import { richTextPlain } from "@/lib/rich-text";
 import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
@@ -9,6 +11,11 @@ import { Box, Card, CardContent, Container, Typography, Button, Grid, Stack, Rat
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { aboutAPI, postsAPI, productsAPI, type AboutPage, type Post, type Product } from "@/lib/api-client";
+
+const sectionSx = { py: { xs: 6, sm: 8, md: 11 } } as const;
+const eyebrowSx = { fontSize: { xs: ".75rem", md: ".8rem" }, fontWeight: 800, letterSpacing: ".12em", lineHeight: 1.5, mb: 1.5 } as const;
+const headingSx = { fontSize: { xs: "1.85rem", sm: "2.25rem", md: "2.8rem" }, fontWeight: 750, lineHeight: 1.2, letterSpacing: "-.035em" } as const;
+const bodySx = { fontSize: { xs: "1rem", md: "1.075rem" }, lineHeight: 1.75 } as const;
 
 const fallbackAbout = {
   title: "Về Võ Mâm Xe Nâng",
@@ -24,6 +31,7 @@ export default function HomePage() {
   const [about, setAbout] = useState<Pick<AboutPage, "title" | "summary">>(fallbackAbout);
   const [products, setProducts] = useState<Product[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const availableSizes = uniqueProductSizes(products).slice(0, 8);
   const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
 
   useEffect(() => {
@@ -43,37 +51,81 @@ export default function HomePage() {
         sx={{
           position: "relative",
           overflow: "hidden",
-          minHeight: { xs: 510, md: 650 },
+          minHeight: { xs: 540, md: 650 },
           display: "flex",
           alignItems: "flex-end",
           color: "#fff",
-          background: "linear-gradient(118deg, #171716 0%, #25241f 49%, #6d5136 100%)",
+          background: "linear-gradient(100deg, rgba(15,35,53,.97) 0%, rgba(15,35,53,.91) 48%, rgba(15,35,53,.35) 100%), url(/images/products/tire-rim-service.png) center / cover no-repeat",
           "&:before": { content: '""', position: "absolute", width: { xs: 340, md: 620 }, height: { xs: 340, md: 620 }, border: "1px solid rgba(255,255,255,.25)", borderRadius: "50%", right: { xs: -170, md: -120 }, top: { xs: -130, md: -210 } },
           "&:after": { content: '""', position: "absolute", width: "44%", height: "100%", right: 0, top: 0, opacity: .18, backgroundImage: "repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 58px)" },
         }}
       >
-        <Container maxWidth={false} sx={{ maxWidth: 1440, width: "100%", py: { xs: 7, md: 10 }, position: "relative", zIndex: 1 }}>
+        <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, width: "100%", ...sectionSx, position: "relative", zIndex: 1 }}>
           <Typography sx={{ fontSize: "1.1rem", letterSpacing: ".18em", fontWeight: 800, mb: 2, color: "#dec19e" }}>VÕ MÂM XE NÂNG · INDUSTRIAL MOBILITY</Typography>
-          <Typography component="h1" variant="h1" sx={{ fontSize: "3rem", maxWidth: 860, textTransform: "uppercase" }}>
+          <Typography component="h1" variant="h1" sx={{ fontSize: { xs: "2.45rem", sm: "3.2rem", md: "4.5rem" }, lineHeight: 1.08, maxWidth: 860, textTransform: "uppercase" }}>
             Vỏ mâm xe nâng.<br />Chọn đúng cho đội xe.
           </Typography>
           <Typography sx={{ maxWidth: 570, mt: 3, mb: 4, fontSize: { xs: "1rem", md: "1.16rem" }, lineHeight: 1.7, color: "rgba(255,255,255,.78)" }}>
             Tìm hiểu vỏ xe nâng, lốp đặc, lốp hơi và mâm bánh xe nâng. Đối chiếu kích thước, cấu hình mâm và điều kiện kho xưởng trước khi lựa chọn.
           </Typography>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button component={NextLink} href="/vo-xe-nang" sx={{ bgcolor: "#fff", color: "#1a1a1a", "&:hover": { bgcolor: "#dec19e" } }}>Xem vỏ xe nâng</Button><Button component={NextLink} href="/about" variant="outlined" sx={{ borderColor: "rgba(255,255,255,.7)", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.12)" } }}>Về chúng tôi</Button><Button component={NextLink} href="/mam-xe-nang" sx={{ color: "#fff" }}>Tìm mâm xe nâng</Button></Stack>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button component={NextLink} href="/vo-xe-nang" sx={{ bgcolor: homeDesign.colors.accent, color: homeDesign.colors.ink, borderRadius: 2, "&:hover": { bgcolor: "#FBBF24" } }}>Xem vỏ xe nâng</Button><Button component={NextLink} href="/about" variant="outlined" sx={{ borderColor: "rgba(255,255,255,.7)", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.12)" } }}>Về chúng tôi</Button><Button component={NextLink} href="/mam-xe-nang" sx={{ color: "#fff" }}>Tìm mâm xe nâng</Button></Stack>
         </Container>
       </Box>
-      <Container component="section" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 7, md: 12 } }}>
-        <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center"><Grid item xs={12} md={5}><Typography sx={{ fontSize: { xs: "1.1rem", md: "1.1rem" }, letterSpacing: ".16em", fontWeight: 800, mb: 2, color: "secondary.main" }}>GIẢI PHÁP ĐỒNG HÀNH</Typography><Typography component="h2" variant="h2">{about.title}</Typography></Grid><Grid item xs={12} md={7}><Typography color="text.secondary" sx={{ fontSize: { xs: "1.08rem", md: "1.35rem" }, lineHeight: 1.7, maxWidth: 690 }}>{about.summary}</Typography><Button component={NextLink} href="/about" variant="text" sx={{ px: 0, mt: 3, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "6px" }}>Tìm hiểu thêm</Button></Grid></Grid>
+      <Box component="section" sx={{ bgcolor: homeDesign.colors.surface, ...sectionSx }}>
+        <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}>
+          <Typography sx={{ ...eyebrowSx, color: homeDesign.colors.accent }}>TÌM ĐÚNG GIẢI PHÁP</Typography>
+          <Typography component="h2" variant="h2" sx={{ ...headingSx, color: homeDesign.colors.ink, mb: 4 }}>Bạn đang tìm loại vỏ hay mâm xe nâng nào?</Typography>
+          <Grid container spacing={3}>
+            {homeDesign.categoryLinks.map((category) => (
+              <Grid item xs={12} md={4} key={category.href}>
+                <Box component={NextLink} href={category.href} sx={{ display: "block", height: "100%", p: { xs: 3, md: 4 }, border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3, bgcolor: "#fff", textDecoration: "none", transition: "transform .2s ease, box-shadow .2s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 14px 32px rgba(23,50,77,.1)" } }}>
+                  <Typography component="h3" variant="h5" sx={{ color: homeDesign.colors.ink, mb: 1.5 }}>{category.title}</Typography>
+                  <Typography sx={{ ...bodySx, color: homeDesign.colors.muted }}>{category.description}</Typography>
+                  <Typography sx={{ color: homeDesign.colors.ink, fontWeight: 700, mt: 3 }}>Khám phá →</Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+          <Typography component="h3" variant="h6" sx={{ mt: 5, mb: 2, color: homeDesign.colors.ink }}>Tìm nhanh theo kích thước phổ biến</Typography>
+          <Stack direction="row" flexWrap="wrap" gap={1.5}>
+            {availableSizes.map(({ size }) => (
+              <Button key={size} component={NextLink} href={`/kich-thuoc/${sizeToSlug(size)}`} variant="outlined" sx={{ borderRadius: 2, color: homeDesign.colors.ink, borderColor: homeDesign.colors.border, bgcolor: "#fff" }}>{size}</Button>
+            ))}
+          </Stack>
+          {!availableSizes.length && <Button component={NextLink} href="/products" variant="outlined" sx={{ mt: 2 }}>Duyệt tất cả kích thước trong catalog</Button>}
+        </Container>
+      </Box>
+      <Container component="section" maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, ...sectionSx }}>
+        <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center"><Grid item xs={12} md={5}><Typography sx={{ ...eyebrowSx, color: "secondary.main" }}>GIẢI PHÁP ĐỒNG HÀNH</Typography><Typography component="h2" variant="h2" sx={headingSx}>{about.title}</Typography></Grid><Grid item xs={12} md={7}><Typography color="text.secondary" sx={{ ...bodySx, maxWidth: 690 }}>{about.summary}</Typography><Button component={NextLink} href="/about" variant="text" sx={{ px: 0, mt: 3, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "6px" }}>Tìm hiểu thêm</Button></Grid></Grid>
       </Container>
-      <Container component="section" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 7, md: 10 } }}>
-        <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} sx={{ mb: 4 }}><Box><Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>LỰA CHỌN NỔI BẬT</Typography><Typography component="h2" variant="h2">Sản phẩm sẵn sàng vận hành.</Typography></Box><Button component={NextLink} href="/products" variant="outlined">Xem tất cả sản phẩm</Button></Stack>
-        <Grid container spacing={{ xs: 2, md: 3 }}>{products.map((product) => <Grid item xs={12} sm={6} md={3} key={product.id}><Card sx={{ height: "100%", bgcolor: "transparent", "&:hover img": { transform: "scale(1.04)" } }}><Box sx={{ overflow: "hidden", bgcolor: "#e9e5dc", height: 260 }}><ContentImage src={product.imageUrl} fallbackSrc={productFallbackImage(product)} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} sx={{ height: "100%", transition: "transform .4s ease" }} /></Box><CardContent sx={{ px: 0, pt: 2 }}><Typography component="h3" variant="h5">{product.name}</Typography><Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.6 }}>{productSeoDescription(product)}</Typography><Typography sx={{ mt: 1.25, fontWeight: 800, color: "secondary.main" }}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString("vi-VN")} ₫` : "Liên hệ báo giá"}</Typography><Button component={NextLink} href={`/products/${product.slug || product.id}`} variant="text" sx={{ px: 0, mt: 1.5, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "4px" }}>Xem chi tiết</Button></CardContent></Card></Grid>)}</Grid>
+      <Container component="section" maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, ...sectionSx }}>
+        <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} sx={{ mb: 4 }}><Box><Typography sx={{ ...eyebrowSx, color: "secondary.main" }}>LỰA CHỌN NỔI BẬT</Typography><Typography component="h2" variant="h2" sx={headingSx}>Sản phẩm sẵn sàng vận hành.</Typography></Box><Button component={NextLink} href="/products" variant="outlined">Xem tất cả sản phẩm</Button></Stack>
+        <Grid container spacing={{ xs: 2, md: 3 }}>{products.map((product) => <Grid item xs={12} sm={6} md={3} key={product.id}><Card sx={{ height: "100%", bgcolor: "#fff", border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3, overflow: "hidden", "&:hover img": { transform: "scale(1.04)" } }}><Box sx={{ overflow: "hidden", bgcolor: "#e9e5dc", height: 260 }}><ContentImage src={product.imageUrl} fallbackSrc={productFallbackImage(product)} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} sx={{ height: "100%", transition: "transform .4s ease" }} /></Box><CardContent sx={{ px: 2.5, pt: 2.5, pb: 3 }}><Typography component="h3" variant="h5">{product.name}</Typography><Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.6 }}>{productSeoDescription(product)}</Typography><Typography sx={{ mt: 1.25, fontWeight: 800, color: "secondary.main" }}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString("vi-VN")} ₫` : "Liên hệ báo giá"}</Typography><Button component={NextLink} href={`/products/${product.slug || product.id}`} variant="text" sx={{ px: 0, mt: 1.5, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "4px" }}>Xem chi tiết</Button></CardContent></Card></Grid>)}</Grid>
         {!products.length && <Typography color="text.secondary">Sản phẩm nổi bật đang được cập nhật.</Typography>}
       </Container>
-      <Box component="section" sx={{ bgcolor: "#e9e5dc", py: { xs: 5, md: 7 } }}><Container maxWidth={false} sx={{ maxWidth: 1440 }}><Grid container spacing={3}>{[["01", "Tư vấn đúng tải trọng"], ["02", "Sản phẩm tuyển chọn"], ["03", "Hỗ trợ sau bán hàng"]].map(([number, text]) => <Grid item xs={12} md={4} key={number}><Typography sx={{ color: "secondary.main", fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, mb: 1 }}>{number}</Typography><Typography component="h2" variant="h5" sx={{ fontWeight: 500 }}>{text}</Typography></Grid>)}</Grid></Container></Box>
-      <Box component="section" sx={{ bgcolor: "#1a1a1a", color: "#fff", py: { xs: 7, md: 10 } }}><Container maxWidth={false} sx={{ maxWidth: 1440 }}><Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "#dec19e", mb: 1 }}>PHẢN HỒI KHÁCH HÀNG</Typography><Typography component="h2" variant="h2" sx={{ maxWidth: 640, mb: 5 }}>Niềm tin được xây từ mỗi ca vận hành.</Typography><Grid container spacing={3}>{reviews.slice(0, 3).map((review) => <Grid item xs={12} md={4} key={review.id}><Box sx={{ height: "100%", borderTop: "1px solid rgba(255,255,255,.35)", pt: 2.5 }}><Rating value={review.rating ?? 0} readOnly size="small" sx={{ mb: 2, "& .MuiRating-iconFilled": { color: "#dec19e" } }} /><Typography sx={{ lineHeight: 1.75, fontSize: "1.04rem", minHeight: { md: 112 } }}>“{review.content}”</Typography><Typography sx={{ mt: 2.5, fontWeight: 700 }}>{review.reviewerName}</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,.62)", mt: .5 }}>{review.product.name}</Typography></Box></Grid>)}</Grid></Container></Box>
-      <Container component="section" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 7, md: 10 } }}><Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} sx={{ mb: 4 }}><Box><Typography sx={{ fontSize: "1.1rem", letterSpacing: ".16em", fontWeight: 800, color: "secondary.main", mb: 1 }}>TỪ BLOG</Typography><Typography component="h2" variant="h2">Kiến thức cho đội xe của bạn.</Typography></Box><Button component={NextLink} href="/blog" variant="outlined">Xem tất cả bài viết</Button></Stack><Grid container spacing={{ xs: 2, md: 3 }}>{posts.map((post) => <Grid item xs={12} md={4} key={post.id}><Card sx={{ height: "100%", bgcolor: "transparent" }}><Box sx={{ height: 200, bgcolor: "#e9e5dc", display: "grid", placeItems: "center", color: "text.secondary", fontSize: "1.1rem", letterSpacing: ".12em", fontWeight: 800 }}>KIẾN THỨC VẬN HÀNH</Box><CardContent sx={{ px: 0, pt: 2.25 }}><Typography component="h3" variant="h6" sx={{ fontWeight: 600 }}>{post.title}</Typography><Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.65 }}>{richTextPlain(post.content).slice(0, 120)}…</Typography><Button component={NextLink} href={`/blog/${post.slug || post.id}`} variant="text" sx={{ px: 0, mt: 1.5, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "4px" }}>Đọc bài viết</Button></CardContent></Card></Grid>)}</Grid>{!posts.length && <Typography color="text.secondary">Bài viết nổi bật đang được cập nhật.</Typography>}</Container>
+      <Box component="section" sx={{ bgcolor: homeDesign.colors.ink, color: "#fff", ...sectionSx }}>
+        <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}>
+          <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Box sx={{ overflow: "hidden", borderRadius: 3, aspectRatio: "4 / 3" }}>
+                <ContentImage kind="post" alt="Hình minh họa dịch vụ vỏ và mâm xe nâng" sx={{ height: "100%", objectFit: "cover" }} />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography sx={{ ...eyebrowSx, color: homeDesign.colors.accent }}>DỊCH VỤ XE NÂNG</Typography>
+              <Typography component="h2" variant="h2" sx={{ ...headingSx, mb: 3 }}>Ép vỏ, thay vỏ và tư vấn cấu hình mâm.</Typography>
+              <Typography sx={{ ...bodySx, color: "rgba(255,255,255,.8)", mb: 3 }}>Trao đổi kích thước, loại vỏ và tình trạng xe để được hướng dẫn lựa chọn phương án phù hợp.</Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Button component={NextLink} href="/services" sx={{ bgcolor: homeDesign.colors.accent, color: homeDesign.colors.ink, borderRadius: 2, "&:hover": { bgcolor: "#FBBF24" } }}>Khám phá dịch vụ</Button>
+                <Button component={NextLink} href="/cong-viec-da-lam" variant="outlined" sx={{ color: "#fff", borderColor: "#fff", borderRadius: 2 }}>Công việc thực tế</Button>
+              </Stack>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+      <Box component="section" sx={{ bgcolor: homeDesign.colors.surface, ...sectionSx }}><Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}><Grid container spacing={3}>{[["01", "Tư vấn đúng tải trọng"], ["02", "Sản phẩm tuyển chọn"], ["03", "Hỗ trợ sau bán hàng"]].map(([number, text]) => <Grid item xs={12} md={4} key={number}><Typography sx={{ ...eyebrowSx, color: homeDesign.colors.accent }}>{number}</Typography><Typography component="h2" variant="h5" sx={{ fontWeight: 650, lineHeight: 1.35 }}>{text}</Typography></Grid>)}</Grid></Container></Box>
+      <Box component="section" sx={{ bgcolor: homeDesign.colors.ink, color: "#fff", ...sectionSx }}><Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}><Typography sx={{ ...eyebrowSx, color: homeDesign.colors.accent }}>PHẢN HỒI KHÁCH HÀNG</Typography><Typography component="h2" variant="h2" sx={{ ...headingSx, maxWidth: 640, mb: 5 }}>Niềm tin được xây từ mỗi ca vận hành.</Typography><Grid container spacing={3}>{reviews.slice(0, 3).map((review) => <Grid item xs={12} md={4} key={review.id}><Box sx={{ height: "100%", borderTop: "1px solid rgba(255,255,255,.35)", pt: 2.5 }}><Rating value={review.rating ?? 0} readOnly size="small" sx={{ mb: 2, "& .MuiRating-iconFilled": { color: "#dec19e" } }} /><Typography sx={{ ...bodySx, minHeight: { md: 112 } }}>“{review.content}”</Typography><Typography sx={{ mt: 2.5, fontWeight: 700 }}>{review.reviewerName}</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,.62)", mt: .5 }}>{review.product.name}</Typography></Box></Grid>)}</Grid></Container></Box>
+      <Container component="section" maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, ...sectionSx }}><Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} sx={{ mb: 4 }}><Box><Typography sx={{ ...eyebrowSx, color: "secondary.main" }}>TỪ BLOG</Typography><Typography component="h2" variant="h2" sx={headingSx}>Kiến thức cho đội xe của bạn.</Typography></Box><Button component={NextLink} href="/blog" variant="outlined">Xem tất cả bài viết</Button></Stack><Grid container spacing={{ xs: 2, md: 3 }}>{posts.map((post) => <Grid item xs={12} md={4} key={post.id}><Card sx={{ height: "100%", bgcolor: "#fff", border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3, overflow: "hidden" }}><Box sx={{ height: 200, overflow: "hidden", borderRadius: 2 }}><ContentImage src={post.seo?.imageUrl} kind="post" alt={post.seo?.imageAlt || post.title} sx={{ height: "100%", objectFit: "cover" }} /></Box><CardContent sx={{ px: 2.5, pt: 2.5, pb: 3 }}><Typography component="h3" variant="h6" sx={{ fontWeight: 600 }}>{post.title}</Typography><Typography color="text.secondary" sx={{ ...bodySx, mt: 1 }}>{richTextPlain(post.content).slice(0, 120)}…</Typography><Button component={NextLink} href={`/blog/${post.slug || post.id}`} variant="text" sx={{ px: 0, mt: 1.5, color: "primary.main", bgcolor: "transparent", textDecoration: "none", "&:hover": { bgcolor: "transparent", color: "primary.dark" }, textUnderlineOffset: "4px" }}>Đọc bài viết</Button></CardContent></Card></Grid>)}</Grid>{!posts.length && <Typography color="text.secondary">Bài viết nổi bật đang được cập nhật.</Typography>}</Container>
 
       <Footer />
     </>
