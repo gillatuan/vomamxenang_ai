@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
+const mediaRedirects = JSON.parse(readFileSync('../frontend/config/day2-media-redirects.json', 'utf8'));
+assert.equal(Object.keys(mediaRedirects).length, 10, 'Seven photos and three videos must use external storage.');
 const source = readFileSync('scripts/create-day2-warehouse-cleanup-draft.ts', 'utf8');
 const marker = 'const content = `';
 const start = source.indexOf(marker);
@@ -15,8 +17,12 @@ assert(words.length >= 1200 && words.length <= 1800, `Expected 1,200–1,800 Vie
 for (const path of ['/vo-xe-nang', '/mam-xe-nang', '/products']) assert.equal(content.includes(`href=\"${path}\"`), true, `Missing verified internal link: ${path}`);
 for (const media of ['kho-cu-mam-lop-01.jpg', 'kho-cu-mam-lop-02.jpg', 'kho-lop-theo-cum-01.jpg', 'cot-lop-sau-sap-xep-01.jpg', 'loi-di-kho-sau-sap-xep-01.jpg']) {
   assert.equal(source.includes(media), true, `Missing Day 2 media reference: ${media}`);
-  // Media is intentionally hosted outside the public Git repository; validate references, not local file copies.
-  assert.equal(content.includes(`${media}`), true, `Missing Day 2 draft content image: ${media}`);
+  const externalUrl = mediaRedirects[`/images/campaigns/chuyen-kho-2026/day-2/${media}`];
+  assert.equal(typeof externalUrl, 'string', `Missing external media redirect: ${media}`);
+  const parsed = new URL(externalUrl);
+  assert.equal(parsed.protocol, 'https:');
+  assert.equal(parsed.hostname, 'evgd1ro8jvugg2yw.public.blob.vercel-storage.com');
+  assert.equal(parsed.pathname.startsWith('/content/chuyen-kho-2026/day-2/'), true);
 }
 assert.equal(source.includes('videoUrl:'), false, 'A video must not be added because none was supplied.');
 assert.equal(source.includes("status: ContentStatus.DRAFT"), true, 'The post must stay DRAFT until media review is complete.');
