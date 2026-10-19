@@ -35,10 +35,30 @@ const FigureCaption = Node.create({
   renderHTML({ HTMLAttributes }) { return ["figcaption", mergeAttributes(HTMLAttributes), 0]; },
 });
 
+const EmbeddedVideo = Node.create({
+  name: "embeddedVideo",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      poster: { default: null },
+      controls: { default: true },
+      preload: { default: "metadata" },
+      playsinline: { default: true },
+    };
+  },
+  parseHTML() { return [{ tag: "video[src]" }]; },
+  renderHTML({ HTMLAttributes }) {
+    return ["video", mergeAttributes(HTMLAttributes, { controls: "", preload: "metadata", playsinline: "" })];
+  },
+});
+
 const EmbeddedFigure = Node.create({
   name: "embeddedFigure",
   group: "block",
-  content: "embeddedImage figureCaption?",
+  content: "(embeddedImage | embeddedVideo) figureCaption?",
   isolating: true,
   parseHTML() { return [{ tag: "figure" }]; },
   renderHTML({ HTMLAttributes }) { return ["figure", mergeAttributes(HTMLAttributes), 0]; },
@@ -53,7 +73,7 @@ export default function RichTextEditor({ label, value, onChange }: { label: stri
   const [url, setUrl] = useState("");
   const [linkError, setLinkError] = useState(false);
   const editor = useEditor({
-    extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false } }), EmbeddedImage, FigureCaption, EmbeddedFigure],
+    extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false } }), EmbeddedImage, EmbeddedVideo, FigureCaption, EmbeddedFigure],
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     content: richTextHtml(value),
