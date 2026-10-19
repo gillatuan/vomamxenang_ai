@@ -8,10 +8,10 @@ if (!process.env.DATABASE_URL) config({ path: '.env.local' });
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required.');
 const parsed = new URL(url);
-const dbName = decodeURIComponent(parsed.pathname.replace(/^\\//, '')).toLowerCase();
+const dbName = decodeURIComponent(parsed.pathname.slice(1)).toLowerCase();
 const apply = process.argv.includes('--apply');
 const isApprovedName = /(^|[_-])(demo|test|staging|sandbox)([_-]|$)/.test(dbName);
-const forbiddenHost = /prisma-data|neon|supabase|production|prod\\b/i.test(parsed.hostname);
+const forbiddenHost = /prisma-data|neon|supabase|production|prod/i.test(parsed.hostname);
 if (!isApprovedName || forbiddenHost || process.env.APP_ENV === 'production' || process.env.NODE_ENV === 'production') {
   throw new Error('Refusing demo pricing: use a dedicated non-production database named *_demo, *_test or *_staging (not production).');
 }
