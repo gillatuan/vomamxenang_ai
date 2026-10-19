@@ -23,8 +23,9 @@ Rules are in `backend/scripts/demo-product-prices.ts`. Values are sample estimat
    ```sh
    ALLOW_DEMO_PRICE_WRITE=YES yarn ts-node --transpile-only scripts/apply-demo-product-prices.ts --apply
    ```
-5. Point a separate frontend deployment to the test API, and set `NEXT_PUBLIC_DEMO_PRICING=true` to show warning banners on listing, detail, and checkout.
-6. Use Stripe **test keys** and test credentials only. Never process actual transactions with example prices.
+5. For checkout end-to-end, prepare positive `StockLocation.quantity` for each demo product in the staging database, sign in with a test account (checkout requires authentication), and configure backend `APP_ENV=staging`, `ALLOW_DEMO_CHECKOUT=YES` and `STRIPE_SECRET_KEY=sk_test_...`. The staging-only backend allocator selects a real stock location with enough quantity; production behavior remains unchanged.
+6. Point a separate frontend deployment to the test API, and set `NEXT_PUBLIC_DEMO_PRICING=true` to show warning banners on listing, detail, and checkout.
+7. Use Stripe **test keys** and test credentials only. Never process actual transactions with example prices.
 
 ## Test plan
 
