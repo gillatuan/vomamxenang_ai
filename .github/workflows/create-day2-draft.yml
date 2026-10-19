@@ -1,0 +1,46 @@
+name: Create approved Day 2 article draft
+on:
+  push:
+    branches: [ops/create-day2-article-draft]
+    paths:
+      - backend/scripts/create-day2-draft.ts
+      - backend/scripts/day2-post.json
+      - backend/test/day2-draft.spec.ts
+      - .github/workflows/create-day2-draft.yml
+permissions:
+  contents: read
+concurrency:
+  group: production-content-day2
+  cancel-in-progress: false
+jobs:
+  draft:
+    runs-on: ubuntu-24.04
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile
+      - name: Verify content alias handling
+        run: yarn test:content
+      - name: Test draft creation safety
+        run: yarn ts-node --transpile-only test/day2-draft.spec.ts
+      - name: Verify deployed article images
+        run: |
+          curl --fail --silent --show-error --output /dev/null https://www.vomamxenang.com/images/campaigns/chuyen-kho-2026/day-2/loi-di-kho-sau-sap-xep-01.jpg
+          curl --fail --silent --show-error --output /dev/null https://www.vomamxenang.com/images/campaigns/chuyen-kho-2026/day-2/kho-cu-mam-lop-01.jpg
+      - name: Read-only duplicate preflight
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          CONFIRMATION: CREATE-DAY2-DRAFT
+        run: yarn ts-node --transpile-only scripts/create-day2-draft.ts --dry-run
+      - name: Create and verify the single approved draft
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          CONFIRMATION: CREATE-DAY2-DRAFT
+        run: yarn ts-node --transpile-only scripts/create-day2-draft.ts
