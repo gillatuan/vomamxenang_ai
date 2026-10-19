@@ -1,4 +1,5 @@
 "use client";
+import { homeDesign } from "./home-design";
 import { ContentImage } from "@/components/ContentImage";
 import { richTextPlain } from "@/lib/rich-text";
 import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
@@ -61,6 +62,29 @@ export default function HomePage() {
             Tìm hiểu vỏ xe nâng, lốp đặc, lốp hơi và mâm bánh xe nâng. Đối chiếu kích thước, cấu hình mâm và điều kiện kho xưởng trước khi lựa chọn.
           </Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}><Button component={NextLink} href="/vo-xe-nang" sx={{ bgcolor: "#fff", color: "#1a1a1a", "&:hover": { bgcolor: "#dec19e" } }}>Xem vỏ xe nâng</Button><Button component={NextLink} href="/about" variant="outlined" sx={{ borderColor: "rgba(255,255,255,.7)", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.12)" } }}>Về chúng tôi</Button><Button component={NextLink} href="/mam-xe-nang" sx={{ color: "#fff" }}>Tìm mâm xe nâng</Button></Stack>
+        </Container>
+      </Box>
+      <Box component="section" sx={{ bgcolor: homeDesign.colors.surface, py: homeDesign.sectionPadding }}>
+        <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}>
+          <Typography sx={{ fontWeight: 800, color: homeDesign.colors.accent, letterSpacing: ".12em", mb: 1 }}>TÌM ĐÚNG GIẢI PHÁP</Typography>
+          <Typography component="h2" variant="h2" sx={{ color: homeDesign.colors.ink, mb: 4 }}>Bạn đang tìm loại vỏ hay mâm xe nâng nào?</Typography>
+          <Grid container spacing={3}>
+            {homeDesign.categoryLinks.map((category) => (
+              <Grid item xs={12} md={4} key={category.href}>
+                <Box component={NextLink} href={category.href} sx={{ display: "block", height: "100%", p: { xs: 3, md: 4 }, border: `1px solid ${homeDesign.colors.border}`, borderRadius: 3, bgcolor: "#fff", textDecoration: "none", transition: "transform .2s ease, box-shadow .2s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 14px 32px rgba(23,50,77,.1)" } }}>
+                  <Typography component="h3" variant="h5" sx={{ color: homeDesign.colors.ink, mb: 1.5 }}>{category.title}</Typography>
+                  <Typography sx={{ color: homeDesign.colors.muted, lineHeight: 1.7 }}>{category.description}</Typography>
+                  <Typography sx={{ color: homeDesign.colors.ink, fontWeight: 700, mt: 3 }}>Khám phá →</Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+          <Typography component="h3" variant="h6" sx={{ mt: 5, mb: 2, color: homeDesign.colors.ink }}>Tìm nhanh theo kích thước phổ biến</Typography>
+          <Stack direction="row" flexWrap="wrap" gap={1.5}>
+            {homeDesign.popularSizes.map((size) => (
+              <Button key={size} component={NextLink} href={`/kich-thuoc/${encodeURIComponent(size.toLowerCase())}`} variant="outlined" sx={{ borderRadius: 2, color: homeDesign.colors.ink, borderColor: homeDesign.colors.border, bgcolor: "#fff" }}>{size}</Button>
+            ))}
+          </Stack>
         </Container>
       </Box>
       <Container component="section" maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 7, md: 12 } }}>
