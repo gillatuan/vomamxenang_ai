@@ -16,6 +16,21 @@ jobs:
   draft:
     runs-on: ubuntu-24.04
     environment: Production
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/day2_fixture
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: day2_fixture
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: backend
@@ -26,6 +41,8 @@ jobs:
           node-version: 20
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - name: Apply migrations only to the disposable test database
+        run: yarn prisma:migrate
       - name: Verify content alias handling
         run: yarn test:content
       - name: Test draft creation safety
