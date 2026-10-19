@@ -5,6 +5,9 @@ module.exports = (phase) => ({
   reactStrictMode: true,
   // Keep production builds from overwriting a running development server's chunks.
   distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
+  async redirects() {
+    return Object.entries(require("./config/day2-media-redirects.json")).map(([source, destination]) => ({ source, destination, permanent: true }));
+  },
   images: {
     remotePatterns: [
       {

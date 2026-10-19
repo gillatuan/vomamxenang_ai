@@ -24,3 +24,6 @@ backend/yarn.lock
 .env*
 backend/tsconfig.build.tsbuildinfo
 frontend/tsconfig.tsbuildinfo
+
+# Uploaded Day 2 media is stored in Blob, outside Git.
+frontend/public/images/campaigns/chuyen-kho-2026/day-2/
