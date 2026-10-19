@@ -45,6 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Test encrypted backup recovery and tamper rejection
+        run: node --test test/backup-envelope.test.cjs
       - name: Test backup target safety
         run: node --test test/db-audit-backup.test.cjs
       - name: Install PostgreSQL client for restore test
@@ -115,4 +117,3 @@ jobs:
       - name: Run backend verification suite
         run: yarn test:ci
       - run: yarn build
-
