@@ -1,5 +1,5 @@
-import { homeDesign } from "@/app/home-design";
 "use client";
+import { homeDesign } from "@/app/home-design";
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
