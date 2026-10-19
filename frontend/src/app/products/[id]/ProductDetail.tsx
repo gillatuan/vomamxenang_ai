@@ -45,6 +45,7 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
     <PublicHeader />
     <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, py: { xs: 5, md: 9 } }}>
       {breadcrumbs}
+      {process.env.NEXT_PUBLIC_DEMO_PRICING === "true" && <Box sx={{ mt: 2, p: 2, bgcolor: "#FFF7ED", border: "1px solid #F59E0B", borderRadius: 2, color: "#78350F", lineHeight: 1.6 }}>Giá thử nghiệm để kiểm tra giỏ hàng và thanh toán. Không phải báo giá chính thức.</Box>}
       <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 3, md: 6 }} sx={{ mt: 2, mb: { xs: 5, md: 8 } }}>
         <Box sx={{ width: { xs: "100%", md: "48%" }, borderRadius: 3, overflow: "hidden", bgcolor: homeDesign.colors.surface, border: `1px solid ${homeDesign.colors.border}` }}><ProductImage priority src={product.imageUrl} alt={product.seo?.imageAlt || `${product.name}${product.size ? ` ${product.size}` : ""}`} fallbackSrc={productFallbackImage(product)} watermark={watermark} imageSx={{ height: { xs: 320, md: 470 }, objectFit: "contain", bgcolor: homeDesign.colors.surface }} /></Box>
         <Box sx={{ flex: 1 }}>

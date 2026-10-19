@@ -13,7 +13,7 @@ import { OrdersService } from './orders.service';
 class CheckoutItemDto {
   @IsOptional() @IsString() productId?: string;
   @IsOptional() @IsString() wheelRimId?: string;
-  @IsString() locationId!: string;
+  @IsOptional() @IsString() locationId?: string;
   @IsInt() @Min(1) quantity!: number;
 }
 class PaymentDueDto {
