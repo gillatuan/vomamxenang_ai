@@ -55,7 +55,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [page, setPage] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
   const [conditionFilter, setConditionFilter] = useState("");
-  const [brandFilter,setBrandFilter]=useState(""); const [sizeFilter,setSizeFilter]=useState(""); const [tireTypeFilter,setTireTypeFilter]=useState(""); const [rimTypeFilter,setRimTypeFilter]=useState(""); const PRICE_MIN=0, PRICE_MAX=3000000, PRICE_STEP=50000;
+  const [brandFilter,setBrandFilter]=useState(""); const [sizeFilter,setSizeFilter]=useState(""); const [tireTypeFilter,setTireTypeFilter]=useState(""); const [rimTypeFilter,setRimTypeFilter]=useState(""); const PRICE_MIN=0, PRICE_MAX=15000000, PRICE_STEP=50000;
   const [priceRange,setPriceRange]=useState<number[]>([PRICE_MIN,PRICE_MAX]);
   const [appliedPriceRange,setAppliedPriceRange]=useState<number[]>([PRICE_MIN,PRICE_MAX]);
   const pageSize = 9;
@@ -136,6 +136,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
       <PublicHeader />
       <Box component="main"><Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth, pt: { xs: 5, md: 9 }, pb: { xs: 7, md: 12 } }}>
         <SeoBreadcrumbs items={[{ name: "Trang chủ", path: "/" }, { name: "Sản phẩm", path: "/products" }]} />
+        {process.env.NEXT_PUBLIC_DEMO_PRICING === "true" && <Alert severity="warning" sx={{ mb: 3 }}>Đây là môi trường kiểm thử: giá sản phẩm là dữ liệu mẫu, không phải báo giá bán thực tế. Không đặt hàng hoặc thanh toán thật.</Alert>}
         <Typography sx={{ fontSize: { xs: ".75rem", md: ".8rem" }, letterSpacing: ".12em", fontWeight: 800, lineHeight: 1.5, color: homeDesign.colors.accent, mb: 1.5 }}>DANH MỤC SẢN PHẨM</Typography>
         <Typography component="h1" variant="h2" sx={{ fontSize: { xs: "2.1rem", md: "3.2rem" }, fontWeight: 750, lineHeight: 1.15, letterSpacing: "-.035em", color: homeDesign.colors.ink, mb: 2 }}>Vỏ xe nâng, mâm xe nâng phù hợp mọi nhu cầu.</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 720, fontSize: { xs: "1rem", md: "1.15rem" }, lineHeight: 1.75, mb: { xs: 4, md: 6 } }}>Lựa chọn lốp và mâm phù hợp với tải trọng, môi trường và nhịp vận hành của đội xe.</Typography>
