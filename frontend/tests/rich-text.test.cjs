@@ -29,3 +29,25 @@ test('produces readable excerpts and detects empty formatted content', () => {
   assert.equal(richTextPlain('<p><br></p>'), '');
   assert.equal(richTextPlain('<p>&nbsp;</p>'), '');
 });
+
+test('keeps the complete day-two photo and video gallery through repeated sanitization', () => {
+  const photos = Array.from({ length: 7 }, (_, i) => `<figure><img src="/images/day2/photo-${i}.jpg" alt="Ảnh ${i}"><figcaption>Ảnh ${i}</figcaption></figure>`).join('');
+  const videos = Array.from({ length: 3 }, (_, i) => `<figure><video src="https://example.com/video-${i}.mp4" autoplay loop></video><figcaption>Video ${i}</figcaption></figure>`).join('');
+  const html = richTextHtml(photos + videos);
+  assert.equal((html.match(/<img /g) || []).length, 7);
+  assert.equal((html.match(/<video /g) || []).length, 3);
+  assert.equal((html.match(/<figcaption>/g) || []).length, 10);
+  assert.equal((html.match(/controls/g) || []).length, 3);
+  assert.doesNotMatch(html, /autoplay|loop/);
+  assert.equal(richTextHtml(html), html);
+});
+
+test('media rejects executable and protocol-relative sources and strips handlers', () => {
+  for (const src of ['javascript:alert(1)', 'data:image/svg+xml,test', '//example.com/x', 'x', '/\\\\example.com/x']) {
+    assert.doesNotMatch(richTextHtml(`<img src="${src}"><video src="${src}"></video>`), /<img|<video/);
+  }
+  const html = richTextHtml('<video src="/images/movie.mp4" poster="javascript:alert(1)" onplay="alert(1)" style="display:none"></video><img src="https://example.com/image.jpg" onerror="alert(1)">');
+  assert.doesNotMatch(html, /javascript:|onplay|onerror|style=|alert/);
+  assert.match(html, /<video /);
+  assert.match(html, /<img /);
+});
