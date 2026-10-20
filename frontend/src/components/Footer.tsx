@@ -56,7 +56,7 @@ export function Footer() {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: homeDesign.colors.accent }}>Liên hệ</Typography>
-            {storeInfo.address && <Typography variant="body2" sx={{ mb: 1.2, lineHeight: 1.6, color:"rgba(255,255,255,.78)" }}><LocationOnOutlinedIcon sx={{ fontSize: 17, verticalAlign: "middle", mr: .7 }} />{storeInfo.address}</Typography>}
+            {storeInfo.address && <Typography variant="body2" sx={{ mb: 1.2, lineHeight: 1.6 }}><Box component="a" href={storeInfo.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeInfo.address)}`} target="_blank" rel="noopener noreferrer" aria-label={`Mở Google Maps: ${storeInfo.address}`} sx={{ display: "inline-flex", alignItems: "flex-start", gap: .7, color: "rgba(255,255,255,.9)", textDecoration: "underline", textUnderlineOffset: "3px", "&:hover": { color: homeDesign.colors.accent } }}><LocationOnOutlinedIcon sx={{ fontSize: 17, mt: .3, flexShrink: 0 }} />{storeInfo.address}</Box></Typography>}
             {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"rgba(255,255,255,.78)","&:hover":{color:homeDesign.colors.accent,bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
             {storeInfo.phone && (
               <Stack spacing={.5}>
