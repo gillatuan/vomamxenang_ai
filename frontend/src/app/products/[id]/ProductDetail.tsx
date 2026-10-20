@@ -59,6 +59,7 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
             <Stack direction="row" spacing={1} alignItems="center"><Chip size="small" color={stockState.color} label={stockState.label} /><Typography variant="body2" color="text.secondary">{stockState.detail}</Typography></Stack>
           </Stack>
           <Typography component="p" variant="h5" sx={{ color: homeDesign.colors.ink, fontWeight: 800, fontSize: { xs: "1.55rem", md: "1.85rem" }, lineHeight: 1.3 }}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ báo giá"}</Typography>
+          {product.tags?.includes("PRICE_REFERENCE_2026") && <Typography sx={{ mt: 1, color: "#92400e", fontWeight: 700 }}>Giá tham khảo từ thị trường. Vui lòng liên hệ xác nhận giá chính thức trước khi thanh toán.</Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3, flexWrap: "wrap", "& .MuiButton-root": { borderRadius: 2, minHeight: 44 } }}>
             <Button component="a" href={`tel:${phone}`} onClick={() => trackConversion("CLICK_PHONE", { productId: product.id, context: product.size })} variant="contained" startIcon={<PhoneIcon />} sx={{ bgcolor: homeDesign.colors.accent, color: homeDesign.colors.ink, "&:hover": { bgcolor: "#FBBF24" } }}>Gọi ngay</Button>
             <Button component="a" href={zaloUrl} onClick={() => trackConversion("CLICK_ZALO", { productId: product.id, context: product.size })} target="_blank" rel="noopener noreferrer" variant="outlined" startIcon={<ChatIcon />}>Chat Zalo</Button>
