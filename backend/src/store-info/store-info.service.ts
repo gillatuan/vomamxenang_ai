@@ -53,17 +53,20 @@ export class StoreInfoService {
         if (data.isActive !== false) {
           await tx.storeInfo.updateMany({ where: { isActive: true }, data: { isActive: false } });
         }
-        try {
-          return await tx.storeInfo.create({ data: { ...data, isActive: data.isActive !== false } });
-        } catch (error) {
-          if (!missingStoreColumn(error)) throw error;
-          if (requiresGeoColumns(data)) this.failGeoSave();
-          this.logger.warn('StoreInfo create is using legacy column projection until production migration.');
-          return tx.storeInfo.create({
-            data: { ...data, isActive: data.isActive !== false },
-            select: legacySelect,
-          });
+        if (requiresGeoColumns(data)) {
+          const found = await tx.$queryRaw<Array<{ column_name: string }>>`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = 'StoreInfo'
+              AND column_name IN ('googleMapsUrl', 'latitude', 'longitude')
+          `;
+          const names = new Set(found.map(row => row.column_name));
+          if (!['googleMapsUrl', 'latitude', 'longitude'].every(name => names.has(name))) this.failGeoSave();
         }
+        return tx.storeInfo.create({
+          data: { ...data, isActive: data.isActive !== false },
+          select: legacySelect,
+        });
       });
     } catch (error) { this.handleError(error); }
   }
@@ -123,14 +126,17 @@ export class StoreInfoService {
             data: { isActive: false },
           });
         }
-        try {
-          return await tx.storeInfo.update({ where: { id }, data });
-        } catch (error) {
-          if (!missingStoreColumn(error)) throw error;
-          if (requiresGeoColumns(data)) this.failGeoSave();
-          this.logger.warn('StoreInfo update is using legacy column projection until production migration.');
-          return tx.storeInfo.update({ where: { id }, data, select: legacySelect });
+        if (requiresGeoColumns(data)) {
+          const found = await tx.$queryRaw<Array<{ column_name: string }>>`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = 'StoreInfo'
+              AND column_name IN ('googleMapsUrl', 'latitude', 'longitude')
+          `;
+          const names = new Set(found.map(row => row.column_name));
+          if (!['googleMapsUrl', 'latitude', 'longitude'].every(name => names.has(name))) this.failGeoSave();
         }
+        return tx.storeInfo.update({ where: { id }, data, select: legacySelect });
       });
     } catch (error) { this.handleError(error); }
   }
