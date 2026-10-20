@@ -8,7 +8,7 @@ const empty:StoreInfoInput={name:'',address:'',phone:'',email:'',website:'',taxC
 function storePayload(form:StoreInfoInput):StoreInfoInput {
   const optionalStrings=['email','website','taxCode','logoUrl','facebookUrl','googleMapsUrl','businessHours','notes'] as const;
   const payload:{[key:string]:unknown}={...form};
-  optionalStrings.forEach(key=>{const value=form[key];if(typeof value==='string'&&!value.trim())delete payload[key]});
+  optionalStrings.forEach(key=>{const value=form[key];if(typeof value==='string'&&!value.trim()){if(key==='googleMapsUrl')payload[key]=null;else delete payload[key]}});
   for(const key of ['latitude','longitude'] as const){const value=form[key];if(value===undefined || value===null){delete payload[key]}else{payload[key]=Number(value)}}
   return payload as StoreInfoInput;
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { splitStoreNotes, joinStoreNotes } from './store-info-legacy-maps';
 import { CreateStoreInfoDto } from './dto/create-store-info.dto';
 import { UpdateStoreInfoDto } from './dto/update-store-info.dto';
 
@@ -33,7 +34,13 @@ function missingStoreColumn(error: unknown): boolean {
 }
 
 function requiresGeoColumns(data: CreateStoreInfoDto | UpdateStoreInfoDto): boolean {
-  return data.googleMapsUrl != null || data.latitude != null || data.longitude != null;
+  return data.latitude != null || data.longitude != null;
+}
+
+function exposeStore<T extends { notes: string | null; googleMapsUrl?: string | null }>(store: T | null): (T & { googleMapsUrl: string | null }) | null {
+  if (!store) return null;
+  const split = splitStoreNotes(store.notes);
+  return { ...store, notes: split.notes, googleMapsUrl: store.googleMapsUrl ?? split.googleMapsUrl };
 }
 
 @Injectable()
@@ -53,6 +60,10 @@ export class StoreInfoService {
         if (data.isActive !== false) {
           await tx.storeInfo.updateMany({ where: { isActive: true }, data: { isActive: false } });
         }
+        const mapsUrl = data.googleMapsUrl;
+        const { googleMapsUrl: _maps, ...otherData } = data;
+        const geoFieldsExist = await this.hasGeoColumns(tx);
+        if (!geoFieldsExist && requiresGeoColumns(data)) this.failGeoSave();
         if (requiresGeoColumns(data)) {
           const found = await tx.$queryRaw<Array<{ column_name: string }>>`
             SELECT column_name FROM information_schema.columns
@@ -63,23 +74,31 @@ export class StoreInfoService {
           const names = new Set(found.map(row => row.column_name));
           if (!['googleMapsUrl', 'latitude', 'longitude'].every(name => names.has(name))) this.failGeoSave();
         }
-        return tx.storeInfo.create({
-          data: { ...data, isActive: data.isActive !== false },
+        const created = await tx.storeInfo.create({
+          data: {
+            ...otherData,
+            ...(geoFieldsExist ? { googleMapsUrl: mapsUrl } : {}),
+            notes: geoFieldsExist ? (data.notes ?? null) : joinStoreNotes(data.notes, mapsUrl),
+            isActive: data.isActive !== false,
+          },
           select: legacySelect,
         });
+        return exposeStore({ ...created, googleMapsUrl: mapsUrl ?? null });
       });
     } catch (error) { this.handleError(error); }
   }
 
   async findAll() {
     try {
-      return await this.prisma.storeInfo.findMany({ orderBy: [{ isActive: 'desc' }, { updatedAt: 'desc' }] });
+      const rows = await this.prisma.storeInfo.findMany({ orderBy: [{ isActive: 'desc' }, { updatedAt: 'desc' }] });
+      return rows.map(row => exposeStore(row));
     } catch (error) {
       if (missingStoreColumn(error)) {
-        return this.prisma.storeInfo.findMany({
+        const rows = await this.prisma.storeInfo.findMany({
           orderBy: [{ isActive: 'desc' }, { updatedAt: 'desc' }],
           select: legacySelect,
         });
+        return rows.map(row => exposeStore(row));
       }
       this.handleError(error);
     }
@@ -87,18 +106,18 @@ export class StoreInfoService {
 
   async findPublic() {
     try {
-      return await this.prisma.storeInfo.findFirst({
+      return exposeStore(await this.prisma.storeInfo.findFirst({
         where: { isActive: true },
         orderBy: { updatedAt: 'desc' },
         select: publicSelect,
-      });
+      }));
     } catch (error) {
       if (missingStoreColumn(error)) {
-        return this.prisma.storeInfo.findFirst({
+        return exposeStore(await this.prisma.storeInfo.findFirst({
           where: { isActive: true },
           orderBy: { updatedAt: 'desc' },
           select: legacyPublicSelect,
-        });
+        }));
       }
       this.handleError(error);
     }
@@ -113,11 +132,11 @@ export class StoreInfoService {
       store = await this.prisma.storeInfo.findUnique({ where: { id }, select: legacySelect });
     }
     if (!store) throw new NotFoundException('Không tìm thấy cửa hàng.');
-    return store;
+    return exposeStore(store);
   }
 
   async update(id: string, data: UpdateStoreInfoDto) {
-    await this.findOne(id);
+    const current = await this.findOne(id);
     try {
       return await this.prisma.$transaction(async tx => {
         if (data.isActive === true) {
@@ -126,17 +145,23 @@ export class StoreInfoService {
             data: { isActive: false },
           });
         }
-        if (requiresGeoColumns(data)) {
-          const found = await tx.$queryRaw<Array<{ column_name: string }>>`
-            SELECT column_name FROM information_schema.columns
-            WHERE table_schema = current_schema()
-              AND table_name = 'StoreInfo'
-              AND column_name IN ('googleMapsUrl', 'latitude', 'longitude')
-          `;
-          const names = new Set(found.map(row => row.column_name));
-          if (!['googleMapsUrl', 'latitude', 'longitude'].every(name => names.has(name))) this.failGeoSave();
-        }
-        return tx.storeInfo.update({ where: { id }, data, select: legacySelect });
+        const geoFieldsExist = await this.hasGeoColumns(tx);
+        if (!geoFieldsExist && requiresGeoColumns(data)) this.failGeoSave();
+        const { googleMapsUrl, ...otherData } = data;
+        const nextMaps = googleMapsUrl === undefined ? current?.googleMapsUrl ?? null : googleMapsUrl;
+        const nextNotes = data.notes === undefined ? current?.notes ?? null : data.notes;
+        const changed = await tx.storeInfo.update({
+          where: { id },
+          data: {
+            ...otherData,
+            ...(geoFieldsExist && googleMapsUrl !== undefined ? { googleMapsUrl: nextMaps } : {}),
+            ...(!geoFieldsExist || data.notes !== undefined ? {
+              notes: geoFieldsExist ? nextNotes : joinStoreNotes(nextNotes, nextMaps),
+            } : {}),
+          },
+          select: legacySelect,
+        });
+        return exposeStore({ ...changed, googleMapsUrl: nextMaps });
       });
     } catch (error) { this.handleError(error); }
   }
@@ -146,6 +171,17 @@ export class StoreInfoService {
     try {
       return await this.prisma.storeInfo.delete({ where: { id }, select: legacySelect });
     } catch (error) { this.handleError(error); }
+  }
+
+  private async hasGeoColumns(tx: Pick<PrismaService, '$queryRaw'>): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ column_name: string }>>`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'StoreInfo'
+        AND column_name IN ('googleMapsUrl', 'latitude', 'longitude')
+    `;
+    const names = new Set(rows.map(row => row.column_name));
+    return ['googleMapsUrl', 'latitude', 'longitude'].every(name => names.has(name));
   }
 
   private handleError(error: unknown): never {
