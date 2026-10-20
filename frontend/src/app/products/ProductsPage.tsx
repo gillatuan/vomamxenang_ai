@@ -236,6 +236,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
                   </Typography>
                   <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
                     {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}
+                    {product.tags?.includes("PRICE_REFERENCE_2026") && <Chip label="Giá tham khảo · xác nhận trước khi mua" size="small" color="warning" sx={{ ml: 1, mt: 1 }} />}
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ px: 2.5, pb: 2.5, pt: 1, gap: 1, flexWrap: "wrap" }}>
