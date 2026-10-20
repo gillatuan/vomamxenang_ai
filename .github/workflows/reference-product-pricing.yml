@@ -1,0 +1,74 @@
+name: Reference product pricing (operator approved)
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target database
+        required: true
+        type: choice
+        options: [staging, production]
+      apply:
+        description: Apply reference prices after dry run and verified backup
+        required: true
+        type: boolean
+        default: false
+      expected_database_name:
+        description: Exact database name (identity guard)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+concurrency:
+  group: reference-pricing-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  preview-staging:
+    if: inputs.target == 'staging'
+    runs-on: ubuntu-latest
+    environment: Staging
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      REFERENCE_PRICE_ENV: staging
+      REFERENCE_PRICE_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+      REFERENCE_PRICE_EXPECT_DB: ${{ inputs.expected_database_name }}
+      CONFIRM_REFERENCE_PRICE_APPLY: ${{ inputs.apply && 'YES' || 'NO' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable && yarn install --frozen-lockfile
+      - name: Preview or apply reference prices
+        run: yarn ts-node --transpile-only scripts/apply-reference-product-prices.ts ${{ inputs.apply && '--apply' || '' }}
+
+  preview-production:
+    if: inputs.target == 'production'
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      REFERENCE_PRICE_ENV: production
+      REFERENCE_PRICE_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      REFERENCE_PRICE_EXPECT_DB: ${{ inputs.expected_database_name }}
+      CONFIRM_REFERENCE_PRICE_APPLY: ${{ inputs.apply && 'YES' || 'NO' }}
+      CONFIRM_PRODUCTION_REFERENCE_PRICES: ${{ inputs.apply && 'YES' || 'NO' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable && yarn install --frozen-lockfile
+      - name: Verify a recent durable production backup before writing
+        if: inputs.apply
+        run: |
+          echo "::error::Production reference-price writes require a separately verified durable backup and operator-controlled execution. Use the reviewed command in docs/reference-product-prices.md."
+          exit 1
+      - name: Preview reference prices (read only)
+        if: ${{ !inputs.apply }}
+        run: yarn ts-node --transpile-only scripts/apply-reference-product-prices.ts
