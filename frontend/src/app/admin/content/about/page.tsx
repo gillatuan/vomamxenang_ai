@@ -53,7 +53,7 @@ export default function AboutAdminPage() {
         });
         imageUrl = uploaded.data.url;
       }
-      const payload = { ...form, title: form.title.trim(), summary: form.summary.trim(), content: form.content.trim(), imageUrl };
+      const payload = { ...form, title: form.title.trim(), summary: form.summary.trim(), content: form.content.trim(), imageUrl: imageUrl || null };
       if (editing) await aboutAPI.update(editing.id, payload); else await aboutAPI.create(payload);
       setPendingImage(null); setOpen(false); load();
     } catch (err: any) {
