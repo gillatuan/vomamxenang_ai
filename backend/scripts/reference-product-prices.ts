@@ -1,8 +1,6 @@
 /**
  * Publicly listed 2026 reference prices (VND/unit), NOT this shop's final offers.
  * Sources: https://xenanghiepphat.com/lop-xe-nang
- *          https://xenangbainhat.vn/lop-dac-xe-nang/
- *          https://partsworld.vn/lop-xe-nang-heli/
  * Prices are applied only to missing sellingPrice; mark product as reference.
  */
 export const REFERENCE_PRICE_TAG = 'PRICE_REFERENCE_2026';
@@ -20,15 +18,8 @@ const byBrand: Record<string, Record<string,number>> = {
   BRIDGESTONE: {'5.00-8':2850000,'6.00-9':3250000,'6.50-10':4150000,'7.00-12':5400000,'21X8-9':3700000,'23X9-10':6350000,'28X9-15':6900000,'300-15':10800000},
   ASCENDO: {'5.00-8':1900000,'6.00-9':2250000,'6.50-10':2750000,'7.00-12':3800000,'21X8-9':2500000,'23X9-10':4700000,'28X9-15':4600000,'300-15':7000000}
 };
-const pneumaticRangeMidpoints: Record<string,number> = {
-  '6.00-9':1250000,'7.00-12':1250000,'28X9-15':1250000
-};
-const pneumaticSource = 'https://partsworld.vn/lop-xe-nang-heli/';
-const rimMidpoints: Record<string,number> = {
-  '5.00-8':1750000,'6.00-9':1750000,'6.50-10':2000000,'7.00-12':2000000,
-  '18X7-8':1750000,'21X8-9':1750000,'8.25-15':2250000,
-};
-const rimSource = 'https://fxbike.vn/la-zang-xe/';
+// Only exact brand/size solid tire table entries are accepted for production.
+// Pneumatic tyres, used tyres and rims require SKU-specific verification.
 export function normalizeReferenceSize(input: string|null): string {
   return (input||'').trim().toUpperCase().replace(/×/g,'X').replace(/\s/g,'').replace(/^3\.00-15$/,'300-15');
 }
@@ -38,16 +29,8 @@ export function getReferencePrice(p: ReferenceProduct): ReferencePrice|null {
   const type = p.type.toUpperCase();
   const condition = (p.condition||'').toUpperCase();
   if (condition === 'USED' || condition === 'SECOND_HAND') return null; // condition grading needed
-  if (type === 'RIM') {
-    const amount = rimMidpoints[size];
-    return amount ? {amount,source:rimSource,category:'RIM_MIDPOINT_2023_24'} : null;
-  }
   if (type !== 'TIRE') return null;
   const tireType = (p.tireType||'').toUpperCase();
-  if (tireType === 'PNEUMATIC') {
-    const amount = pneumaticRangeMidpoints[size];
-    return amount ? {amount,source:pneumaticSource,category:'PNEUMATIC_RANGE_MIDPOINT'}:null;
-  }
   if (tireType !== 'SOLID') return null;
   const brand = (p.brand||'').trim().toUpperCase();
   // No brand-specific claims based on a different brand's published listing.
