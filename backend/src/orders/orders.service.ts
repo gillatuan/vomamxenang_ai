@@ -142,6 +142,12 @@ export class OrdersService {
 
     const products = await this.prisma.product.findMany({ where: { id: { in: productIds } }, include: { priceMatrix: true } });
     const wheelRims = await this.prisma.wheelRim.findMany({ where: { id: { in: wheelRimIds } } });
+    // Reference prices are for catalog/cart testing only, not payable offers.
+    // An operator removes PRICE_REFERENCE_2026 when setting an approved price.
+    if (products.some(product => product.tags.includes('PRICE_REFERENCE_2026'))) {
+      throw new BadRequestException('Sản phẩm có giá tham khảo. Vui lòng liên hệ để xác nhận giá trước khi thanh toán.');
+    }
+
 
     // Support two checkout assumptions:
     // - Logged-in user: attempt to resolve a Client by authenticated user's email (req.user.email)

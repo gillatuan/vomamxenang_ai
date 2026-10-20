@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {getReferencePrice,normalizeReferenceSize,REFERENCE_PRICE_TAG} from '../scripts/reference-product-prices';
+const tire = {type:'TIRE',size:'6.00-9',brand:'NEXEN',tireType:'SOLID',condition:'NEW_100',sellingPrice:null};
+assert.equal(getReferencePrice(tire)?.amount,3200000);
+assert.equal(getReferencePrice({...tire,brand:'Casumina'})?.amount,1980000);
+assert.equal(getReferencePrice({...tire,brand:'Phoenix',size:'6.50-10'})?.amount,2650000);
+assert.equal(getReferencePrice({...tire,sellingPrice:42}),null,'Must not overwrite an existing price');
+assert.equal(getReferencePrice({...tire,tireType:'PNEUMATIC'}),null,'No cross-type guesses');
+assert.equal(getReferencePrice({...tire,condition:'USED'}),null,'Do not price ungraded used tires');
+assert.equal(getReferencePrice({...tire,type:'RIM'}),null,'Do not use tire prices for rims');
+assert.equal(getReferencePrice({...tire,brand:'UNKNOWN'}),null,'No unknown-brand quotes');
+assert.equal(normalizeReferenceSize(' 28×9-15 '),'28X9-15');
+assert.equal(REFERENCE_PRICE_TAG,'PRICE_REFERENCE_2026');
+console.log('Reference price policy checks passed.');

@@ -65,6 +65,18 @@ export class ProductsService {
   }
 
   async update(id: string, data: any) {
+    // An explicitly updated selling price is the operator's approval to replace
+    // the external reference amount and allow checkout again.
+    if (Object.prototype.hasOwnProperty.call(data, 'sellingPrice')) {
+      const current = await this.prisma.product.findUnique({
+        where: { id }, select: { sellingPrice: true, tags: true },
+      });
+      if (current?.tags.includes('PRICE_REFERENCE_2026') &&
+          typeof data.sellingPrice === 'number' && Number.isFinite(data.sellingPrice) &&
+          data.sellingPrice > 0 && data.sellingPrice !== current.sellingPrice) {
+        data = { ...data, tags: (data.tags ?? current.tags).filter((tag: string) => tag !== 'PRICE_REFERENCE_2026') };
+      }
+    }
     return saveContent(this.prisma, 'product', data, id);
   }
 
