@@ -11,7 +11,9 @@ export function splitStoreNotes(input: string | null | undefined): { notes: stri
   const encoded = text.slice(i + MAPS_MARKER.length);
   try {
     const url = decodeURIComponent(encoded);
-    if (!/^https:\/\//i.test(url) || !url.toLowerCase().includes('google')) throw Error('Invalid URL');
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (parsed.protocol !== 'https:' || !(host === 'maps.app.goo.gl' || host === 'goo.gl' || host === 'google.com' || host.endsWith('.google.com'))) throw Error('Invalid URL');
     return { notes: text.slice(0, i) || null, googleMapsUrl: url };
   } catch {
     // Malformed metadata must not accidentally destroy the user's actual notes.
