@@ -22,7 +22,7 @@ async function main() {
     where: { sellingPrice: null, status: 'PUBLISHED' },
     select: { id: true, sku: true, name: true, type: true, brand: true, size: true, tireType: true, condition: true, sellingPrice: true, tags: true },
   });
-  const matches = products.map(p => ({ p, price: getReferencePrice(p) })).filter((v): v is typeof v & { price: NonNullable<typeof v.price> } => v.price !== null);
+  const matches = products.flatMap(p => { const price = getReferencePrice(p); return price ? [{ p, price }] : []; });
   const summary = {
     mode, operation: apply ? 'APPLY' : 'DRY_RUN', database: dbName,
     totalMissing: products.length, eligible: matches.length, excluded: products.length - matches.length,
