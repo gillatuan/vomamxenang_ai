@@ -46,7 +46,7 @@ export function Footer() {
       }}
     >
       <Container maxWidth={false} sx={{ maxWidth: homeDesign.containerWidth }}>
-        <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: "1.1rem", mb: 5, color: homeDesign.colors.accent }}>VÕ MÂM XE NÂNG</Typography>
+        <Typography sx={{ fontWeight: 800, letterSpacing: ".12em", fontSize: "1.1rem", mb: 5, color: homeDesign.colors.accent }}>{storeInfo.name || fallbackStoreInfo.name}</Typography>
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
             <Typography component="h2" variant="h6" sx={{ mb: 1.5, fontWeight: 600, color: homeDesign.colors.accent }}>Về chúng tôi</Typography>
@@ -60,7 +60,7 @@ export function Footer() {
             {storeInfo.email && <Button component="a" href={`mailto:${storeInfo.email}`} variant="text" startIcon={<EmailOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"rgba(255,255,255,.78)","&:hover":{color:homeDesign.colors.accent,bgcolor:"transparent"}}}>{storeInfo.email}</Button>}
             {storeInfo.phone && (
               <Stack spacing={.5}>
-                <Button component="a" href={`tel:${storeInfo.phone.replace(/\s/g,"")}`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"rgba(255,255,255,.78)","&:hover":{color:homeDesign.colors.accent,bgcolor:"transparent"}}}>{storeInfo.phone}</Button>
+                <Button component="a" href={`tel:${storeInfo.phone.replace(/[^\d+]/g,"")}`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"rgba(255,255,255,.78)","&:hover":{color:homeDesign.colors.accent,bgcolor:"transparent"}}}>{storeInfo.phone}</Button>
                 <Button component="a" href={`tel:0977757911`} variant="text" startIcon={<PhoneOutlinedIcon />} sx={{justifyContent:"flex-start",fontSize:"0.875rem",px:0,color:"rgba(255,255,255,.78)","&:hover":{color:homeDesign.colors.accent,bgcolor:"transparent"}}}>09 777 5 7 9 11 - Tuấn</Button>
               </Stack>
             )}
