@@ -25,6 +25,7 @@
     "test:content": "ts-node --transpile-only test/content-alias.spec.ts",
     "test:warehouse": "ts-node --transpile-only test/day2-warehouse-cleanup-draft.spec.ts",
     "test:demo-pricing": "ts-node --transpile-only test/demo-product-prices.spec.ts",
+    "test:demo-catalog:staging": "ts-node --transpile-only scripts/smoke-demo-catalog.ts",
     "test:ci": "yarn test:seo && yarn test:production-seed && yarn test:content && yarn test:product-seo-migration && yarn test:demo-pricing && yarn test:warehouse && yarn test:critical && yarn test:integration:critical",
     "test:critical": "ts-node --transpile-only test/auth-critical.spec.ts && ts-node --transpile-only test/inventory-critical.spec.ts && ts-node --transpile-only test/orders-critical.spec.ts && ts-node --transpile-only test/payments-critical.spec.ts && ts-node --transpile-only test/public-categories.spec.ts",
     "test:integration:critical": "ts-node --transpile-only test/postgres-critical.integration.spec.ts",
