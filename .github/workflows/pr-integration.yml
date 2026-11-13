@@ -78,7 +78,7 @@ jobs:
           pg_restore --version
           test "$(pg_dump --version | grep -oE '[0-9]+' | head -1)" = "16"
           test "$(pg_restore --version | grep -oE '[0-9]+' | head -1)" = "16"
-          test "$(psql -XAt -c 'SHOW server_version_num' | cut -c1-2)" = "16"
+          test "$(PGHOST=localhost PGPORT=5432 PGUSER=postgres PGPASSWORD=postgres PGDATABASE=vomamxenang_backup_ci psql -XAt -c 'SHOW server_version_num' | cut -c1-2)" = "16"
       - name: Exercise backup and restore against PostgreSQL
         run: bash test/db-audit-backup.integration.sh
 
