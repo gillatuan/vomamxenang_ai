@@ -1,6 +1,6 @@
 import { PrismaClient, ContentStatus } from '@prisma/client';
 import { readFileSync, realpathSync, statSync } from 'node:fs';
-import { resolve, sep } from 'node:path';
+import { sep } from 'node:path';
 import { warehouseDay4Day5PostsSeed } from '../prisma/seeds/production/013-warehouse-day4-day5-posts.seed';
 import { runProductionSeeds } from '../prisma/seed-production-runner';
 
@@ -18,9 +18,12 @@ if (!databaseUrl) throw new Error('DIRECT_DATABASE_URL is missing');
 const url = new URL(databaseUrl);
 if (!['postgresql:', 'postgres:'].includes(url.protocol) || !url.hostname || !url.pathname.slice(1) ||
     url.hostname.includes('accelerate.prisma-data.net')) throw new Error('Direct PostgreSQL URL required');
-const expectedDb = process.env.EXPECTED_PRODUCTION_DATABASE_NAME;
-if (!expectedDb || !/^[a-zA-Z0-9_\-]+$/.test(expectedDb)) throw new Error('Expected database name required');
-if (decodeURIComponent(url.pathname.slice(1)) !== expectedDb) throw new Error('Configured URL database name mismatch');
+const expectedDb = process.env.EXPECTED_PRODUCTION_DATABASE_NAME?.trim() || '';
+// Dry-run discovers the live database name; writes still require explicit operator approval.
+if (mode === 'apply') {
+  if (!expectedDb || !/^[a-zA-Z0-9_\-]+$/.test(expectedDb)) throw new Error('Expected database name required for apply');
+  if (decodeURIComponent(url.pathname.slice(1)) !== expectedDb) throw new Error('Configured URL database name mismatch');
+}
 const prisma = new PrismaClient();
 
 function requireFreshVerifiedBackup(): void {
@@ -47,14 +50,20 @@ async function main(): Promise<void> {
   const identity = await prisma.$queryRaw<Array<{ name: string; server: string | null }>>`
     SELECT current_database()::text AS name, inet_server_addr()::text AS server
   `;
-  if (identity.length !== 1 || identity[0].name !== expectedDb || !identity[0].server)
+  if (identity.length !== 1 || !identity[0].name || !identity[0].server)
     throw new Error('Live database identity check failed');
+  if (mode === 'apply' && identity[0].name !== expectedDb)
+    throw new Error('Live database name does not match approved name');
+  if (mode === 'dry-run') {
+    console.log('[SEED 013] Detected production database name: ' + identity[0].name);
+    console.log('[SEED 013] Copy this exact name into expected_database_name when choosing apply.');
+  }
   const before = await prisma.post.findMany({
     where: { slug: { in: slugs } },
     select: { id: true, slug: true, status: true },
   });
   const record = await prisma.seedHistory.findUnique({ where: { key }, select: { key: true } });
-  console.log(JSON.stringify({ mode, database: expectedDb, seed: key,
+  console.log(JSON.stringify({ mode, database: identity[0].name, seed: key,
     alreadyApplied: !!record, existingPosts: before.map(({ slug, status }) => ({ slug, status })) }, null, 2));
   if (mode === 'dry-run') {
     console.log('[SEED 013] READ-ONLY DRY RUN COMPLETE');
