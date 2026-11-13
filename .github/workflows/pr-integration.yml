@@ -50,11 +50,28 @@ jobs:
         run: node --test test/backup-envelope.test.cjs
       - name: Test backup target safety
         run: node --test test/db-audit-backup.test.cjs
-      - name: Install PostgreSQL 16 client for restore test
+      # Keep the restore client on the same major as the PostgreSQL 16 CI
+      # server, independent of the GitHub runner Ubuntu/apt repository version.
+      - name: Prepare pinned PostgreSQL 16 client
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-16
-          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+          docker pull postgres:16
+          mkdir -p "$RUNNER_TEMP/pg16-bin"
+          cat > "$RUNNER_TEMP/pg16-bin/pg16-client" <<'SH'
+          #!/usr/bin/env bash
+          set -Eeuo pipefail
+          command_name="$(basename "$0")"
+          exec docker run --rm --network host \
+            --user "$(id -u):$(id -g)" \
+            --volume /tmp:/tmp \
+            -e PGHOST -e PGPORT -e PGUSER -e PGPASSWORD -e PGDATABASE \
+            -e PGCONNECT_TIMEOUT -e PGOPTIONS -e PGSSLMODE -e PGSSLROOTCERT \
+            -e PGSSLCERT -e PGSSLKEY -e PGSSLPASSWORD \
+            postgres:16 "$command_name" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/pg16-bin/pg16-client"
+          ln -s pg16-client "$RUNNER_TEMP/pg16-bin/pg_dump"
+          ln -s pg16-client "$RUNNER_TEMP/pg16-bin/pg_restore"
+          echo "$RUNNER_TEMP/pg16-bin" >> "$GITHUB_PATH"
       - name: Verify PostgreSQL client and service major versions
         run: |
           pg_dump --version
