@@ -10,8 +10,8 @@ on:
         options: [dry-run, apply]
         default: dry-run
       expected_database_name:
-        description: Exact production PostgreSQL database name
-        required: true
+        description: Required for apply only; leave blank during dry-run to detect database name
+        required: false
         type: string
       confirmation:
         description: For apply, type APPLY-SEED-013-PRODUCTION
