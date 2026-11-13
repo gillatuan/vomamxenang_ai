@@ -9,6 +9,7 @@ import { syncRecycledTireArticleSeed } from './008-sync-recycled-tire-article.se
 import { completeDraftPostsSeed } from './010-complete-draft-posts.seed';
 import { expandVoMamKeywordMapSeed } from './012-expand-vo-mam-keyword-map.seed';
 import { publishCompleteDraftPostsSeed } from './011-publish-complete-draft-posts.seed';
+import { warehouseDay4Day5PostsSeed } from './013-warehouse-day4-day5-posts.seed';
 
 // Append new releases here. Do not alter a seed after it has run in production;
 // create the next numbered seed for corrections or additional products instead.
@@ -23,4 +24,5 @@ export const productionSeeds: readonly ProductionSeed[] = [
   completeDraftPostsSeed,
   publishCompleteDraftPostsSeed,
   expandVoMamKeywordMapSeed,
+  warehouseDay4Day5PostsSeed,
 ];

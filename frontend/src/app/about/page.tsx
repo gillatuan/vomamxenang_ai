@@ -6,6 +6,7 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { aboutAPI, type AboutPage } from "@/lib/api-client";
+import RichTextContent from "@/components/RichTextContent";
 
 const fallbackAbout: Pick<AboutPage, "title" | "summary" | "content"> = {
   title: "Về Võ Mâm Xe Nâng",
@@ -34,9 +35,7 @@ export default function AboutPage() {
           {about.summary || fallbackAbout.summary}
         </Typography>
         {about.imageUrl && <Box component="img" src={about.imageUrl} alt={about.title || fallbackAbout.title} sx={{ width: "100%", maxHeight: 420, objectFit: "cover", borderRadius: 3, mb: 4 }} />}
-        <Typography component="div" sx={{ whiteSpace: "pre-line", lineHeight: 1.9, fontSize: "1.05rem" }}>
-          {about.content || fallbackAbout.content}
-        </Typography>
+        <RichTextContent value={about.content || fallbackAbout.content} />
       </Container>
     </Box>
     <Footer />
