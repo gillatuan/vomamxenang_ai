@@ -1,0 +1,125 @@
+name: Production warehouse diary seed 013
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only preview or protected production apply
+        required: true
+        type: choice
+        options: [dry-run, apply]
+        default: dry-run
+      expected_database_name:
+        description: Exact production PostgreSQL database name
+        required: true
+        type: string
+      confirmation:
+        description: For apply, type APPLY-SEED-013-PRODUCTION
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-seed-013
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    name: Read-only seed 013 preview
+    if: ${{ inputs.mode == 'dry-run' }}
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      EXPECTED_PRODUCTION_DATABASE_NAME: ${{ inputs.expected_database_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require main branch
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable && yarn install --frozen-lockfile
+      - name: Preview only seed 013
+        run: yarn ts-node --transpile-only scripts/seed-warehouse-day4-day5.ts dry-run
+
+  apply:
+    name: Backup, restore, then write only seed 013
+    if: ${{ inputs.mode == 'apply' }}
+    runs-on: [self-hosted, production-db-backup]
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      EXPECTED_PRODUCTION_DATABASE_NAME: ${{ inputs.expected_database_name }}
+      CONFIRM_WAREHOUSE_SEED_013: ${{ inputs.confirmation }}
+      PRODUCTION_BACKUP_DIR: ${{ vars.PRODUCTION_BACKUP_DIR }}
+      BACKUP_MODE: production-only
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
+      AUDITED_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require main and explicit approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test "$CONFIRM_WAREHOUSE_SEED_013" = APPLY-SEED-013-PRODUCTION
+          test "${RUNNER_ENVIRONMENT:-}" = self-hosted
+          test -n "${DATABASE_URL:-}"
+          test -n "${PRODUCTION_BACKUP_DIR:-}"
+          [[ "$PRODUCTION_BACKUP_DIR" = /* ]]
+          test -d "$PRODUCTION_BACKUP_DIR"
+          test -w "$PRODUCTION_BACKUP_DIR"
+          test "$(git rev-parse HEAD)" = "$AUDITED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable && yarn install --frozen-lockfile
+      - name: Verify installed PostgreSQL backup/restore clients
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v psql
+          command -v pg_dump
+          command -v pg_restore
+          pg_dump --version
+          pg_restore --version
+          psql --version
+      - name: Create fresh durable backup and verify isolated restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          export BACKUP_DIR="$PRODUCTION_BACKUP_DIR/seed013-run-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT"
+          mkdir -m 700 "$BACKUP_DIR"
+          bash scripts/db-audit-backup.sh
+          marker="$(find "$BACKUP_DIR" -name verified.json -type f -print -quit)"
+          test -n "$marker"
+          echo "RESTORE_VERIFIED_MARKER=$marker" >> "$GITHUB_ENV"
+      - name: Apply only seed 013 and verify both published posts
+        shell: bash
+        run: yarn ts-node --transpile-only scripts/seed-warehouse-day4-day5.ts apply
