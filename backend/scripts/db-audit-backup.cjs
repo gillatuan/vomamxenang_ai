@@ -30,23 +30,44 @@ function validate(env) {
 function run(command, args, url, input) {
   const r = spawnSync(command, args, { env: pgEnv(url), input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
   // PostgreSQL errors may contain connection credentials or private row data.
-  if (r.error || r.status !== 0) throw new Error(`POSTGRES_${classifyFailure(r.stderr || '')}`);
+  if (r.error || r.status !== 0) {
+    // Report a bounded, allowlisted error class only. stderr may contain SQL,
+    // sensitive values, object names and connection details: never print it.
+    const code = classifyFailure(r.stderr || '', r.error, r.signal);
+    throw new Error(`POSTGRES_${code}`);
+  }
   return r.stdout;
 }
-function classifyFailure(stderr) {
-  if (/server version mismatch|server version:.*pg_dump version|aborting because of server version/i.test(stderr)) return 'CLIENT_VERSION_MISMATCH';
-  if (/invalid snapshot|snapshot.*does not exist|SET TRANSACTION SNAPSHOT/i.test(stderr)) return 'SNAPSHOT_IMPORT_FAILED';
-  if (/password authentication failed|no password supplied|authentication failed/i.test(stderr)) return 'AUTHENTICATION_FAILED';
-  if (/could not translate host name|name or service not known/i.test(stderr)) return 'DNS_FAILED';
-  if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out/i.test(stderr)) return 'CONNECTION_FAILED';
-  if (/SSL|certificate|TLS/i.test(stderr)) return 'TLS_FAILED';
-  if (/permission denied|must be|insufficient privilege/i.test(stderr)) return 'PERMISSION_DENIED';
-  if (/database .* does not exist/i.test(stderr)) return 'DATABASE_NOT_FOUND';
+function classifyFailure(stderr, spawnError, signal) {
+  // The caller must never log raw stderr, even if it seems to be a SQL error.
+  const message = typeof stderr === 'string' ? stderr : '';
+  if (spawnError?.code === 'ENOENT') return 'CLIENT_NOT_INSTALLED';
+  if (spawnError?.code === 'ENOBUFS') return 'CLIENT_OUTPUT_TOO_LARGE';
+  if (spawnError?.code === 'ETIMEDOUT') return 'CLIENT_TIMEOUT';
+  if (signal === 'SIGKILL' || /out of memory|out-of-memory|cannot allocate memory|killed process/i.test(message)) return 'RESOURCE_MEMORY';
+  if (/no space left on device|disk full|could not write to file.*space/i.test(message)) return 'RESOURCE_DISK_FULL';
+  if (/too many connections|remaining connection slots are reserved/i.test(message)) return 'RESOURCE_CONNECTION_LIMIT';
+  if (/out of shared memory|max_locks_per_transaction|shared memory segment/i.test(message)) return 'RESOURCE_SHARED_MEMORY';
+  if (/statement timeout|canceling statement due to statement timeout/i.test(message)) return 'QUERY_TIMEOUT';
+  if (/server version mismatch|server version:.*pg_dump version|aborting because of server version/i.test(message)) return 'CLIENT_VERSION_MISMATCH';
+  if (/invalid snapshot|snapshot.*does not exist|SET TRANSACTION SNAPSHOT/i.test(message)) return 'SNAPSHOT_IMPORT_FAILED';
+  if (/extension .* is not available|extension .* is not installed|could not open extension control file|extension .* has no installation script/i.test(message)) return 'MISSING_EXTENSION';
+  if (/type .* does not exist|function .* does not exist|operator class .* does not exist/i.test(message)) return 'MISSING_DATABASE_OBJECT';
+  if (/unrecognized configuration parameter|unrecognized option|syntax error at or near/i.test(message)) return 'SQL_COMPATIBILITY';
+  if (/password authentication failed|no password supplied|authentication failed/i.test(message)) return 'AUTHENTICATION_FAILED';
+  if (/could not translate host name|name or service not known/i.test(message)) return 'DNS_FAILED';
+  if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out|server closed the connection unexpectedly/i.test(message)) return 'CONNECTION_FAILED';
+  if (/SSL|certificate|TLS/i.test(message)) return 'TLS_FAILED';
+  if (/permission denied|must be|insufficient privilege|not owner|must be owner/i.test(message)) return 'PERMISSION_DENIED';
+  if (/database .* does not exist/i.test(message)) return 'DATABASE_NOT_FOUND';
+  if (/role .* does not exist/i.test(message)) return 'MISSING_ROLE';
+  if (/duplicate key|already exists|multiple primary keys/i.test(message)) return 'OBJECT_CONFLICT';
+  if (/pg_restore: error: could not execute query|pg_restore: error: errors ignored on restore/i.test(message)) return 'RESTORE_SQL_FAILED';
   return 'CLIENT_FAILED';
 }
 function safeFailure(error) {
   const message = error?.message || '';
-  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_VERSION_MISMATCH|SNAPSHOT_IMPORT_FAILED|CLIENT_FAILED)$/.test(message)) return message;
+  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_VERSION_MISMATCH|SNAPSHOT_IMPORT_FAILED|CLIENT_FAILED|CLIENT_NOT_INSTALLED|CLIENT_OUTPUT_TOO_LARGE|CLIENT_TIMEOUT|RESOURCE_MEMORY|RESOURCE_DISK_FULL|RESOURCE_CONNECTION_LIMIT|RESOURCE_SHARED_MEMORY|QUERY_TIMEOUT|MISSING_EXTENSION|MISSING_DATABASE_OBJECT|SQL_COMPATIBILITY|MISSING_ROLE|OBJECT_CONFLICT|RESTORE_SQL_FAILED)$/.test(message)) return message;
   if (message === 'Production and local connections resolve to the same database' || message === 'Production and local databases must differ') return 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE';
   if (message === 'Unsupported PostgreSQL connection parameter') return 'UNSUPPORTED_CONNECTION_PARAMETER';
   if (message === 'Only public Prisma schema is supported') return 'UNSUPPORTED_SCHEMA';
