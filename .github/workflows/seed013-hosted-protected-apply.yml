@@ -1,0 +1,138 @@
+name: Hosted protected apply of warehouse seed 013
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_database_name:
+        description: Exact name of production database (postgres)
+        required: true
+        type: string
+      backup_run_id:
+        description: Completed encrypted backup workflow run ID
+        required: true
+        type: string
+      backup_sha256:
+        description: SHA-256 from encrypted backup file saved outside GitHub
+        required: true
+        type: string
+      external_backup_confirmation:
+        description: Type EXTERNAL-BACKUP-SAVED after downloading and retaining encrypted backup
+        required: true
+        type: string
+      confirmation:
+        description: Type APPLY-SEED-013-PRODUCTION
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-seed-013
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Verify independent backup, fresh restore, then seed 013
+    runs-on: ubuntu-24.04
+    environment: Production
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      EXPECTED_PRODUCTION_DATABASE_NAME: ${{ inputs.expected_database_name }}
+      CONFIRM_WAREHOUSE_SEED_013: ${{ inputs.confirmation }}
+      BACKUP_MODE: production-only
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
+      AUDITED_SHA: ${{ github.sha }}
+      BACKUP_RUN_ID: ${{ inputs.backup_run_id }}
+      EXPECTED_BACKUP_SHA: ${{ inputs.backup_sha256 }}
+      BACKUP_CONFIRMATION: ${{ inputs.external_backup_confirmation }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require explicit approval and independent retained backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test "$CONFIRM_WAREHOUSE_SEED_013" = APPLY-SEED-013-PRODUCTION
+          test "$BACKUP_CONFIRMATION" = EXTERNAL-BACKUP-SAVED
+          test "$EXPECTED_PRODUCTION_DATABASE_NAME" = postgres
+          test -n "${DATABASE_URL:-}"
+          test "$(git rev-parse HEAD)" = "$AUDITED_SHA"
+          [[ "$BACKUP_RUN_ID" =~ ^[0-9]{6,20}$ ]]
+          [[ "$EXPECTED_BACKUP_SHA" =~ ^[a-fA-F0-9]{64}$ ]]
+          run_info="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BACKUP_RUN_ID" --jq '[.event, .status, .conclusion, .head_branch, .path] | @tsv')"
+          RUN_INFO="$run_info" node - <<'NODE'
+          const [event, status, conclusion, branch, path] = process.env.RUN_INFO.split('\t');
+          if (event !== 'workflow_dispatch' || status !== 'completed' || conclusion !== 'success' ||
+              branch !== 'main' || !path.includes('seed013-hosted-encrypted-backup.yml')) {
+            throw new Error('Untrusted encrypted backup run');
+          }
+          NODE
+      - name: Download encrypted backup from completed verification run
+        uses: actions/download-artifact@v4
+        with:
+          name: seed013-production-encrypted-backup
+          run-id: ${{ inputs.backup_run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seed013-proof
+      - name: Verify encrypted backup SHA against independently saved copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/seed013-proof"
+          sha256sum --check seed013-production.vmxenc.sha256
+          actual="$(sha256sum seed013-production.vmxenc | cut -d' ' -f1)"
+          test "${actual,,}" = "${EXPECTED_BACKUP_SHA,,}"
+          echo 'Encrypted backup checksum matches operator-confirmed external backup.'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable && yarn install --frozen-lockfile
+      - name: Install PostgreSQL 18 client
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Fresh production backup and isolated restore check
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PRODUCTION_BACKUP_DIR="$RUNNER_TEMP/seed013-apply-backup"
+          export BACKUP_DIR="$PRODUCTION_BACKUP_DIR"
+          mkdir -m 700 "$BACKUP_DIR"
+          bash scripts/db-audit-backup.sh
+          marker="$(find "$BACKUP_DIR" -name verified.json -type f -print -quit)"
+          test -n "$marker"
+          echo "RESTORE_VERIFIED_MARKER=$marker" >> "$GITHUB_ENV"
+          echo "PRODUCTION_BACKUP_DIR=$PRODUCTION_BACKUP_DIR" >> "$GITHUB_ENV"
+      - name: Apply only seed 013, then verify both published posts
+        run: yarn ts-node --transpile-only scripts/seed-warehouse-day4-day5.ts apply
+      - name: Remove plaintext temporary backup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/seed013-apply-backup"
