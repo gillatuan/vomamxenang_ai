@@ -45,3 +45,25 @@ test('production-only mode permits absent reference without relaxing restore iso
   assert.throws(() => validate({ ...env, TEMP_RESTORE_DATABASE_URL: 'postgresql://a@localhost/prod' }));
   assert.throws(() => validate({ ...env, BACKUP_MODE: undefined }));
 });
+
+test('classifies restore problems without leaking PostgreSQL output', () => {
+  const cases = [
+    ['pg_restore: error: could not execute query: ERROR: extension "postgis" is not available', 'MISSING_EXTENSION'],
+    ['pg_restore: error: could not execute query: ERROR: role "secret_role" does not exist', 'MISSING_ROLE'],
+    ['pg_restore: error: could not execute query: ERROR: permission denied for schema public', 'PERMISSION_DENIED'],
+    ['pg_restore: error: could not execute query: ERROR: no space left on device', 'RESOURCE_DISK_FULL'],
+    ['pg_restore: error: could not execute query: ERROR: out of shared memory', 'RESOURCE_SHARED_MEMORY'],
+    ['pg_restore: error: could not execute query: ERROR: syntax error at or near "secret"', 'SQL_COMPATIBILITY'],
+    ['pg_restore: error: could not execute query: ERROR: type "secret" does not exist', 'MISSING_DATABASE_OBJECT'],
+    ['pg_restore: error: could not execute query: ERROR: confidential row text', 'RESTORE_SQL_FAILED'],
+  ];
+  for (const [stderr, code] of cases) {
+    assert.equal(classifyFailure(stderr), code);
+    assert.equal(safeFailure(new Error('POSTGRES_' + code)), 'POSTGRES_' + code);
+    assert.ok(!safeFailure(new Error('POSTGRES_' + code)).includes('secret'));
+  }
+  assert.equal(classifyFailure('', { code: 'ENOENT' }), 'CLIENT_NOT_INSTALLED');
+  assert.equal(classifyFailure('', { code: 'ENOBUFS' }), 'CLIENT_OUTPUT_TOO_LARGE');
+  assert.equal(classifyFailure('confidential text'), 'CLIENT_FAILED');
+  assert.equal(safeFailure(new Error('pg_restore: password=very-secret')), 'VERIFICATION_FAILED');
+});
