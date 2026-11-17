@@ -30,3 +30,12 @@ frontend/public/images/campaigns/chuyen-kho-2026/day-2/
 seed013-production-encrypted-backup.zip
 seed013-production-encrypted-backup/seed013-production.vmxenc
 seed013-production-encrypted-backup/seed013-production.vmxenc.sha256
+
+# Never commit production backups, decrypted artifacts, or recovery keys
+backend/backup/
+backend/backup-recipient-public.pem
+**/*recovery-key*.pem
+**/*private-key*.pem
+**/*.vmxenc
+**/*.dump
+**/recovered.tar

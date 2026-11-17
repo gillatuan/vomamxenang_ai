@@ -1,0 +1,115 @@
+name: Hosted encrypted backup for seed 013
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-seed-013-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Snapshot, restore verification, and encrypted archive
+    runs-on: ubuntu-24.04
+    environment: Production
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      BACKUP_MODE: production-only
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
+      AUDITED_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require main and public recovery key
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test -n "${PRODUCTION_DATABASE_URL:-}"
+          test ! -f backup/production-recovery-key.pem || {
+            echo "::error::Tracked recovery private key must be removed"
+            exit 1
+          }
+          test ! -e backup-recipient-public.pem || {
+            echo "::error::Do not use the old repository public key"
+            exit 1
+          }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install PostgreSQL 18 client
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Prepare isolated PostgreSQL extension compatibility
+        env:
+          RESTORE_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/prepare-isolated-restore-extensions.cjs
+      - name: Verify backup against isolated restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          export BACKUP_DIR="$RUNNER_TEMP/seed013-private"
+          mkdir -m 700 "$BACKUP_DIR"
+          bash scripts/db-audit-backup.sh
+          test -n "$(find "$BACKUP_DIR" -name verified.json -type f -print -quit)"
+      - name: Configure rotated public recovery key from GitHub Secret
+        env:
+          BACKUP_RECIPIENT_PUBLIC_PEM: ${{ secrets.BACKUP_RECIPIENT_PUBLIC_PEM }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${BACKUP_RECIPIENT_PUBLIC_PEM:-}" || { echo "::error::Set BACKUP_RECIPIENT_PUBLIC_PEM in the Production environment"; exit 1; }
+          umask 077
+          printf '%s\n' "$BACKUP_RECIPIENT_PUBLIC_PEM" > "$RUNNER_TEMP/seed013-recipient.pem"
+          openssl pkey -pubin -in "$RUNNER_TEMP/seed013-recipient.pem" -noout >/dev/null
+          test "$(git hash-object "$RUNNER_TEMP/seed013-recipient.pem")" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || { echo "::error::Old recovery key is not allowed"; exit 1; }
+      - name: Encrypt verified backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker="$(find "$RUNNER_TEMP/seed013-private" -name verified.json -type f -print -quit)"
+          test -n "$marker"
+          tar -C "$(dirname "$marker")" -cf "$RUNNER_TEMP/seed013-backup.tar" .
+          node scripts/backup-envelope.cjs encrypt "$RUNNER_TEMP/seed013-backup.tar" "$RUNNER_TEMP/seed013-production.vmxenc" "$RUNNER_TEMP/seed013-recipient.pem"
+          (cd "$RUNNER_TEMP" && sha256sum seed013-production.vmxenc > seed013-production.vmxenc.sha256)
+      - name: Upload encrypted artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: seed013-production-encrypted-backup
+          path: |
+            ${{ runner.temp }}/seed013-production.vmxenc
+            ${{ runner.temp }}/seed013-production.vmxenc.sha256
+          if-no-files-found: error
+          retention-days: 7
+      - name: Remove plaintext temporary backup
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/seed013-backup.tar" "$RUNNER_TEMP/seed013-recipient.pem"
+          rm -rf "$RUNNER_TEMP/seed013-private"

@@ -3,7 +3,6 @@ on:
   push:
     branches: [fix/production-release-preflight]
     paths:
-      - backend/backup-recipient-public.pem
       - .github/workflows/private-production-backup.yml
   workflow_dispatch:
     inputs:
@@ -40,8 +39,16 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
-      - name: Require reviewed recovery public key
-        run: test -s backup-recipient-public.pem
+      - name: Load rotated public recovery key
+        env:
+          BACKUP_RECIPIENT_PUBLIC_PEM: ${{ secrets.BACKUP_RECIPIENT_PUBLIC_PEM }}
+        run: |
+          set -euo pipefail
+          test -n "${BACKUP_RECIPIENT_PUBLIC_PEM:-}"
+          umask 077
+          printf '%s\n' "$BACKUP_RECIPIENT_PUBLIC_PEM" > "$RUNNER_TEMP/recipient.pem"
+          openssl pkey -pubin -in "$RUNNER_TEMP/recipient.pem" -noout >/dev/null
+          test "$(git hash-object "$RUNNER_TEMP/recipient.pem")" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257"
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -75,7 +82,7 @@ jobs:
           test -n "$backup_marker"
           backup_directory="$(dirname "$backup_marker")"
           tar -C "$backup_directory" -cf "$RUNNER_TEMP/production-backup.tar" .
-          node scripts/backup-envelope.cjs encrypt "$RUNNER_TEMP/production-backup.tar" "$RUNNER_TEMP/production-backup.vmxenc" backup-recipient-public.pem
+          node scripts/backup-envelope.cjs encrypt "$RUNNER_TEMP/production-backup.tar" "$RUNNER_TEMP/production-backup.vmxenc" "$RUNNER_TEMP/recipient.pem"
           (cd "$RUNNER_TEMP" && sha256sum production-backup.vmxenc > production-backup.vmxenc.sha256)
       - name: Upload encrypted-only transit artifact
         uses: actions/upload-artifact@v4
@@ -91,5 +98,5 @@ jobs:
         run: |
           set -euo pipefail
           : "${RUNNER_TEMP:?}"
-          rm -f "$RUNNER_TEMP/production-backup.tar"
+          rm -f "$RUNNER_TEMP/production-backup.tar" "$RUNNER_TEMP/recipient.pem"
           rm -rf "$RUNNER_TEMP/private-backups"

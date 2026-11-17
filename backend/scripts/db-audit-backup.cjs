@@ -4,6 +4,7 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 const readline = require('node:readline');
+const { providerRestoreList } = require('./prisma-provider-restore-list.cjs');
 let phase = 'configuration';
 
 function validate(env) {
@@ -30,26 +31,49 @@ function validate(env) {
 function run(command, args, url, input) {
   const r = spawnSync(command, args, { env: pgEnv(url), input, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
   // PostgreSQL errors may contain connection credentials or private row data.
-  if (r.error || r.status !== 0) throw new Error(`POSTGRES_${classifyFailure(r.stderr || '')}`);
+  if (r.error || r.status !== 0) {
+    // Report a bounded, allowlisted error class only. stderr may contain SQL,
+    // sensitive values, object names and connection details: never print it.
+    const code = classifyFailure(r.stderr || '', r.error, r.signal);
+    throw new Error(`POSTGRES_${code}`);
+  }
   return r.stdout;
 }
-function classifyFailure(stderr) {
-  if (/server version mismatch|server version:.*pg_dump version|aborting because of server version/i.test(stderr)) return 'CLIENT_VERSION_MISMATCH';
-  if (/invalid snapshot|snapshot.*does not exist|SET TRANSACTION SNAPSHOT/i.test(stderr)) return 'SNAPSHOT_IMPORT_FAILED';
-  if (/password authentication failed|no password supplied|authentication failed/i.test(stderr)) return 'AUTHENTICATION_FAILED';
-  if (/could not translate host name|name or service not known/i.test(stderr)) return 'DNS_FAILED';
-  if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out/i.test(stderr)) return 'CONNECTION_FAILED';
-  if (/SSL|certificate|TLS/i.test(stderr)) return 'TLS_FAILED';
-  if (/permission denied|must be|insufficient privilege/i.test(stderr)) return 'PERMISSION_DENIED';
-  if (/database .* does not exist/i.test(stderr)) return 'DATABASE_NOT_FOUND';
+function classifyFailure(stderr, spawnError, signal) {
+  // The caller must never log raw stderr, even if it seems to be a SQL error.
+  const message = typeof stderr === 'string' ? stderr : '';
+  if (spawnError?.code === 'ENOENT') return 'CLIENT_NOT_INSTALLED';
+  if (spawnError?.code === 'ENOBUFS') return 'CLIENT_OUTPUT_TOO_LARGE';
+  if (spawnError?.code === 'ETIMEDOUT') return 'CLIENT_TIMEOUT';
+  if (signal === 'SIGKILL' || /out of memory|out-of-memory|cannot allocate memory|killed process/i.test(message)) return 'RESOURCE_MEMORY';
+  if (/no space left on device|disk full|could not write to file.*space/i.test(message)) return 'RESOURCE_DISK_FULL';
+  if (/too many connections|remaining connection slots are reserved/i.test(message)) return 'RESOURCE_CONNECTION_LIMIT';
+  if (/out of shared memory|max_locks_per_transaction|shared memory segment/i.test(message)) return 'RESOURCE_SHARED_MEMORY';
+  if (/statement timeout|canceling statement due to statement timeout/i.test(message)) return 'QUERY_TIMEOUT';
+  if (/server version mismatch|server version:.*pg_dump version|aborting because of server version/i.test(message)) return 'CLIENT_VERSION_MISMATCH';
+  if (/invalid snapshot|snapshot.*does not exist|SET TRANSACTION SNAPSHOT/i.test(message)) return 'SNAPSHOT_IMPORT_FAILED';
+  if (/extension .* is not available|extension .* is not installed|could not open extension control file|extension .* has no installation script/i.test(message)) return 'MISSING_EXTENSION';
+  if (/type .* does not exist|function .* does not exist|operator class .* does not exist/i.test(message)) return 'MISSING_DATABASE_OBJECT';
+  if (/unrecognized configuration parameter|unrecognized option|syntax error at or near/i.test(message)) return 'SQL_COMPATIBILITY';
+  if (/password authentication failed|no password supplied|authentication failed/i.test(message)) return 'AUTHENTICATION_FAILED';
+  if (/could not translate host name|name or service not known/i.test(message)) return 'DNS_FAILED';
+  if (/connection refused|timeout expired|could not connect|network is unreachable|connection timed out|server closed the connection unexpectedly/i.test(message)) return 'CONNECTION_FAILED';
+  if (/SSL|certificate|TLS/i.test(message)) return 'TLS_FAILED';
+  if (/permission denied|must be|insufficient privilege|not owner|must be owner/i.test(message)) return 'PERMISSION_DENIED';
+  if (/database .* does not exist/i.test(message)) return 'DATABASE_NOT_FOUND';
+  if (/role .* does not exist/i.test(message)) return 'MISSING_ROLE';
+  if (/duplicate key|already exists|multiple primary keys/i.test(message)) return 'OBJECT_CONFLICT';
+  if (/pg_restore: error: could not execute query|pg_restore: error: errors ignored on restore/i.test(message)) return 'RESTORE_SQL_FAILED';
   return 'CLIENT_FAILED';
 }
 function safeFailure(error) {
   const message = error?.message || '';
-  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_VERSION_MISMATCH|SNAPSHOT_IMPORT_FAILED|CLIENT_FAILED)$/.test(message)) return message;
+  if (/^POSTGRES_(AUTHENTICATION_FAILED|DNS_FAILED|CONNECTION_FAILED|TLS_FAILED|PERMISSION_DENIED|DATABASE_NOT_FOUND|CLIENT_VERSION_MISMATCH|SNAPSHOT_IMPORT_FAILED|CLIENT_FAILED|CLIENT_NOT_INSTALLED|CLIENT_OUTPUT_TOO_LARGE|CLIENT_TIMEOUT|RESOURCE_MEMORY|RESOURCE_DISK_FULL|RESOURCE_CONNECTION_LIMIT|RESOURCE_SHARED_MEMORY|QUERY_TIMEOUT|MISSING_EXTENSION|MISSING_DATABASE_OBJECT|SQL_COMPATIBILITY|MISSING_ROLE|OBJECT_CONFLICT|RESTORE_SQL_FAILED)$/.test(message)) return message;
   if (message === 'Production and local connections resolve to the same database' || message === 'Production and local databases must differ') return 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE';
   if (message === 'Unsupported PostgreSQL connection parameter') return 'UNSUPPORTED_CONNECTION_PARAMETER';
   if (message === 'Only public Prisma schema is supported') return 'UNSUPPORTED_SCHEMA';
+  if (message === 'PROVIDER_RESTORE_TOC_INVALID') return 'PROVIDER_RESTORE_TOC_INVALID';
+  if (message === 'PROVIDER_RESTORE_TOC_AMBIGUOUS') return 'PROVIDER_RESTORE_TOC_AMBIGUOUS';
   if (message.startsWith('Invalid direct PostgreSQL configuration: ')) return 'INVALID_DIRECT_POSTGRESQL_URL';
   return 'VERIFICATION_FAILED';
 }
@@ -141,12 +165,17 @@ async function main() {
     phase = 'archive dump';
     run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', `--snapshot=${prodSnapshot.id}`, `--file=${archive}`], env.PRODUCTION_DATABASE_URL);
     if (!fs.statSync(archive).size) throw new Error('Empty backup');
-    write('restore-toc.txt', run('pg_restore', ['--list', archive]));
+    const restoreToc = run('pg_restore', ['--list', archive]);
+    write('restore-toc.txt', restoreToc);
     const digest = crypto.createHash('sha256');
     for await (const chunk of fs.createReadStream(archive)) digest.update(chunk);
     const checksum = digest.digest('hex');
     write('production.dump.sha256', checksum + '  production.dump\n');
     phase = 'source inventory';
+    const hasProviderExtension = query(env.PRODUCTION_DATABASE_URL,
+      `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SET TRANSACTION SNAPSHOT '${prodSnapshot.id}'; SELECT count(*) FROM pg_extension WHERE extname = 'prisma_postgres'; COMMIT;`).trim() === '1';
+    if (hasProviderExtension && env.PRISMA_PROVIDER_APP_DATA_RESTORE !== 'YES')
+      throw new Error('Provider app-data-only restore mode must be explicitly approved');
     const prod = inventory(env.PRODUCTION_DATABASE_URL, prodSnapshot.id);
     const local = localSnapshot ? inventory(env.LOCAL_DATABASE_URL, localSnapshot.id) : null;
     for (const [label, url, snap] of [['production', env.PRODUCTION_DATABASE_URL, prodSnapshot], ...(localSnapshot ? [['local', env.LOCAL_DATABASE_URL, localSnapshot]] : [])]) {
@@ -155,8 +184,24 @@ async function main() {
     prodSnapshot.close(); prodSnapshot = null;
     localSnapshot?.close(); localSnapshot = null;
     phase = 'isolated restore';
+    // Full production archive remains untouched. For managed Prisma Postgres,
+    // filter only its provider-managed EXTENSION and optional COMMENT entries
+    // from the temporary test restore list. Never ignore any other restore error.
+    const restoreArgs = ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error'];
+    let excludedProviderEntries = 0;
+    if (hasProviderExtension) {
+      const selected = providerRestoreList(restoreToc);
+      excludedProviderEntries = selected.excludedEntries;
+      if (excludedProviderEntries > 0) {
+        write('isolated-restore-list.txt', selected.list);
+        restoreArgs.push('--use-list', path.join(dir, 'isolated-restore-list.txt'));
+        console.log('Provider extension metadata excluded from isolated application-data restore only.');
+      } else {
+        console.log('Provider extension not present in archive TOC; restoring complete archive contents for application verification.');
+      }
+    }
     // pg_restore requires -d to execute a restore; credentials stay in env.
-    run('pg_restore', ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error', archive], env.TEMP_RESTORE_DATABASE_URL);
+    run('pg_restore', [...restoreArgs, archive], env.TEMP_RESTORE_DATABASE_URL);
     phase = 'restore inventory verification';
     const restored = inventory(env.TEMP_RESTORE_DATABASE_URL);
     for (const key of Object.keys(prod)) {
@@ -185,8 +230,11 @@ async function main() {
       unresolved: ledger.filter(row => !row[2] && !row[3]).map(row => row[0]),
       checksumMismatch: applied.filter(row => migrationFiles.includes(row[0]) && crypto.createHash('sha256').update(fs.readFileSync(path.join(migrationRoot, row[0], 'migration.sql'))).digest('hex') !== row[1]).map(row => row[0]),
     }, null, 2));
-    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true, localComparison: local ? 'completed' : 'not-run', comparisons: local ? Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) : null }, null, 2));
-    console.log(`Backup and snapshot-consistent restore verification PASS: ${dir}`);
+    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true,
+      restoreScope: hasProviderExtension ? 'APPLICATION_DATA_ONLY_EXCLUDES_PRISMA_PROVIDER_EXTENSION' : 'FULL_DATABASE',
+      excludedProviderEntries, fullOriginalArchivePreserved: true,
+      localComparison: local ? 'completed' : 'not-run', comparisons: local ? Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) : null }, null, 2));
+    console.log(`Backup and snapshot-consistent application restore verification PASS: ${dir}`);
   } finally {
     prodSnapshot?.close(); localSnapshot?.close();
     if (created) query(env.TEMP_RESTORE_ADMIN_URL, `DROP DATABASE ${quote(name)}`);
