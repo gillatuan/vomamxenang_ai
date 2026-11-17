@@ -87,7 +87,7 @@ jobs:
           set -euo pipefail
           test -n "${BACKUP_RECIPIENT_PUBLIC_PEM:-}" || { echo "::error::Set BACKUP_RECIPIENT_PUBLIC_PEM in the Production environment"; exit 1; }
           umask 077
-          printf '%s\\n' "$BACKUP_RECIPIENT_PUBLIC_PEM" > "$RUNNER_TEMP/seed013-recipient.pem"
+          printf '%s\n' "$BACKUP_RECIPIENT_PUBLIC_PEM" > "$RUNNER_TEMP/seed013-recipient.pem"
           openssl pkey -pubin -in "$RUNNER_TEMP/seed013-recipient.pem" -noout >/dev/null
           test "$(git hash-object "$RUNNER_TEMP/seed013-recipient.pem")" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || { echo "::error::Old recovery key is not allowed"; exit 1; }
       - name: Encrypt verified backup
