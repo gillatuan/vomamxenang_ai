@@ -72,6 +72,8 @@ function safeFailure(error) {
   if (message === 'Production and local connections resolve to the same database' || message === 'Production and local databases must differ') return 'SOURCE_AND_REFERENCE_ARE_SAME_DATABASE';
   if (message === 'Unsupported PostgreSQL connection parameter') return 'UNSUPPORTED_CONNECTION_PARAMETER';
   if (message === 'Only public Prisma schema is supported') return 'UNSUPPORTED_SCHEMA';
+  if (message === 'PROVIDER_RESTORE_TOC_INVALID') return 'PROVIDER_RESTORE_TOC_INVALID';
+  if (message === 'PROVIDER_RESTORE_TOC_AMBIGUOUS') return 'PROVIDER_RESTORE_TOC_AMBIGUOUS';
   if (message.startsWith('Invalid direct PostgreSQL configuration: ')) return 'INVALID_DIRECT_POSTGRESQL_URL';
   return 'VERIFICATION_FAILED';
 }
@@ -190,9 +192,13 @@ async function main() {
     if (hasProviderExtension) {
       const selected = providerRestoreList(restoreToc);
       excludedProviderEntries = selected.excludedEntries;
-      write('isolated-restore-list.txt', selected.list);
-      restoreArgs.push('--use-list', path.join(dir, 'isolated-restore-list.txt'));
-      console.log('Provider extension metadata excluded from isolated application-data restore only.');
+      if (excludedProviderEntries > 0) {
+        write('isolated-restore-list.txt', selected.list);
+        restoreArgs.push('--use-list', path.join(dir, 'isolated-restore-list.txt'));
+        console.log('Provider extension metadata excluded from isolated application-data restore only.');
+      } else {
+        console.log('Provider extension not present in archive TOC; restoring complete archive contents for application verification.');
+      }
     }
     // pg_restore requires -d to execute a restore; credentials stay in env.
     run('pg_restore', [...restoreArgs, archive], env.TEMP_RESTORE_DATABASE_URL);
