@@ -27,3 +27,6 @@ frontend/tsconfig.tsbuildinfo
 
 # Uploaded Day 2 media is stored in Blob, outside Git.
 frontend/public/images/campaigns/chuyen-kho-2026/day-2/
+seed013-production-encrypted-backup.zip
+seed013-production-encrypted-backup/seed013-production.vmxenc
+seed013-production-encrypted-backup/seed013-production.vmxenc.sha256
