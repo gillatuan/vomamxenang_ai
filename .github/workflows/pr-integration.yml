@@ -48,8 +48,8 @@ jobs:
           node-version: 20
       - name: Test encrypted backup recovery and tamper rejection
         run: node --test test/backup-envelope.test.cjs
-      - name: Test backup target safety
-        run: node --test test/db-audit-backup.test.cjs
+      - name: Test backup target safety and isolated extension provisioning
+        run: node --test test/db-audit-backup.test.cjs test/prepare-isolated-restore-extensions.test.cjs
       # Keep the restore client on the same major as the PostgreSQL 16 CI
       # server, independent of the GitHub runner Ubuntu/apt repository version.
       - name: Prepare pinned PostgreSQL 16 client
