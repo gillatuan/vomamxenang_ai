@@ -34,6 +34,7 @@ jobs:
     env:
       PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       BACKUP_MODE: production-only
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
       TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
       TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
       AUDITED_SHA: ${{ github.sha }}
