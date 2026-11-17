@@ -60,6 +60,7 @@ jobs:
       EXPECTED_PRODUCTION_DATABASE_NAME: ${{ inputs.expected_database_name }}
       CONFIRM_WAREHOUSE_SEED_013: ${{ inputs.confirmation }}
       BACKUP_MODE: production-only
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
       TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
       TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
       AUDITED_SHA: ${{ github.sha }}
