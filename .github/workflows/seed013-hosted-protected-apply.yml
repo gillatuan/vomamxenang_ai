@@ -75,6 +75,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/main
+          test "$(git hash-object backup-recipient-public.pem)" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || {
+            echo "::error::Refusing apply: backup recovery key must be rotated"
+            exit 1
+          }
+          test ! -f backup/production-recovery-key.pem || {
+            echo "::error::Refusing apply: private recovery key remains checked into Git"
+            exit 1
+          }
           test "$CONFIRM_WAREHOUSE_SEED_013" = APPLY-SEED-013-PRODUCTION
           test "$BACKUP_CONFIRMATION" = EXTERNAL-BACKUP-SAVED
           test "$EXPECTED_PRODUCTION_DATABASE_NAME" = postgres
