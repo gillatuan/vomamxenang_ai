@@ -113,8 +113,14 @@ jobs:
           echo 'Encrypted backup checksum matches operator-confirmed external backup.'
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - run: corepack enable && yarn install --frozen-lockfile
+          node-version: '22'
+      - name: Install backend dependencies (Node 22)
+        run: |
+          node --version
+          corepack enable
+          yarn install --frozen-lockfile
+      - name: Generate Prisma client for production seed
+        run: yarn prisma generate
       - name: Install PostgreSQL 18 client
         shell: bash
         run: |
