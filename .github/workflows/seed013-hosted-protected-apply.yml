@@ -75,10 +75,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/main
-          test "$(git hash-object backup-recipient-public.pem)" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || {
-            echo "::error::Refusing apply: backup recovery key must be rotated"
-            exit 1
-          }
+          test ! -e backup-recipient-public.pem || { echo "::error::Old repository public key remains"; exit 1; }
           test ! -f backup/production-recovery-key.pem || {
             echo "::error::Refusing apply: private recovery key remains checked into Git"
             exit 1
