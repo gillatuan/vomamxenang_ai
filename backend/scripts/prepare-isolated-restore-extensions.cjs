@@ -27,13 +27,17 @@ function requiredPackages(source, available) {
     if (!NAME.test(name) || !VERSION.test(version)) throw new Error('Invalid source extension metadata');
     return !available.some(([target, candidate]) => target === name && candidate === version);
   });
-  const unsupported = missing.filter(([name]) => !PACKAGES[name]);
+  const provider = source.filter(([name]) => name === 'prisma_postgres');
+  if (provider.length && process.env.PRISMA_PROVIDER_APP_DATA_RESTORE !== 'YES')
+    throw new Error('PROVIDER_RESTORE_MODE_NOT_APPROVED');
+  const missingPackages = missing.filter(([name]) => name !== 'prisma_postgres');
+  const unsupported = missingPackages.filter(([name]) => !PACKAGES[name]);
   if (unsupported.length) {
     const names = unsupported.map(([name]) => name).join(', ');
     throw new Error('UNSUPPORTED_RESTORE_EXTENSION: ' + names +
       ' (do not bypass verification; review a supported isolated restore image)');
   }
-  return [...new Set(missing.map(([name]) => PACKAGES[name]))];
+  return [...new Set(missingPackages.map(([name]) => PACKAGES[name]))];
 }
 function query(url, sql) {
   const proc = spawnSync('psql', ['-XAt', '-F', '\t', '-v', 'ON_ERROR_STOP=1', '-c', sql], {
@@ -66,11 +70,13 @@ function main() {
   }
   const after = query(local,
     "SELECT name, version FROM pg_available_extension_versions ORDER BY name, version");
-  const remaining = sourceExtensions.filter(([name, version]) =>
+  const remaining = sourceExtensions.filter(([name, version]) => name !== 'prisma_postgres' &&
     !after.some(([target, candidate]) => target === name && candidate === version));
   if (remaining.length) throw new Error('ISOLATED_RESTORE_EXTENSION_VERSION_UNAVAILABLE: ' +
     remaining.map(([name, version]) => name + '@' + version).join(', '));
-  console.log('Production extension versions are available for isolated restore.');
+  if (sourceExtensions.some(([name]) => name === 'prisma_postgres'))
+    console.log('Provider extension detected: app-data-only isolated restore mode; full archive retained.');
+  console.log('Non-provider production extension versions are available for isolated restore.');
 }
 module.exports = { requiredPackages };
 if (require.main === module) {

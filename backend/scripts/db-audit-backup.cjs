@@ -4,6 +4,7 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 const readline = require('node:readline');
+const { providerRestoreList } = require('./prisma-provider-restore-list.cjs');
 let phase = 'configuration';
 
 function validate(env) {
@@ -162,12 +163,17 @@ async function main() {
     phase = 'archive dump';
     run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', `--snapshot=${prodSnapshot.id}`, `--file=${archive}`], env.PRODUCTION_DATABASE_URL);
     if (!fs.statSync(archive).size) throw new Error('Empty backup');
-    write('restore-toc.txt', run('pg_restore', ['--list', archive]));
+    const restoreToc = run('pg_restore', ['--list', archive]);
+    write('restore-toc.txt', restoreToc);
     const digest = crypto.createHash('sha256');
     for await (const chunk of fs.createReadStream(archive)) digest.update(chunk);
     const checksum = digest.digest('hex');
     write('production.dump.sha256', checksum + '  production.dump\n');
     phase = 'source inventory';
+    const hasProviderExtension = query(env.PRODUCTION_DATABASE_URL,
+      `BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SET TRANSACTION SNAPSHOT '${prodSnapshot.id}'; SELECT count(*) FROM pg_extension WHERE extname = 'prisma_postgres'; COMMIT;`).trim() === '1';
+    if (hasProviderExtension && env.PRISMA_PROVIDER_APP_DATA_RESTORE !== 'YES')
+      throw new Error('Provider app-data-only restore mode must be explicitly approved');
     const prod = inventory(env.PRODUCTION_DATABASE_URL, prodSnapshot.id);
     const local = localSnapshot ? inventory(env.LOCAL_DATABASE_URL, localSnapshot.id) : null;
     for (const [label, url, snap] of [['production', env.PRODUCTION_DATABASE_URL, prodSnapshot], ...(localSnapshot ? [['local', env.LOCAL_DATABASE_URL, localSnapshot]] : [])]) {
@@ -176,8 +182,20 @@ async function main() {
     prodSnapshot.close(); prodSnapshot = null;
     localSnapshot?.close(); localSnapshot = null;
     phase = 'isolated restore';
+    // Full production archive remains untouched. For managed Prisma Postgres,
+    // filter only its provider-managed EXTENSION and optional COMMENT entries
+    // from the temporary test restore list. Never ignore any other restore error.
+    const restoreArgs = ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error'];
+    let excludedProviderEntries = 0;
+    if (hasProviderExtension) {
+      const selected = providerRestoreList(restoreToc);
+      excludedProviderEntries = selected.excludedEntries;
+      write('isolated-restore-list.txt', selected.list);
+      restoreArgs.push('--use-list', path.join(dir, 'isolated-restore-list.txt'));
+      console.log('Provider extension metadata excluded from isolated application-data restore only.');
+    }
     // pg_restore requires -d to execute a restore; credentials stay in env.
-    run('pg_restore', ['--dbname', name, '--no-owner', '--no-acl', '--exit-on-error', archive], env.TEMP_RESTORE_DATABASE_URL);
+    run('pg_restore', [...restoreArgs, archive], env.TEMP_RESTORE_DATABASE_URL);
     phase = 'restore inventory verification';
     const restored = inventory(env.TEMP_RESTORE_DATABASE_URL);
     for (const key of Object.keys(prod)) {
@@ -206,8 +224,11 @@ async function main() {
       unresolved: ledger.filter(row => !row[2] && !row[3]).map(row => row[0]),
       checksumMismatch: applied.filter(row => migrationFiles.includes(row[0]) && crypto.createHash('sha256').update(fs.readFileSync(path.join(migrationRoot, row[0], 'migration.sql'))).digest('hex') !== row[1]).map(row => row[0]),
     }, null, 2));
-    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true, localComparison: local ? 'completed' : 'not-run', comparisons: local ? Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) : null }, null, 2));
-    console.log(`Backup and snapshot-consistent restore verification PASS: ${dir}`);
+    write('verified.json', JSON.stringify({ verifiedAt: new Date().toISOString(), revision: env.AUDITED_SHA || null, sha256: checksum, restoreVerified: true,
+      restoreScope: hasProviderExtension ? 'APPLICATION_DATA_ONLY_EXCLUDES_PRISMA_PROVIDER_EXTENSION' : 'FULL_DATABASE',
+      excludedProviderEntries, fullOriginalArchivePreserved: true,
+      localComparison: local ? 'completed' : 'not-run', comparisons: local ? Object.fromEntries(Object.keys(prod).map(k => [k, prod[k] === local[k]])) : null }, null, 2));
+    console.log(`Backup and snapshot-consistent application restore verification PASS: ${dir}`);
   } finally {
     prodSnapshot?.close(); localSnapshot?.close();
     if (created) query(env.TEMP_RESTORE_ADMIN_URL, `DROP DATABASE ${quote(name)}`);

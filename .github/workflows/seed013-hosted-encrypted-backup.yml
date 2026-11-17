@@ -34,6 +34,7 @@ jobs:
     env:
       PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       BACKUP_MODE: production-only
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
       TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
       TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_seed013
       AUDITED_SHA: ${{ github.sha }}
@@ -46,6 +47,16 @@ jobs:
           test "$GITHUB_REF" = refs/heads/main
           test -n "${PRODUCTION_DATABASE_URL:-}"
           test -s backup-recipient-public.pem
+          # Refuse the previously exposed recovery key pair. The old private
+          # recovery key was tracked in the public repository: rotate offline.
+          test "$(git hash-object backup-recipient-public.pem)" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || {
+            echo "::error::Backup recovery key pair must be rotated before creating new encrypted backups"
+            exit 1
+          }
+          test ! -f backup/production-recovery-key.pem || {
+            echo "::error::Remove tracked recovery private key after preserving it securely offline"
+            exit 1
+          }
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

@@ -39,6 +39,12 @@ function requireFreshVerifiedBackup(): void {
   const verified = JSON.parse(readFileSync(marker, 'utf8'));
   if (verified.restoreVerified !== true || !/^[0-9a-f]{64}$/i.test(verified.sha256 ?? ''))
     throw new Error('Isolated restore was not verified');
+  if (!['FULL_DATABASE', 'APPLICATION_DATA_ONLY_EXCLUDES_PRISMA_PROVIDER_EXTENSION'].includes(verified.restoreScope))
+    throw new Error('Restore verification scope is missing or not authorized');
+  if (verified.restoreScope === 'APPLICATION_DATA_ONLY_EXCLUDES_PRISMA_PROVIDER_EXTENSION' &&
+      (process.env.PRISMA_PROVIDER_APP_DATA_RESTORE !== 'YES' || verified.excludedProviderEntries < 1 ||
+       verified.fullOriginalArchivePreserved !== true))
+    throw new Error('Provider-scoped restore verification is not approved');
   const timestamp = Date.parse(verified.verifiedAt);
   if (!Number.isFinite(timestamp) || Date.now() - timestamp > 30 * 60_000 || timestamp > Date.now() + 60_000)
     throw new Error('Backup must be verified within 30 minutes of apply');
