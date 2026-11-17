@@ -12,19 +12,19 @@ function providerRestoreList(toc) {
   let extensions = 0;
   let comments = 0;
   let providerMentions = 0;
-  const lines = toc.split('\\n').map(line => {
+  const lines = toc.split('\n').map(line => {
     // pg_restore TOC can contain variable whitespace, quoted identifiers and
     // trailing ownership fields. Match exact object TYPE and extension NAME,
     // never arbitrary references in SQL, tables, or function descriptions.
-    const record = /^\\s*\\d+;\\s+\\d+\\s+\\d+\\s+(.+?)\\r?$/.exec(line);
+    const record = /^\s*\d+;\s+\d+\s+\d+\s+(.+?)\r?$/.exec(line);
     if (!record) return line;
     const detail = record[1];
     if (/prisma_postgres/i.test(detail)) providerMentions++;
-    if (/^EXTENSION\\s+-\\s+"?prisma_postgres"?(?:\\s+.*)?$/.test(detail)) {
+    if (/^EXTENSION\s+-\s+"?prisma_postgres"?(?:\s+.*)?$/.test(detail)) {
       extensions++;
       return ';' + line;
     }
-    if (/^COMMENT\\s+-\\s+EXTENSION\\s+"?prisma_postgres"?(?:\\s+.*)?$/.test(detail)) {
+    if (/^COMMENT\s+-\s+EXTENSION\s+"?prisma_postgres"?(?:\s+.*)?$/.test(detail)) {
       comments++;
       return ';' + line;
     }
@@ -36,6 +36,6 @@ function providerRestoreList(toc) {
   // pg_dump. In that case there is nothing to exclude: restore the full TOC
   // without suppressing any errors, then compare the actual restored data.
   if (extensions === 0) return { list: toc, excludedEntries: 0, providerMentions };
-  return { list: lines.join('\\n'), excludedEntries: extensions + comments, providerMentions };
+  return { list: lines.join('\n'), excludedEntries: extensions + comments, providerMentions };
 }
 module.exports = { providerRestoreList, NAME };
