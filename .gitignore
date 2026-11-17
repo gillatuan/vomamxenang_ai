@@ -27,3 +27,12 @@ frontend/tsconfig.tsbuildinfo
 
 # Uploaded Day 2 media is stored in Blob, outside Git.
 frontend/public/images/campaigns/chuyen-kho-2026/day-2/
+
+# Never commit production backups, decrypted artifacts, or recovery keys
+backend/backup/
+backend/backup-recipient-public.pem
+**/*recovery-key*.pem
+**/*private-key*.pem
+**/*.vmxenc
+**/*.dump
+**/recovered.tar
