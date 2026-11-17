@@ -47,6 +47,16 @@ jobs:
           test "$GITHUB_REF" = refs/heads/main
           test -n "${PRODUCTION_DATABASE_URL:-}"
           test -s backup-recipient-public.pem
+          # Refuse the previously exposed recovery key pair. The old private
+          # recovery key was tracked in the public repository: rotate offline.
+          test "$(git hash-object backup-recipient-public.pem)" != "1db80633a1c4630796b5d1b6ec1340ec5dc01257" || {
+            echo "::error::Backup recovery key pair must be rotated before creating new encrypted backups"
+            exit 1
+          }
+          test ! -f backup/production-recovery-key.pem || {
+            echo "::error::Remove tracked recovery private key after preserving it securely offline"
+            exit 1
+          }
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
