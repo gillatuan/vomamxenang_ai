@@ -59,6 +59,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client-18
           echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Prepare isolated PostgreSQL extension compatibility
+        env:
+          RESTORE_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/prepare-isolated-restore-extensions.cjs
       - name: Verify backup against isolated restore
         shell: bash
         run: |
