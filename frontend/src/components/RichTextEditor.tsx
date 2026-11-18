@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { Alert, Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from "@mui/material";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { mergeAttributes, Node } from "@tiptap/core";
 import { postsAPI, productsAPI } from "@/lib/api-client";
@@ -69,11 +69,6 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
   const id = useId();
   const [related, setRelated] = useState<RelatedContent[]>([]);
   const [mediaBusy, setMediaBusy] = useState(false);
-  const [cropImage, setCropImage] = useState<{file: File; bitmap: ImageBitmap} | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [cropX, setCropX] = useState(50);
-  const [cropY, setCropY] = useState(50);
-  const [preview, setPreview] = useState<HTMLCanvasElement | null>(null);
   const [mediaError, setMediaError] = useState("");
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
@@ -107,23 +102,6 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
     return () => { active = false; };
   }, [linkOpen]);
 
-  useEffect(() => {
-    const bitmap = cropImage?.bitmap;
-    return () => bitmap?.close();
-  }, [cropImage]);
-
-  useEffect(() => {
-    const bitmap = cropImage?.bitmap;
-    const canvas = preview;
-    if (!bitmap || !canvas) return;
-    const width = Math.min(bitmap.width, bitmap.height * 16 / 9) / zoom;
-    const height = width * 9 / 16;
-    const context = canvas.getContext("2d");
-    context?.clearRect(0, 0, canvas.width, canvas.height);
-    context?.drawImage(bitmap, (bitmap.width - width) * cropX / 100,
-      (bitmap.height - height) * cropY / 100, width, height, 0, 0, canvas.width, canvas.height);
-  }, [cropImage, preview, zoom, cropX, cropY]);
-
   const applyLink = () => {
     const href = url.trim();
     if (href && !/^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i.test(href)) { setLinkError(true); return; }
@@ -131,28 +109,6 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
     else if (href) editor?.chain().focus().extendMarkRange("link").setLink({ href }).run();
     else editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     setLinkOpen(false);
-  };
-
-  const openImageCrop = async (file?: File) => {
-    if (!file) return;
-    setMediaError("");
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 12 * 1024 * 1024) {
-      setMediaError("Ảnh gốc phải là JPG, PNG hoặc WebP và không quá 12 MB.");
-      return;
-    }
-    setMediaBusy(true);
-    try {
-      const bitmap = await createImageBitmap(file);
-      if (!editor || editor.isDestroyed) { bitmap.close(); return; }
-      setZoom(1);
-      setCropX(50);
-      setCropY(50);
-      setCropImage({ file, bitmap });
-    } catch {
-      setMediaError("Không đọc được ảnh. Vui lòng chọn tệp khác.");
-    } finally {
-      setMediaBusy(false);
-    }
   };
 
   const insertImage = async (file?: File) => {
@@ -172,23 +128,6 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
     } catch {
       setMediaError("Không upload được ảnh. Kiểm tra kết nối và Vercel Blob.");
     } finally { setMediaBusy(false); }
-  };
-
-  const applyImageCrop = async () => {
-    const canvas = preview;
-    if (!cropImage || !canvas || mediaBusy) return;
-    setMediaBusy(true);
-    try {
-      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
-      if (!blob || blob.type !== "image/webp") throw new Error("Image conversion failed");
-      const name = cropImage.file.name.replace(/\.[^.]+$/, "") + "-16x9.webp";
-      setCropImage(null);
-      await insertImage(new File([blob], name, { type: blob.type }));
-    } catch {
-      setMediaError("Không thể cắt ảnh. Vui lòng thử lại.");
-    } finally {
-      setMediaBusy(false);
-    }
   };
 
   const insertVideo = () => {
@@ -226,7 +165,7 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
         {enableMedia && <>
           <Button component="label" size="small" variant="outlined" disabled={!editor || mediaBusy}>
             {mediaBusy ? "Đang upload ảnh..." : "Chèn ảnh"}
-            <input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={event => { void openImageCrop(event.target.files?.[0]); event.target.value = ""; }} />
+            <input hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={event => { void insertImage(event.target.files?.[0]); event.target.value = ""; }} />
           </Button>
           <Button size="small" variant="outlined" disabled={!editor} onClick={() => { setMediaError(""); setVideoOpen(true); }}>Chèn video</Button>
         </>}
@@ -234,26 +173,6 @@ export default function RichTextEditor({ label, value, onChange, enableMedia = f
       {mediaError && <Alert severity="error" sx={{ m: 1 }}>{mediaError}</Alert>}
       <Box sx={{ ...richTextStyles, "& .tiptap": { minHeight: 220, p: 2, outline: "none" } }}><EditorContent editor={editor} /></Box>
     </Box>
-    {cropImage && <Dialog open onClose={() => { if (!mediaBusy) setCropImage(null); }} fullWidth maxWidth="sm">
-      <DialogTitle>Chỉnh ảnh theo khung 16:9</DialogTitle>
-      <DialogContent>
-        <Box component="canvas" ref={setPreview} width={1280} height={720}
-          role="img" aria-label="Xem trước vùng ảnh 16:9" sx={{ display: "block", width: "100%", height: "auto", bgcolor: "action.hover" }} />
-        <Typography sx={{ mt: 2 }}>Thu phóng</Typography>
-        <Slider aria-label="Thu phóng" min={1} max={3} step={0.05} value={zoom} onChange={(_, v) => setZoom(v as number)} />
-        <Typography>Căn ngang</Typography>
-        <Slider aria-label="Căn ngang" value={cropX} onChange={(_, v) => setCropX(v as number)} />
-        <Typography>Căn dọc</Typography>
-        <Slider aria-label="Căn dọc" value={cropY} onChange={(_, v) => setCropY(v as number)} />
-        {mediaError && <Alert severity="error">{mediaError}</Alert>}
-      </DialogContent>
-      <DialogActions sx={{ flexWrap: "wrap" }}>
-        <Button type="button" disabled={mediaBusy} onClick={() => setCropImage(null)}>Hủy</Button>
-        <Button type="button" disabled={mediaBusy || cropImage.file.size > 5 * 1024 * 1024}
-          onClick={() => { const file = cropImage.file; setCropImage(null); void insertImage(file); }}>Giữ ảnh gốc</Button>
-        <Button type="button" variant="contained" disabled={mediaBusy} onClick={() => void applyImageCrop()}>Chèn ảnh 16:9</Button>
-      </DialogActions>
-    </Dialog>}
     <Dialog open={videoOpen} onClose={() => setVideoOpen(false)} fullWidth maxWidth="sm">
       <DialogTitle>Chèn video vào nội dung</DialogTitle>
       <DialogContent>

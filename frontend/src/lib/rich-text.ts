@@ -44,7 +44,7 @@ export const richTextStyles = {
   "& pre": { bgcolor: "action.hover", p: 2, overflowX: "auto" },
   "& figure": { m: "24px 0" },
   "& figure img": { display: "block", width: "100%", height: "auto", borderRadius: 2 },
-  "& img": { maxWidth: "100%", height: "auto" },
+  "& img": { display: "block", width: "100%", height: "auto" },
   "& video": { display: "block", width: "100%", maxHeight: "75vh", bgcolor: "black", borderRadius: 2 },
   "& figcaption": { mt: 1, color: "text.secondary", fontSize: 14 },
 };
