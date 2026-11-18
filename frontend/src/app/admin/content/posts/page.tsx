@@ -122,7 +122,7 @@ export default function PostsAdminPage() {
           <ImageUploadField key={editing?.id || "new-post"} label="Ảnh bài viết" value={form.seo.imageUrl || ""} onChange={changeImage} />
         </Box>
         <ContentSeoFields id={editing?.id} kind="blog" title={form.title} content={form.content} slug={form.slug} seo={form.seo} onChange={(data) => setForm(current => ({ ...current, ...data }))} onContentChange={(content) => setForm(current => ({ ...current, content }))} />
-        <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} />
+        <RichTextEditor label="Nội dung" value={form.content} onChange={(content) => setForm({ ...form, content })} enableMedia />
         <TextField fullWidth label="Video URL (không bắt buộc)" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} />
       </DialogContent>
       <DialogActions>

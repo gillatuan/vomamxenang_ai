@@ -367,7 +367,7 @@ export default function ProductsPage() {
             {formData.type==="RIM" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại mâm" value={formData.rimType} onChange={(e)=>setFormData({...formData,rimType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="LIP">Lip</MenuItem><MenuItem value="CLICK">Click</MenuItem><MenuItem value="STANDARD">Standard</MenuItem></TextField></Grid>}
               <Grid item xs={12}>
               <ContentSeoFields id={editingId || ""} kind="products" title={formData.name} content={formData.description} slug={formData.slug} seo={formData.seo} onChange={(data) => setFormData(current => ({ ...current, ...data }))} onContentChange={(description) => setFormData(current => ({ ...current, description }))} />
-              <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} />
+              <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} enableMedia />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Giá nhập" type="number" value={formData.importPrice} onChange={(e) => setFormData({ ...formData, importPrice: Number(e.target.value) })} />
