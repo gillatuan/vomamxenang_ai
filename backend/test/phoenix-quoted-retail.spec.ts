@@ -18,7 +18,7 @@ async function main() {
     product: {
       updateMany: async ({ where, data }: any) => {
         assert(where.sku === 'SEED-PHOENIX-600-9', 'Only original Phoenix SKU may be updated');
-        assert(Array.isArray(where.sellingPrice?.in) && where.sellingPrice.in.length === 2 && where.sellingPrice.in.includes(null) && where.sellingPrice.in.includes(2100000), 'Only unset or original placeholder price may be updated');
+        assert(Array.isArray(where.OR) && where.OR.length === 2 && where.OR.some((item: any) => item.sellingPrice === null) && where.OR.some((item: any) => item.sellingPrice === 2100000), 'Only unset or original placeholder price may be updated');
         existingUpdated = data;
         return { count: 1 };
       },
