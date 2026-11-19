@@ -89,7 +89,7 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
         size: existing.size,
         tireType: 'SOLID',
         condition: 'NEW_100',
-        sellingPrice: { in: [null, 2100000] },
+        OR: [{ sellingPrice: null }, { sellingPrice: 2100000 }],
       },
       data: productData(existing),
     });
