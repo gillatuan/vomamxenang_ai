@@ -89,12 +89,12 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
         size: existing.size,
         tireType: 'SOLID',
         condition: 'NEW_100',
-        sellingPrice: 2100000,
+        sellingPrice: { in: [null, 2100000] },
       },
       data: productData(existing),
     });
     if (!updated || (updated as { count?: number }).count !== 1)
-      throw new Error('Phoenix 6.00-9 no longer has expected placeholder price; manual review required');
+      throw new Error('Phoenix 6.00-9 must have an unset price or the original placeholder price; manual review required');
 
     const newProducts = phoenixQuotedPrices.slice(1).map(entry => ({
       ...productData(entry),
