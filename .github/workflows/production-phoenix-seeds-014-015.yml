@@ -136,7 +136,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/seed013-proof"
+          cd "$RUNNER_TEMP/phoenix-proof"
+          test -s seed013-production.vmxenc || { echo "::error::Encrypted backup file is missing"; exit 1; }
+          test -s seed013-production.vmxenc.sha256 || { echo "::error::Encrypted backup checksum file is missing"; exit 1; }
           sha256sum --check seed013-production.vmxenc.sha256
           actual="$(sha256sum seed013-production.vmxenc | cut -d' ' -f1)"
           test "${actual,,}" = "${EXPECTED_BACKUP_SHA,,}"
@@ -181,4 +183,4 @@ jobs:
         run: yarn ts-node --transpile-only scripts/seed-phoenix-014-015.ts apply
       - name: Remove plaintext temporary backup
         if: always()
-        run: rm -rf "$RUNNER_TEMP/seed013-apply-backup"
+        run: rm -rf "$RUNNER_TEMP/phoenix-apply-backup"
