@@ -88,8 +88,8 @@ async function main(): Promise<void> {
     const existing = products.find(p => p.sku === 'SEED-PHOENIX-600-9');
     if (!existing || existing.brand !== 'PHOENIX' || existing.size !== '6.00-9' ||
         existing.condition !== 'NEW_100' || existing.tireType !== 'SOLID' ||
-        existing.sellingPrice !== 2100000)
-      throw new Error('Original PHOENIX 6.00-9 no longer matches price guard; review before apply');
+        (existing.sellingPrice !== null && existing.sellingPrice !== 2100000))
+      throw new Error('Original PHOENIX 6.00-9 price must be null or 2,100,000 and product identity must match; review before apply');
     if (products.some(p => p.sku !== 'SEED-PHOENIX-600-9'))
       throw new Error('One of the three new PHOENIX SKUs already exists; review before apply');
   }
