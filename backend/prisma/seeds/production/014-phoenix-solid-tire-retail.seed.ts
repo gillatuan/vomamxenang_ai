@@ -54,7 +54,7 @@ function productData(entry: (typeof phoenixQuotedPrices)[number]) {
     categoryId: 'category-tires',
     tireType: 'SOLID', condition: 'NEW_100',
     sellingPrice: entry.price,
-    shortDescription, description, highlights, specifications,
+    shortDescription, description: detail, highlights, specifications,
     applications: [
       'Kho hàng và nhà xưởng',
       'Khu xuất nhập và luân chuyển hàng hóa',
