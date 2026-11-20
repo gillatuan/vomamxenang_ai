@@ -81,6 +81,32 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
     // supplier quotations. Never put acquisition prices in public Git.
     // Ensure the existing 6.00-9 product was not repriced by an operator.
     // Abort safely rather than changing a manually maintained sales price.
+    // Category FK must refer to a real Category row. Seed 003 may be
+    // recorded in SeedHistory while its legacy category was later removed.
+    // Reuse a unique existing "Vỏ xe nâng" category rather than creating a
+    // duplicate. Only create the known canonical category when none exists.
+    const availableCategories = await database.category.findMany({
+      where: { OR: [{ id: 'category-tires' }, { name: 'Vỏ xe nâng' }] },
+      select: { id: true, name: true },
+      take: 3,
+    });
+    if (availableCategories.length > 1)
+      throw new Error('Ambiguous forklift tire categories; manual review required');
+    const categoryId = availableCategories.length === 1
+      ? availableCategories[0].id
+      : (await database.category.create({
+          data: {
+            id: 'category-tires',
+            name: 'Vỏ xe nâng',
+            tireSize: 'Nhiều kích thước',
+            brand: 'Nhiều thương hiệu',
+            tireType: 'SOLID',
+            rimType: 'STANDARD',
+            origin: 'Nhiều nguồn',
+            condition: 'NEW',
+            specifications: 'Danh mục vỏ/lốp xe nâng',
+          },
+        })).id;
     const existing = phoenixQuotedPrices[0];
     const updated = await database.product.updateMany({
       where: {
@@ -91,13 +117,14 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
         condition: 'NEW_100',
         OR: [{ sellingPrice: null }, { sellingPrice: 2100000 }],
       },
-      data: productData(existing),
+      data: { ...productData(existing), categoryId },
     });
     if (!updated || (updated as { count?: number }).count !== 1)
       throw new Error('Phoenix 6.00-9 must have an unset price or the original placeholder price; manual review required');
 
     const newProducts = phoenixQuotedPrices.slice(1).map(entry => ({
       ...productData(entry),
+      categoryId,
       id: `product-phoenix-solid-${entry.size.replace(/[^a-z0-9]/gi, '').toLowerCase()}-2026`,
       sku: entry.sku,
       slug: entry.slug,
