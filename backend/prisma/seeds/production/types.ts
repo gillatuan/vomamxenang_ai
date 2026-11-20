@@ -1,4 +1,9 @@
 export interface ProductionSeedDatabase {
+  category: {
+    findMany(args: unknown): Promise<Array<{ id: string; name: string }>>;
+    create(args: unknown): Promise<{ id: string }>;
+    upsert(args: unknown): Promise<unknown>;
+  };
   backlinkOpportunity?: { upsert(args: unknown): Promise<unknown> };
   product: {
     createMany(args: unknown): Promise<unknown>;
