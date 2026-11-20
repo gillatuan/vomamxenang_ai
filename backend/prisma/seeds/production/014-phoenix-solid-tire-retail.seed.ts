@@ -77,6 +77,25 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
   name: 'Four Phoenix solid tire prices and quality-first product descriptions from user quotes',
   preview: { productsToCreate: 3 },
   async run(database) {
+    // The production category may be absent even when legacy products exist:
+    // categoryId is nullable and older production seeds can be skipped. Create
+    // only the missing category within the same transaction as these products,
+    // and never overwrite any admin-managed category metadata.
+    await database.category.upsert({
+      where: { id: 'category-tires' },
+      update: {},
+      create: {
+        id: 'category-tires',
+        name: 'Vỏ xe nâng',
+        tireSize: 'Nhiều kích thước',
+        brand: 'Nhiều thương hiệu',
+        tireType: 'SOLID',
+        rimType: 'STANDARD',
+        origin: 'Nhiều nguồn',
+        condition: 'NEW',
+        specifications: 'Danh mục vỏ/lốp xe nâng',
+      },
+    });
     // The operator approved retail prices after checking the confidential
     // supplier quotations. Never put acquisition prices in public Git.
     // Ensure the existing 6.00-9 product was not repriced by an operator.
