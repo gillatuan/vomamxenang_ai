@@ -18,7 +18,7 @@ export const phoenixVatDisclosureSeed: ProductionSeed = {
           tireType: 'SOLID',
           condition: 'NEW_100',
           sellingPrice: entry.price,
-          tags: { hasNot: 'VAT_EXCLUDED_INVOICE_AVAILABLE' },
+          NOT: { tags: { has: 'VAT_EXCLUDED_INVOICE_AVAILABLE' } },
         },
         data: { tags: { push: 'VAT_EXCLUDED_INVOICE_AVAILABLE' } },
       });

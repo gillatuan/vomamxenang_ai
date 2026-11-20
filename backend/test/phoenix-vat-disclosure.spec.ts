@@ -13,6 +13,8 @@ async function main() {
   for (const [index, call] of seen.entries()) {
     assert(call.where.sku === phoenixQuotedPrices[index].sku, 'SKU must match source 014');
     assert(call.where.sellingPrice === phoenixQuotedPrices[index].price, 'Price guard required');
+    assert(call.where.NOT?.tags?.has === 'VAT_EXCLUDED_INVOICE_AVAILABLE', 'Prisma-compatible negation must exclude already tagged products');
+    assert(!Object.prototype.hasOwnProperty.call(call.where.tags ?? {}, 'hasNot'), 'Unsupported hasNot must not be used');
     assert(call.data.tags.push === 'VAT_EXCLUDED_INVOICE_AVAILABLE', 'VAT disclosure tag required');
     assert(!Object.prototype.hasOwnProperty.call(call.data, 'sellingPrice'), 'Never alter existing selling price');
   }
