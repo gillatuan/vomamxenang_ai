@@ -90,8 +90,9 @@ export const phoenixSolidTireRetail2026Seed: ProductionSeed = {
       select: { id: true, name: true },
       take: 3,
     });
-    if (availableCategories.length > 1)
-      throw new Error('Ambiguous forklift tire categories; manual review required');
+    if (availableCategories.length > 1 ||
+        (availableCategories.length === 1 && availableCategories[0].name !== 'Vỏ xe nâng'))
+      throw new Error('Ambiguous or mismatched forklift tire category; manual review required');
     const categoryId = availableCategories.length === 1
       ? availableCategories[0].id
       : (await database.category.create({
