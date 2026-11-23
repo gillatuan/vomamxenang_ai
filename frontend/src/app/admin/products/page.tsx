@@ -55,6 +55,11 @@ type ProductForm = {
   quantityInStock: number;
   imageUrl: string;
   description: string;
+  shortDescription: string;
+  highlights: string[];
+  specifications: Array<{ label: string; value: string }>;
+  applications: string[];
+  tags: string[];
   slug: string;
   seo: SeoMetadata;
   status: ContentStatus;
@@ -90,6 +95,11 @@ export default function ProductsPage() {
     quantityInStock: 0,
     imageUrl: "",
     description: "",
+    shortDescription: "",
+    highlights: [],
+    specifications: [],
+    applications: [],
+    tags: [],
     slug: "",
     seo: {} as SeoMetadata,
     status: "DRAFT" as ContentStatus,
@@ -129,6 +139,11 @@ export default function ProductsPage() {
       quantityInStock: (product.stocks ?? []).reduce((total, stock) => total + stock.quantity, 0),
       imageUrl: product.imageUrl || "",
       description: product.description || "",
+      shortDescription: product.shortDescription || "",
+      highlights: product.highlights || [],
+      specifications: product.specifications || [],
+      applications: product.applications || [],
+      tags: product.tags || [],
       slug: product.slug || "",
       seo: product.seo || {},
       status: product.status ?? "PUBLISHED",
@@ -161,6 +176,11 @@ export default function ProductsPage() {
       sellingPrice: formData.sellingPrice,
       imageUrl,
       description: formData.description,
+      shortDescription: formData.shortDescription,
+      highlights: formData.highlights.map(item => item.trim()).filter(Boolean),
+      specifications: formData.specifications.filter(item => item.label.trim() && item.value.trim()).map(item => ({ label: item.label.trim(), value: item.value.trim() })),
+      applications: formData.applications.map(item => item.trim()).filter(Boolean),
+      tags: formData.tags.map(item => item.trim()).filter(Boolean),
       slug: formData.slug,
       seo: { ...formData.seo, keywords: (formData.seo.keywords || []).map(word => word.trim()).filter(Boolean) },
       minStock: formData.minStock,
@@ -265,6 +285,11 @@ export default function ProductsPage() {
             quantityInStock: 0,
             imageUrl: "",
             description: "",
+            shortDescription: "",
+            highlights: [],
+            specifications: [],
+            applications: [],
+            tags: [],
             slug: "",
             seo: {} as SeoMetadata,
             status: "DRAFT",
@@ -367,7 +392,22 @@ export default function ProductsPage() {
             {formData.type==="RIM" && <Grid item xs={12} sm={6}><TextField select fullWidth label="Loại mâm" value={formData.rimType} onChange={(e)=>setFormData({...formData,rimType:e.target.value})}><MenuItem value="">Chưa chọn</MenuItem><MenuItem value="LIP">Lip</MenuItem><MenuItem value="CLICK">Click</MenuItem><MenuItem value="STANDARD">Standard</MenuItem></TextField></Grid>}
               <Grid item xs={12}>
               <ContentSeoFields id={editingId || ""} kind="products" title={formData.name} content={formData.description} slug={formData.slug} seo={formData.seo} onChange={(data) => setFormData(current => ({ ...current, ...data }))} onContentChange={(description) => setFormData(current => ({ ...current, description }))} />
-              <RichTextEditor label="Mô tả" value={formData.description} onChange={(description) => setFormData({ ...formData, description })} enableMedia />
+              <Typography variant="subtitle1" sx={{ mb: 1, mt: 2 }} fontWeight={700}>Nội dung bán hàng do Admin biên tập</Typography>
+              <Alert severity="info" sx={{ mb: 2 }}>Nhập thông tin đúng theo sản phẩm và ảnh thực tế. Website và metadata SEO lấy dữ liệu đã lưu, không tự tạo lời giới thiệu. Mọi thay đổi cần được kiểm tra trước khi publish.</Alert>
+              <TextField fullWidth multiline minRows={3} label="Mô tả ngắn – lý do khách nên quan tâm" helperText="Viết riêng cho SKU: loại vỏ/mâm, kích thước, tình trạng và lợi ích thực tế đã xác nhận." value={formData.shortDescription} onChange={e => setFormData(current => ({ ...current, shortDescription: e.target.value }))} sx={{ mb: 2 }} />
+              <RichTextEditor label="Mô tả chi tiết – đặc điểm, ứng dụng, lưu ý lắp và tư vấn" value={formData.description} onChange={(description) => setFormData(current => ({ ...current, description }))} enableMedia />
+              <TextField fullWidth multiline minRows={3} label="Điểm nổi bật (mỗi dòng một ý)" value={formData.highlights.join("\n")} onChange={e => setFormData(current => ({ ...current, highlights: e.target.value.split("\n") }))} helperText="Chỉ nhập ưu điểm có cơ sở; tránh cam kết tuổi thọ, tải trọng hoặc xuất xứ chưa xác minh." sx={{ mt: 2 }} />
+              <Typography fontWeight={700} sx={{ mt: 2, mb: 1 }}>Thông số kỹ thuật / thuộc tính cần đối chiếu</Typography>
+              <Stack spacing={1}>
+                {formData.specifications.map((spec, index) => <Stack key={index} direction="row" spacing={1} alignItems="center">
+                  <TextField size="small" label="Tên thông số" value={spec.label} onChange={e => setFormData(current => ({ ...current, specifications: current.specifications.map((item, i) => i === index ? { ...item, label: e.target.value } : item) }))} fullWidth />
+                  <TextField size="small" label="Giá trị đã kiểm chứng" value={spec.value} onChange={e => setFormData(current => ({ ...current, specifications: current.specifications.map((item, i) => i === index ? { ...item, value: e.target.value } : item) }))} fullWidth />
+                  <IconButton aria-label="Xóa thông số" color="error" onClick={() => setFormData(current => ({ ...current, specifications: current.specifications.filter((_, i) => i !== index) }))}><DeleteIcon /></IconButton>
+                </Stack>)}
+                <Button variant="outlined" onClick={() => setFormData(current => ({ ...current, specifications: [...current.specifications, { label: "", value: "" }] }))}>+ Thêm thông số</Button>
+              </Stack>
+              <TextField fullWidth multiline minRows={3} label="Ứng dụng phù hợp (mỗi dòng một trường hợp)" value={formData.applications.join("\n")} onChange={e => setFormData(current => ({ ...current, applications: e.target.value.split("\n") }))} sx={{ mt: 2 }} />
+              <TextField fullWidth label="Nhãn sản phẩm (phân cách dấu phẩy)" value={formData.tags.join(", ")} onChange={e => setFormData(current => ({ ...current, tags: e.target.value.split(",").map(item => item.trim()) }))} helperText="Giữ các nhãn nghiệp vụ như VAT_EXCLUDED_INVOICE_AVAILABLE nếu sản phẩm có giá chưa VAT." sx={{ mt: 2 }} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Giá nhập" type="number" value={formData.importPrice} onChange={(e) => setFormData({ ...formData, importPrice: Number(e.target.value) })} />
