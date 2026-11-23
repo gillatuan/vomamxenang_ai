@@ -49,7 +49,7 @@ type ProductForm = {
   sku: string;
   name: string;
   importPrice: number;
-  sellingPrice: number;
+  sellingPrice: number | null;
   minStock: number;
   maxStock: number;
   quantityInStock: number;
@@ -133,7 +133,7 @@ export default function ProductsPage() {
       sku: product.sku,
       name: product.name,
       importPrice: product.importPrice ?? 0,
-      sellingPrice: product.sellingPrice ?? 0,
+      sellingPrice: product.sellingPrice ?? null,
       minStock: (product as any).minStock ?? 5,
       maxStock: (product as any).maxStock ?? 100,
       quantityInStock: (product.stocks ?? []).reduce((total, stock) => total + stock.quantity, 0),
@@ -155,6 +155,10 @@ export default function ProductsPage() {
   const handleSave = async (status: ContentStatus = formData.status) => {
     if (!formData.sku.trim() || !formData.name.trim()) {
       setError("Vui lòng nhập SKU và tên sản phẩm trước khi lưu.");
+      return;
+    }
+    if (status === "PUBLISHED" && (formData.shortDescription.trim().length < 50 || richTextPlain(formData.description).trim().length < 150)) {
+      setError("Trước khi publish, hãy nhập mô tả ngắn ít nhất 50 ký tự và mô tả chi tiết ít nhất 150 ký tự dựa trên thông tin sản phẩm thực tế.");
       return;
     }
     try {
@@ -413,7 +417,7 @@ export default function ProductsPage() {
               <TextField fullWidth label="Giá nhập" type="number" value={formData.importPrice} onChange={(e) => setFormData({ ...formData, importPrice: Number(e.target.value) })} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Giá bán" type="number" value={formData.sellingPrice} onChange={(e) => setFormData({ ...formData, sellingPrice: Number(e.target.value) })} />
+              <TextField fullWidth label="Giá bán (để trống nếu cần báo giá)" type="number" value={formData.sellingPrice ?? ""} onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value === "" ? null : Number(e.target.value) })} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Min Stock" type="number" value={formData.minStock} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} />
