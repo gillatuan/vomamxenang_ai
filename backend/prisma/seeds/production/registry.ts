@@ -13,6 +13,7 @@ import { warehouseDay4Day5PostsSeed } from './013-warehouse-day4-day5-posts.seed
 import { phoenixSolidTireRetail2026Seed } from './014-phoenix-solid-tire-retail.seed';
 import { phoenixVatDisclosureSeed } from './015-phoenix-vat-disclosure.seed';
 import { editorialAllProductsSeed016 } from './016-unique-product-editorial.seed';
+import { adminOwnedProductContentSeed017 } from './017-admin-owned-product-content.seed';
 
 // Append new releases here. Do not alter a seed after it has run in production;
 // create the next numbered seed for corrections or additional products instead.
@@ -31,4 +32,5 @@ export const productionSeeds: readonly ProductionSeed[] = [
   phoenixSolidTireRetail2026Seed,
   phoenixVatDisclosureSeed,
   editorialAllProductsSeed016,
+  adminOwnedProductContentSeed017,
 ];

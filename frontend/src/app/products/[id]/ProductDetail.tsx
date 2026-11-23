@@ -70,15 +70,6 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
           </Stack>
         </Box>
       </Stack>
-      {product.size && <Card variant="outlined" sx={{ ...cardSx, mt: 4 }}><CardContent>
-        <Typography component="h2" variant="h4" sx={detailHeadingSx}>Vỏ xe nâng {product.size}: thông tin cần biết trước khi đặt</Typography>
-        <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.8 }}>Sản phẩm này có kích thước <b>{product.size}</b>{product.brand ? <> và thương hiệu <b>{product.brand}</b></> : null}. Hãy đối chiếu chính xác thông số ghi trên vỏ hiện tại và cấu hình mâm trước khi thay. Cùng một model xe nâng có thể có cấu hình bánh khác nhau.</Typography>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} sm={4}><Typography variant="body2" color="text.secondary">Kích thước</Typography><Typography fontWeight={800}>{product.size}</Typography></Grid>
-          {tireTypeLabel && <Grid item xs={12} sm={4}><Typography variant="body2" color="text.secondary">Loại</Typography><Typography fontWeight={800}>{tireTypeLabel}</Typography></Grid>}
-          <Grid item xs={12} sm={4}><Typography variant="body2" color="text.secondary">Tình trạng hàng</Typography><Typography fontWeight={800}>{stockState.label}</Typography></Grid>
-        </Grid>
-      </CardContent></Card>}
       {(highlights.length > 0 || specifications.length > 0 || applications.length > 0) && <Grid container spacing={3} sx={{ mt: 2 }}>
         {highlights.length > 0 && <Grid item xs={12} md={4}><Card variant="outlined" sx={{ ...cardSx, height: "100%" }}><CardContent>
           <Typography component="h2" variant="h6" sx={detailHeadingSx} gutterBottom>Điểm đáng chú ý</Typography>
@@ -98,8 +89,8 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
         <RichTextContent value={product.description} />
       </CardContent></Card>}
       <Card variant="outlined" sx={{ mt: 3 }}><CardContent>
-        <Typography component="h2" variant="h5" sx={detailHeadingSx}>Cần xác nhận sản phẩm này có phù hợp?</Typography>
-        <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.75 }}>Chụp thông số trên hông vỏ và ảnh bánh/mâm hiện tại rồi gửi cùng yêu cầu báo giá. Chúng tôi sẽ đối chiếu trước khi xác nhận sản phẩm hoặc dịch vụ ép/thay vỏ.</Typography>
+        <Typography component="h2" variant="h5" sx={detailHeadingSx}>Yêu cầu tư vấn và báo giá</Typography>
+
         <Button variant="contained" startIcon={<RequestQuoteIcon />} sx={{ mt: 3, borderRadius: 2, bgcolor: homeDesign.colors.accent, color: homeDesign.colors.ink, "&:hover": { bgcolor: "#FBBF24" } }} onClick={() => { trackConversion("OPEN_QUOTE", { productId: product.id, context: product.size }); setQuoteOpen(true); }}>Gửi ảnh & yêu cầu báo giá</Button>
       </CardContent></Card>
       {related}

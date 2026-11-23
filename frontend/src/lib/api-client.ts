@@ -29,7 +29,7 @@ export interface Product {
   categoryId?: string;
   category?: { id: string; name: string };
   importPrice?: number;
-  sellingPrice?: number;
+  sellingPrice?: number | null;
   minStock?: number;
   maxStock?: number;
   stocks?: { quantity: number }[];
