@@ -1,0 +1,186 @@
+name: Protected editorial product content seed 016
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Read-only preview or protected apply
+        required: true
+        type: choice
+        options: [dry-run, apply]
+        default: dry-run
+      expected_database_name:
+        description: Production database name, required for apply
+        required: false
+        type: string
+      backup_run_id:
+        description: Successful encrypted-backup run ID, required for apply
+        required: false
+        type: string
+      backup_sha256:
+        description: Encrypted backup SHA-256 retained outside GitHub, required for apply
+        required: false
+        type: string
+      external_backup_confirmation:
+        description: Type EXTERNAL-BACKUP-SAVED only after offsite retention and recovery test
+        required: false
+        type: string
+      confirmation:
+        description: Type APPLY-EDITORIAL-016-PRODUCTION
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: production-editorial-seed-016
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    name: Preview editorial seed 016 without writes
+    if: ${{ inputs.mode == 'dry-run' }}
+    runs-on: ubuntu-24.04
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require reviewed main
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and generate Prisma client
+        run: corepack enable && yarn install --frozen-lockfile && yarn prisma generate
+      - name: Read-only preview of editorial seed 016
+        run: yarn ts-node --transpile-only scripts/seed-product-editorial-016.ts dry-run
+
+  apply:
+    if: ${{ inputs.mode == 'apply' }}
+    name: Verify backup and restore, then apply editorial seed 016
+    runs-on: ubuntu-24.04
+    environment: Production
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      EXPECTED_PRODUCTION_DATABASE_NAME: ${{ inputs.expected_database_name }}
+      CONFIRM_EDITORIAL_SEED: ${{ inputs.confirmation }}
+      BACKUP_MODE: production-only
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_editorial
+      AUDITED_SHA: ${{ github.sha }}
+      BACKUP_RUN_ID: ${{ inputs.backup_run_id }}
+      EXPECTED_BACKUP_SHA: ${{ inputs.backup_sha256 }}
+      BACKUP_CONFIRMATION: ${{ inputs.external_backup_confirmation }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require explicit approval and independent retained backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test ! -e backup-recipient-public.pem || { echo "::error::Old repository public key remains"; exit 1; }
+          test ! -f backup/production-recovery-key.pem || {
+            echo "::error::Refusing apply: private recovery key remains checked into Git"
+            exit 1
+          }
+          test "$CONFIRM_EDITORIAL_SEED" = APPLY-EDITORIAL-016-PRODUCTION
+          test "$BACKUP_CONFIRMATION" = EXTERNAL-BACKUP-SAVED
+          test "$EXPECTED_PRODUCTION_DATABASE_NAME" = postgres
+          test -n "${DATABASE_URL:-}"
+          test "$(git rev-parse HEAD)" = "$AUDITED_SHA"
+          [[ "$BACKUP_RUN_ID" =~ ^[0-9]{6,20}$ ]]
+          [[ "$EXPECTED_BACKUP_SHA" =~ ^[a-fA-F0-9]{64}$ ]]
+          run_info="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BACKUP_RUN_ID" --jq '[.event, .status, .conclusion, .head_branch, .path] | @tsv')"
+          RUN_INFO="$run_info" node - <<'NODE'
+          const [event, status, conclusion, branch, path] = process.env.RUN_INFO.split('\t');
+          if (event !== 'workflow_dispatch' || status !== 'completed' || conclusion !== 'success' ||
+              branch !== 'main' || !path.includes('seed013-hosted-encrypted-backup.yml')) {
+            throw new Error('Untrusted encrypted backup run');
+          }
+          NODE
+      - name: Download encrypted backup from completed verification run
+        uses: actions/download-artifact@v4
+        with:
+          name: seed013-production-encrypted-backup
+          run-id: ${{ inputs.backup_run_id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/editorial-proof
+      - name: Verify encrypted backup SHA against independently saved copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/editorial-proof"
+          test -s seed013-production.vmxenc || { echo "::error::Encrypted backup file is missing"; exit 1; }
+          test -s seed013-production.vmxenc.sha256 || { echo "::error::Encrypted backup checksum file is missing"; exit 1; }
+          sha256sum --check seed013-production.vmxenc.sha256
+          actual="$(sha256sum seed013-production.vmxenc | cut -d' ' -f1)"
+          test "${actual,,}" = "${EXPECTED_BACKUP_SHA,,}"
+          echo 'Encrypted backup checksum matches operator-confirmed external backup.'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install backend dependencies (Node 22)
+        run: |
+          node --version
+          corepack enable
+          yarn install --frozen-lockfile
+      - name: Generate Prisma client for production seed
+        run: yarn prisma generate
+      - name: Install PostgreSQL 18 client
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Prepare isolated PostgreSQL extension compatibility
+        env:
+          RESTORE_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/prepare-isolated-restore-extensions.cjs
+      - name: Fresh production backup and isolated restore check
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PRODUCTION_BACKUP_DIR="$RUNNER_TEMP/editorial-apply-backup"
+          export BACKUP_DIR="$PRODUCTION_BACKUP_DIR"
+          mkdir -m 700 "$BACKUP_DIR"
+          bash scripts/db-audit-backup.sh
+          marker="$(find "$BACKUP_DIR" -name verified.json -type f -print -quit)"
+          test -n "$marker"
+          echo "RESTORE_VERIFIED_MARKER=$marker" >> "$GITHUB_ENV"
+          echo "PRODUCTION_BACKUP_DIR=$PRODUCTION_BACKUP_DIR" >> "$GITHUB_ENV"
+      - name: Apply editorial seed 016 and verify product content
+        run: yarn ts-node --transpile-only scripts/seed-product-editorial-016.ts apply
+      - name: Remove plaintext temporary backup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/editorial-apply-backup"
