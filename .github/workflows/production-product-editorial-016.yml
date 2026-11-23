@@ -59,7 +59,7 @@ jobs:
           node-version: '22'
       - name: Install and generate Prisma client
         run: corepack enable && yarn install --frozen-lockfile && yarn prisma generate
-      - name: Read-only preview of PHOENIX seed 014 and 015
+      - name: Read-only preview of editorial seed 016
         run: yarn ts-node --transpile-only scripts/seed-product-editorial-016.ts dry-run
 
   apply:
