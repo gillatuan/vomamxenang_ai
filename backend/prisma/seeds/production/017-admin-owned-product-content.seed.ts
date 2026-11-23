@@ -65,9 +65,13 @@ export const adminOwnedProductContentSeed017: ProductionSeed = {
         p.applications.every((item: string) => templateApplications.has(item));
       const data: Record<string, unknown> = {};
       if (changedSeo) data.seo = seo;
-      // The old generic 'specifications' asserted instructions rather than
-      // verified product specifications. Remove only the recognizable template.
-      if (generatedSpecs) data.specifications = [];
+      // Remove only recognized legacy instruction rows, never real
+      // specifications that an administrator may have added later.
+      if (generatedSpecs) {
+        data.specifications = p.specifications.filter(
+          (item: { label: string }) => !legacySpecificationLabels.has(item.label),
+        );
+      }
       if (generatedApplications) data.applications = [];
       if (Object.keys(data).length === 0) continue;
       const result = await database.product.updateMany({
