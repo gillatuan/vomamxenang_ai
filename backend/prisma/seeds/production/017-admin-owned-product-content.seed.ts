@@ -33,7 +33,13 @@ export const adminOwnedProductContentSeed017: ProductionSeed = {
   preview: { productsToCreate: 0 },
   async run(database) {
     const skus = editorialProducts016.map(p => p.sku);
-    const records = await database.product.findMany({
+    const db = database as typeof database & {
+      product: typeof database.product & { findMany(args: unknown): Promise<Array<{
+        id: string; sku: string; name: string; seo: unknown;
+        shortDescription: string | null; applications: string[]; specifications: Array<{label:string; value:string}>;
+      }>> };
+    };
+    const records = await db.product.findMany({
       where: { sku: { in: skus } },
       select: { id: true, sku: true, name: true, seo: true, shortDescription: true, applications: true, specifications: true },
     });
@@ -68,7 +74,7 @@ export const adminOwnedProductContentSeed017: ProductionSeed = {
         where: { id: p.id, sku: p.sku, name: p.name },
         data,
       });
-      if (result.count !== 1) throw new Error('Product changed during editorial cleanup: ' + p.sku);
+      if ((result as { count?: number }).count !== 1) throw new Error('Product changed during editorial cleanup: ' + p.sku);
     }
   },
 };
