@@ -15,8 +15,8 @@ export function productSeoDescription(product: Product) {
   // reviewed product data (which can itself be curated from authoritative
   // manufacturer/product references before being saved).
   const candidates = [
-    product.seo?.description,
     product.shortDescription,
+    product.seo?.description,
     product.description,
   ];
 
