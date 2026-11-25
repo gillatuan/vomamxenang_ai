@@ -1,0 +1,82 @@
+name: Production SEO read-only smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-seo-readonly
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Verify public SEO surfaces without writes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download public robots and sitemap
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-smoke"
+          curl --fail --location --silent --show-error --retry 2 --max-time 30 \
+            'https://www.vomamxenang.com/robots.txt' -o "$RUNNER_TEMP/seo-smoke/robots.txt"
+          curl --fail --location --silent --show-error --retry 2 --max-time 40 \
+            'https://www.vomamxenang.com/sitemap.xml' -o "$RUNNER_TEMP/seo-smoke/sitemap.xml"
+      - name: Select published product in live sitemap
+        id: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRODUCT_URL="$(node -e '
+            const fs = require("node:fs");
+            const xml = fs.readFileSync(process.argv[1],"utf8");
+            const matches = [...xml.matchAll(/<loc>(https:\/\/www\.vomamxenang\.com\/products\/[^<]+)<\/loc>/g)];
+            if (!matches.length) { console.error("::error::No product URL in sitemap"); process.exit(1); }
+            const phoenix = matches.find(match => /phoenix/i.test(match[1]));
+            process.stdout.write((phoenix || matches[0])[1]);
+          ' "$RUNNER_TEMP/seo-smoke/sitemap.xml")"
+          echo "url=$PRODUCT_URL" >> "$GITHUB_OUTPUT"
+          echo "Selected public product URL: $PRODUCT_URL"
+      - name: Download live product HTML
+        shell: bash
+        env:
+          PRODUCT_URL: ${{ steps.product.outputs.url }}
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 2 --max-time 45 \
+            "$PRODUCT_URL" -o "$RUNNER_TEMP/seo-smoke/product.html"
+          test -s "$RUNNER_TEMP/seo-smoke/product.html"
+      - name: Validate indexability, canonical and Product JSON-LD
+        shell: bash
+        env:
+          PRODUCT_URL: ${{ steps.product.outputs.url }}
+        run: |
+          set -euo pipefail
+          node scripts/verify-production-seo.cjs \
+            "$RUNNER_TEMP/seo-smoke/robots.txt" \
+            "$RUNNER_TEMP/seo-smoke/sitemap.xml" \
+            "$RUNNER_TEMP/seo-smoke/product.html" \
+            "$PRODUCT_URL"
+      - name: Write verification summary
+        if: always()
+        shell: bash
+        env:
+          PRODUCT_URL: ${{ steps.product.outputs.url }}
+        run: |
+          {
+            echo '### Production SEO read-only smoke'
+            echo
+            echo 'Checked robots.txt, sitemap.xml and a live public product page.'
+            echo 'No API POST, database write, Vercel deploy or production mutation.'
+            echo
+            echo "Sample product URL: ${PRODUCT_URL:-not selected}"
+            echo
+            echo 'See step logs for failures. This smoke cannot confirm actual Google indexing or Core Web Vitals.'
+          } >> "$GITHUB_STEP_SUMMARY"
