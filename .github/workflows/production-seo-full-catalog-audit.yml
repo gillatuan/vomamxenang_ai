@@ -1,0 +1,50 @@
+name: Production SEO full catalog audit (read-only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-seo-full-catalog-readonly
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit every product URL from live sitemap
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit all published product pages using public HTTP GET
+        env:
+          SEO_AUDIT_REPORT_PATH: ${{ runner.temp }}/product-seo-audit.json
+        run: node scripts/audit-production-product-seo.cjs
+      - name: Upload audit report (including on failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-product-seo-audit
+          path: ${{ runner.temp }}/product-seo-audit.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Summarize audit scope
+        if: always()
+        run: |
+          {
+            echo '### Full product SEO audit'
+            echo
+            echo 'Checks every /products/ URL in the public production sitemap (HTTP GET only).'
+            echo
+            echo 'Duplicate titles/descriptions, missing canonical, noindex, bad HTML/JSON-LD and missing images are reported.'
+            echo
+            echo 'Missing real product images are warnings, not generated pictures.'
+            echo
+            echo 'No production mutation, API POST, migration, seed or Vercel deployment.'
+            echo
+            echo 'Download the audit artifact for URL-level findings. Google indexing is not inferred from this audit.'
+          } >> "$GITHUB_STEP_SUMMARY"
