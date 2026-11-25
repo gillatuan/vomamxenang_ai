@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Unit test audit parser and safety checks
+        run: node --test scripts/audit-production-product-seo.test.cjs
       - name: Audit all published product pages using public HTTP GET
         env:
           SEO_AUDIT_REPORT_PATH: ${{ runner.temp }}/product-seo-audit.json
