@@ -312,6 +312,7 @@ export default function ProductsPage() {
               <TableCell>Tên</TableCell>
               <TableCell>Loại</TableCell>
               <TableCell>Image</TableCell>
+              <TableCell>Tình trạng</TableCell>
               <TableCell>Giá nhập</TableCell>
               <TableCell>Giá bán</TableCell>
               <TableCell>Tồn kho</TableCell>
@@ -333,6 +334,7 @@ export default function ProductsPage() {
                   )}
                 </TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
+                <TableCell>{product.condition}</TableCell>
                 <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
                 <TableCell>{`${(product as any).minStock ?? 5}/${(product as any).maxStock ?? 100}`}</TableCell>
