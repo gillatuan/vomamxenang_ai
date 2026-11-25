@@ -45,7 +45,7 @@ export function ProductImage({ src, alt, watermark, imageSx, priority = false }:
 
   return <Box sx={{ position: "relative", overflow: "hidden", bgcolor: "#e9e5dc" }}>
     <Box component="img" src={url} alt={alt}
-      loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"}
+      loading={priority ? "eager" : "lazy"} {...{ fetchPriority: priority ? "high" : "auto" }}
       decoding="async" onError={() => setFailedSource(url)}
       sx={{ display: "block", width: "100%", objectFit: "contain", ...imageSx }} />
     <Box aria-hidden sx={{ position: "absolute", right: 10, bottom: 10, px: 1, py: .45,
