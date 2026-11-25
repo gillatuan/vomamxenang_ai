@@ -16,7 +16,16 @@ async function load(path: string): Promise<Array<{ id: string; slug?: string; cr
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, posts, rims, cases] = await Promise.all([load("products"), load("posts"), getPublicRims(), publicCases()]);
+  // Keep static and healthy sections crawlable even when a nonessential API
+  // source times out. Never generate guessed URLs for unavailable products.
+  const sources = await Promise.allSettled([load("products"), load("posts"), getPublicRims(), publicCases()]);
+  for (const [i, result] of sources.entries()) {
+    if (result.status === "rejected") console.error("[sitemap] Source unavailable:", ["products", "posts", "rims", "cases"][i]);
+  }
+  const products = sources[0].status === "fulfilled" ? sources[0].value : [];
+  const posts = sources[1].status === "fulfilled" ? sources[1].value : [];
+  const rims = sources[2].status === "fulfilled" ? sources[2].value : [];
+  const cases = sources[3].status === "fulfilled" ? sources[3].value : [];
   return [
     { url: siteUrl, changeFrequency: "weekly", priority: 1 },
     { url: `${siteUrl}/products`, changeFrequency: "daily", priority: 0.9 },
