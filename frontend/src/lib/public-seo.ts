@@ -47,7 +47,49 @@ export function contentMetadata(item: PublicSeoItem, kind: 'products' | 'blog'):
 }
 export function contentJsonLd(item: PublicSeoItem, kind: 'products' | 'blog') {
   const seo = seoValues(item, contentPath(item, kind));
-  const entity = { '@context': 'https://schema.org', '@type': kind === 'products' ? 'Product' : 'BlogPosting', name: item.name || item.title, ...(kind === 'blog' ? { headline: item.title, datePublished: item.createdAt, mainEntityOfPage: { '@type': 'WebPage', '@id': seo.canonical } } : { sku: item.sku, ...(typeof item.sellingPrice === 'number' && item.sellingPrice > 0 ? { offers: { '@type': 'Offer', price: item.sellingPrice, priceCurrency: 'VND', url: seo.canonical } } : {}), ...(item.brand ? { brand: { '@type': 'Brand', name: item.brand } } : {}) }), description: seo.description, url: seo.canonical, ...((item.imageUrl || item.seo?.imageUrl) ? { image: item.imageUrl || item.seo?.imageUrl } : {}), keywords: seo.keywords.join(', ') };
+  const image = item.imageUrl || item.seo?.imageUrl;
+  const entity: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': kind === 'products' ? 'Product' : 'BlogPosting',
+    name: item.name || item.title,
+    description: seo.description,
+    url: seo.canonical,
+    ...(image ? { image } : {}),
+  };
+  if (kind === 'blog') {
+    Object.assign(entity, {
+      headline: item.title,
+      datePublished: item.createdAt,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': seo.canonical },
+    });
+  } else {
+    if (item.sku) entity.sku = item.sku;
+    if (item.brand) entity.brand = { '@type': 'Brand', name: item.brand };
+    if (item.condition === 'NEW' || item.condition === 'NEW_100') {
+      entity.itemCondition = 'https://schema.org/NewCondition';
+    } else if (item.condition === 'USED') {
+      entity.itemCondition = 'https://schema.org/UsedCondition';
+    }
+    // Do not publish a provisional reference price as a firm Google Offer.
+    const priceIsConfirmed = !item.tags?.includes('PRICE_REFERENCE_2026');
+    if (priceIsConfirmed && typeof item.sellingPrice === 'number' && item.sellingPrice > 0) {
+      const vatExcluded = item.tags?.includes('VAT_EXCLUDED_INVOICE_AVAILABLE') === true;
+      entity.offers = {
+        '@type': 'Offer',
+        price: item.sellingPrice,
+        priceCurrency: 'VND',
+        url: seo.canonical,
+        seller: { '@id': `${siteUrl}/#organization` },
+        ...(vatExcluded ? { priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: item.sellingPrice,
+          priceCurrency: 'VND',
+          valueAddedTaxIncluded: false,
+        } } : {}),
+      };
+      // Stock availability deliberately omitted: unknown quantity != OutOfStock.
+    }
+  }
   return jsonLd([entity, breadcrumbSchema(contentBreadcrumbs(item, kind))]);
 }
 
