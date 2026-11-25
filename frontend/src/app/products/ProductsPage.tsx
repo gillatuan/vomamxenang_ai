@@ -11,7 +11,6 @@ import {
   CardContent,
   CardActions,
   Button,
-  Dialog,
   TextField,
   CircularProgress,
   Alert,
@@ -40,7 +39,8 @@ import { PublicHeader } from "@/components/PublicHeader";
 import { Footer } from "@/components/Footer";
 import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { ProductImage, useStoreWatermark } from "@/components/ProductImage";
-import { productsAPI, clientsAPI, categoriesAPI, Product } from "@/lib/api-client";
+import { productsAPI, categoriesAPI, Product } from "@/lib/api-client";
+import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useCartStore } from "@/store/cart";
 
 type ProductCategory = { id: string; name: string };
@@ -63,8 +63,6 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({ name: "", phone: "", notes: "" });
-  const [submitting, setSubmitting] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const searchParams = useSearchParams();
   const condition = searchParams.get("condition") || undefined;
@@ -110,26 +108,6 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
     setOpenDialog(true);
   };
 
-  const handleSubmitQuote = async () => {
-    if (!selectedProduct) return;
-    setSubmitting(true);
-
-    try {
-      await clientsAPI.create({
-        name: formData.name,
-        email: formData.phone,
-        phone: formData.phone,
-        notes: `Yêu cầu báo giá sản phẩm: ${selectedProduct.name}\n${formData.notes}`,
-      });
-      alert("Gửi yêu cầu báo giá thành công!");
-      setOpenDialog(false);
-      setFormData({ name: "", phone: "", notes: "" });
-    } catch (err) {
-      alert("Error submitting quote request");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <>
@@ -269,49 +247,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
         {pageCount > 1 && <Box component="nav" aria-label="Phân trang sản phẩm" sx={{display:"flex",justifyContent:"center",mt:5}}><Pagination page={page} count={pageCount} onChange={(_,value)=>setPage(value)} size="large" sx={{ "& .MuiPaginationItem-root": { color: homeDesign.colors.ink }, "& .Mui-selected": { bgcolor: `${homeDesign.colors.accent} !important`, color: homeDesign.colors.ink } }}/></Box>}
       </Container></Box>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <Box sx={{ padding: "2rem" }}>
-          <Typography component="h2" variant="h6" sx={{ marginBottom: "1rem" }}>
-            Yêu cầu báo giá: {selectedProduct?.name}
-          </Typography>
-          <TextField
-            fullWidth
-            label="Tên"
-            margin="normal"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Số điện thoại"
-            margin="normal"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Ghi chú"
-            margin="normal"
-            multiline
-            rows={3}
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          />
-          <Box sx={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
-            <Button variant="outlined" fullWidth onClick={() => setOpenDialog(false)}>
-              Hủy
-            </Button>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={handleSubmitQuote}
-              disabled={submitting}
-            >
-              {submitting ? "Đang gửi..." : "Gửi"}
-            </Button>
-          </Box>
-        </Box>
-      </Dialog>
+      <QuoteRequestDialog open={openDialog} onClose={() => { setOpenDialog(false); setSelectedProduct(null); }} product={selectedProduct || undefined} context="Trang danh sách sản phẩm" />
 
       <Footer />
     </>

@@ -23,3 +23,24 @@ test('Related navigation is based on actual attributes and includes no unrelated
   const unrelated = { id: 'c', kind: 'products', size: '7.00-12' };
   assert.deepEqual(relatedContent(current, [current, relevant, unrelated]), [relevant]);
 });
+
+test('Product offer uses saved price and explicitly marks VAT excluded without inventing stock', () => {
+  const item = { id: 'p', slug: 'phoenix-650-10', name: 'Vỏ đặc PHOENIX 6.50-10', sku: 'PHX-650',
+    brand: 'PHOENIX', condition: 'NEW_100', sellingPrice: 3190000,
+    tags: ['VAT_EXCLUDED_INVOICE_AVAILABLE'], imageUrl: 'https://example.com/verified-photo.jpg' };
+  const [product] = JSON.parse(contentJsonLd(item, 'products'));
+  assert.equal(product.offers.price, 3190000);
+  assert.equal(product.offers.priceSpecification.valueAddedTaxIncluded, false);
+  assert.equal(product.offers.seller['@id'], 'https://www.vomamxenang.com/#organization');
+  assert.equal(product.itemCondition, 'https://schema.org/NewCondition');
+  assert.equal(product.image, item.imageUrl);
+  assert.equal(product.offers.availability, undefined);
+  assert.equal(product.aggregateRating, undefined);
+});
+test('Do not advertise provisional reference price as an Offer', () => {
+  const [product] = JSON.parse(contentJsonLd({
+    id: 'draft-price', name: 'Vỏ xe nâng tham khảo', sellingPrice: 2800000,
+    tags: ['PRICE_REFERENCE_2026'],
+  }, 'products'));
+  assert.equal(product.offers, undefined);
+});
