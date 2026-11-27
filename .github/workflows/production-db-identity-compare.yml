@@ -37,6 +37,8 @@ jobs:
           corepack enable
           yarn install --frozen-lockfile
           yarn prisma generate
+      - name: Syntax-check safe comparison script
+        run: node --check scripts/compare-production-db-identity.cjs
       - name: Compare production schema snapshots using two read-only connections
         run: node scripts/compare-production-db-identity.cjs
       - name: Explain safety and limits
