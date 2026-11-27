@@ -299,8 +299,6 @@ export default function ProductsPage() {
             sellingPrice: 0,
             priceMin: null,
             priceMax: null,
-    priceMin: null,
-    priceMax: null,
             minStock: 5,
             maxStock: 100,
             quantityInStock: 0,
@@ -352,7 +350,7 @@ export default function ProductsPage() {
                 </TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.condition}</TableCell>
-                <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
+                <TableCell>{product.priceMin != null && product.priceMax != null ? `${product.priceMin.toLocaleString('vi-VN')} – ${product.priceMax.toLocaleString('vi-VN')} ₫` : product.sellingPrice?.toLocaleString('vi-VN') || 'Liên hệ'}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
                 <TableCell>{`${(product as any).minStock ?? 5}/${(product as any).maxStock ?? 100}`}</TableCell>
                 <TableCell>
@@ -483,7 +481,7 @@ export default function ProductsPage() {
             <Typography><b>Loại:</b> {viewingProduct?.type}</Typography>
             <Typography><b>Trạng thái:</b> {(viewingProduct?.status ?? "PUBLISHED") === "PUBLISHED" ? "Đã publish" : "Nháp"}</Typography>
             <Typography><b>Giá nhập:</b> {(viewingProduct?.importPrice ?? 0).toLocaleString()} ₫</Typography>
-            <Typography><b>Giá bán:</b> {viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}</Typography>
+            <Typography><b>Giá bán:</b> {viewingProduct?.priceMin != null && viewingProduct.priceMax != null ? `${viewingProduct.priceMin.toLocaleString('vi-VN')} – ${viewingProduct.priceMax.toLocaleString('vi-VN')} ₫` : viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString('vi-VN')} ₫` : 'Liên hệ'}</Typography>
             <Box><Typography fontWeight={700}>Mô tả:</Typography><RichTextContent value={viewingProduct?.description || "Chưa có mô tả."} /></Box>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 3 }}>
