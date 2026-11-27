@@ -1,0 +1,90 @@
+name: Isolated production migration rehearsal (read-only source)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-migration-rehearsal-isolated
+  cancel-in-progress: false
+
+jobs:
+  rehearse:
+    name: Rehearse migrations on disposable PostgreSQL 18 clone
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    environment: Production
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      PRODUCTION_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      TEMP_RESTORE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TEMP_RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vmx_restore_migration_probe
+      PRISMA_PROVIDER_APP_DATA_RESTORE: 'YES'
+      AUDITED_SHA: ${{ github.sha }}
+      BACKUP_MODE: production-only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require reviewed main and direct production database secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test -n "${PRODUCTION_DATABASE_URL:-}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies and generate Prisma client
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile
+          yarn prisma generate
+      - name: Install PostgreSQL 18 client
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Prepare isolated PostgreSQL extension compatibility
+        env:
+          RESTORE_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/prepare-isolated-restore-extensions.cjs
+      - name: Rehearse pending migration SQL on disposable clone only
+        shell: bash
+        run: bash scripts/rehearse-production-migrations.sh
+      - name: Explain results and limits
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '### Isolated migration rehearsal'
+            echo
+            echo 'Reads a consistent production snapshot, verifies isolated restore, then runs Prisma migrate deploy ONLY on a separate throwaway PostgreSQL 18 database.'
+            echo
+            echo 'Source database is never a migration target. Private dumps and data are removed from runner. No backup artifacts uploaded.'
+            echo
+            echo 'A PASS shows SQL can run against the cloned snapshot; it does NOT prove correct Vercel production DB identity or authorize production migrate deploy.'
+            echo
+            echo 'Inspect the step failure if any historical migration conflicts. Keep PR #147 Draft until DB identity and dependency migration plan are approved.'
+          } >> "$GITHUB_STEP_SUMMARY"
