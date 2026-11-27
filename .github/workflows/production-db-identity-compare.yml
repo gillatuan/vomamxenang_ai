@@ -1,0 +1,53 @@
+name: Compare Vercel and GitHub production DB identities (read-only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prod-db-endpoint-compare-readonly
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: Compare production DB schema fingerprints without writes
+    runs-on: ubuntu-24.04
+    environment: Production
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      GITHUB_DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_BACKEND_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require reviewed main
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install backend dependencies
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile
+          yarn prisma generate
+      - name: Compare production schema snapshots using two read-only connections
+        run: node scripts/compare-production-db-identity.cjs
+      - name: Explain safety and limits
+        if: always()
+        run: |
+          {
+            echo '### GitHub and Vercel production database identity'
+            echo
+            echo 'Compares the Vercel backend Production DATABASE_URL with GitHub Production DIRECT_DATABASE_URL.'
+            echo 'No connection strings, credentials, hosts, or customer rows are logged.'
+            echo 'Each PostgreSQL connection uses an explicitly READ ONLY transaction.'
+            echo 'Same schema snapshots do NOT prove physical database identity.'
+            echo 'Do not run Prisma migrate deploy or resolve until verified and authorized.'
+          } >> "$GITHUB_STEP_SUMMARY"
