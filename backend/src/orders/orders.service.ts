@@ -147,6 +147,11 @@ export class OrdersService {
     if (products.some(product => product.tags?.includes('PRICE_REFERENCE_2026') === true)) {
       throw new BadRequestException('Sản phẩm có giá tham khảo. Vui lòng liên hệ để xác nhận giá trước khi thanh toán.');
     }
+    // Variable-price SKUs require a final salesperson-approved quote. Never
+    // treat the lower or upper bound as a payable checkout amount.
+    if (products.some(product => product.priceMin != null || product.priceMax != null)) {
+      throw new BadRequestException('Sản phẩm có khoảng giá linh hoạt. Vui lòng liên hệ để được báo giá chính xác trước khi thanh toán.');
+    }
 
 
     // Support two checkout assumptions:
