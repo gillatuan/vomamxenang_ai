@@ -261,9 +261,9 @@ model Product {
   condition String? // NEW_100 (Mới), USED (Lướt)
 
   importPrice      Float
-  sellingPrice     Float? // Giá bán được duyệt để thanh toán trực tiếp
-  priceMin         Float? // Giá bán tối thiểu do Admin nhập, cần báo giá
-  priceMax         Float? // Giá bán tối đa do Admin nhập, cần báo giá
+  sellingPrice     Float? // Giá bán lẻ mặc định
+  priceMin         Float? // Giá bán thấp nhất, được Admin nhập
+  priceMax         Float? // Giá bán cao nhất, được Admin nhập
   minStock         Int           @default(5) // Định mức tồn tối thiểu để cảnh báo
   maxStock         Int           @default(100) // Định mức tồn tối đa
   imageUrl         String?
