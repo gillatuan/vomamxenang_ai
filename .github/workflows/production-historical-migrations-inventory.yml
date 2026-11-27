@@ -1,0 +1,61 @@
+name: Production historical migrations schema inventory (read-only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-historical-migration-inventory
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    name: Verify production migration ledger versus PostgreSQL schema
+    runs-on: ubuntu-24.04
+    environment: Production
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      APP_ENV: production
+      MIGRATION_AUDIT_REPORT: ${{ runner.temp }}/production-migration-inventory.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restrict to reviewed main
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies and Prisma client
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile
+          yarn prisma generate
+      - name: Check inventory parser before connecting to production
+        run: node --test scripts/audit-historical-production-migrations.test.cjs
+      - name: Inspect only production Prisma history and PostgreSQL catalogs
+        run: node scripts/audit-historical-production-migrations.cjs
+      - name: Save migration assessment for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-historical-migration-inventory
+          path: ${{ runner.temp }}/production-migration-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '### Production historical migration inventory'
+            echo
+            echo 'Read-only audit for 11 historical migrations and the new price-range migration.'
+            echo 'The database transaction is explicitly READ ONLY; no migrate deploy, migrate resolve, DDL, seeds or customer records.'
+            echo
+            echo 'Inspect each migration result in the JSON artifact. Object presence alone does NOT authorize migration resolve.'
+            echo 'Migration history and schema need reviewed reconciliation before the protected price-range apply.'
+          } >> "$GITHUB_STEP_SUMMARY"
