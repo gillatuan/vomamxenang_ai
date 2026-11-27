@@ -71,7 +71,8 @@ export function contentJsonLd(item: PublicSeoItem, kind: 'products' | 'blog') {
       entity.itemCondition = 'https://schema.org/UsedCondition';
     }
     // Do not publish a provisional reference price as a firm Google Offer.
-    const priceIsConfirmed = !item.tags?.includes('PRICE_REFERENCE_2026');
+    const hasRange = item.priceMin != null || item.priceMax != null;
+    const priceIsConfirmed = !hasRange && !item.tags?.includes('PRICE_REFERENCE_2026');
     if (priceIsConfirmed && typeof item.sellingPrice === 'number' && item.sellingPrice > 0) {
       const vatExcluded = item.tags?.includes('VAT_EXCLUDED_INVOICE_AVAILABLE') === true;
       entity.offers = {
