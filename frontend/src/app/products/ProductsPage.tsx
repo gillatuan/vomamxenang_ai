@@ -1,6 +1,7 @@
 "use client";
 import { homeDesign } from "@/app/home-design";
 import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
+import { hasQuoteRange, productPriceText, canCheckoutProduct } from "@/lib/product-pricing";
 
 import {
   Box,
@@ -213,7 +214,8 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
                     {productSeoDescription(product)}
                   </Typography>
                   <Typography variant="body1" sx={{ marginTop: "1rem", fontWeight: 700 }}>
-                    {product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}
+                    {productPriceText(product)}
+                    {hasQuoteRange(product) && <Chip label="Giá phụ thuộc độ cao gai / hiện trạng · xác nhận khi báo giá" size="small" color="info" sx={{ ml: 1, mt: 1 }} />}
                     {product.tags?.includes("PRICE_REFERENCE_2026") && <Chip label="Giá tham khảo · xác nhận trước khi mua" size="small" color="warning" sx={{ ml: 1, mt: 1 }} />}
                     {product.tags?.includes("VAT_EXCLUDED_INVOICE_AVAILABLE") && <Typography component="span" display="block" variant="caption" sx={{ mt: 0.5, color: "text.secondary" }}>Giá chưa gồm VAT · Hỗ trợ xuất hóa đơn VAT theo yêu cầu</Typography>}
                   </Typography>
@@ -222,7 +224,7 @@ function ProductsContent({ initialProducts }: { initialProducts: Product[] }) {
                   <Button component={NextLink} href={`/products/${product.slug || product.id}`} size="small" variant="text" sx={{ px: 0, color: homeDesign.colors.ink, fontWeight: 700, textDecoration: "underline", textUnderlineOffset: "4px", marginRight: "auto" }}>
                     Xem chi tiết
                   </Button>
-                  {product.sellingPrice ? (
+                  {canCheckoutProduct(product) ? (
                     <Button
                       variant="contained"
                       startIcon={<ShoppingCartIcon />}

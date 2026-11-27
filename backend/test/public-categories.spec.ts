@@ -28,12 +28,14 @@ async function main() {
   const products = new ProductsService(productPrisma as unknown as PrismaService);
   for (const [categoryId, type] of [['category-tires', 'TIRE'], ['category-rims', 'RIM']]) {
     await products.findAll({ categoryId, q: '600', brand: 'NEXEN', minPrice: 10 });
-    assert.deepEqual(productWhere.AND, [{ OR: [{ categoryId }, { categoryId: null, type }] }]);
+    assert.deepEqual((productWhere.AND as any[])[0], { OR: [{ categoryId }, { categoryId: null, type }] });
+    const intervalFilter = (productWhere.AND as any[])[1];
+    assert.deepEqual(intervalFilter.OR[0], { priceMin: { not: null }, priceMax: { gte: 10 } });
+    assert.deepEqual(intervalFilter.OR[1], { priceMin: null, priceMax: null, sellingPrice: { not: null, gte: 10 } });
     assert.equal(productWhere.categoryId, undefined);
     assert.equal(productWhere.status, 'PUBLISHED');
     assert.equal(productWhere.brand, 'NEXEN');
     assert.ok(productWhere.OR);
-    assert.deepEqual(productWhere.sellingPrice, { gte: 10 });
   }
   await products.findAll({ categoryId: 'custom' });
   assert.equal(productWhere.categoryId, 'custom');

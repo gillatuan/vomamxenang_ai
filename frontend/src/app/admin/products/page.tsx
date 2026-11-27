@@ -50,6 +50,8 @@ type ProductForm = {
   name: string;
   importPrice: number;
   sellingPrice: number | null;
+  priceMin: number | null;
+  priceMax: number | null;
   minStock: number;
   maxStock: number;
   quantityInStock: number;
@@ -90,6 +92,8 @@ export default function ProductsPage() {
     name: "",
     importPrice: 0,
     sellingPrice: 0,
+    priceMin: null,
+    priceMax: null,
     minStock: 5,
     maxStock: 100,
     quantityInStock: 0,
@@ -134,6 +138,8 @@ export default function ProductsPage() {
       name: product.name,
       importPrice: product.importPrice ?? 0,
       sellingPrice: product.sellingPrice ?? null,
+      priceMin: product.priceMin ?? null,
+      priceMax: product.priceMax ?? null,
       minStock: (product as any).minStock ?? 5,
       maxStock: (product as any).maxStock ?? 100,
       quantityInStock: (product.stocks ?? []).reduce((total, stock) => total + stock.quantity, 0),
@@ -157,6 +163,11 @@ export default function ProductsPage() {
       setError("Vui lòng nhập SKU và tên sản phẩm trước khi lưu.");
       return;
     }
+    const min = formData.priceMin, max = formData.priceMax;
+    if ((min == null) !== (max == null) || (min != null && (min <= 0 || max! < min))) {
+      setError("Vui lòng nhập cả giá thấp nhất và cao nhất, với giá thấp nhất lớn hơn 0 và không vượt giá cao nhất.");
+      return;
+    }
     if (status === "PUBLISHED" && (formData.shortDescription.trim().length < 50 || richTextPlain(formData.description).trim().length < 150)) {
       setError("Trước khi publish, hãy nhập mô tả ngắn ít nhất 50 ký tự và mô tả chi tiết ít nhất 150 ký tự dựa trên thông tin sản phẩm thực tế.");
       return;
@@ -177,7 +188,9 @@ export default function ProductsPage() {
       type: formData.type,
       name: formData.name,
       importPrice: formData.importPrice,
-      sellingPrice: formData.sellingPrice,
+      sellingPrice: formData.priceMin != null && formData.priceMax != null ? null : formData.sellingPrice,
+      priceMin: formData.priceMin,
+      priceMax: formData.priceMax,
       imageUrl,
       description: formData.description,
       shortDescription: formData.shortDescription,
@@ -284,6 +297,8 @@ export default function ProductsPage() {
             name: "",
             importPrice: 0,
             sellingPrice: 0,
+            priceMin: null,
+            priceMax: null,
             minStock: 5,
             maxStock: 100,
             quantityInStock: 0,
@@ -335,7 +350,7 @@ export default function ProductsPage() {
                 </TableCell>
                 <TableCell>{product.importPrice.toLocaleString()}</TableCell>
                 <TableCell>{product.condition}</TableCell>
-                <TableCell>{product.sellingPrice?.toLocaleString() || "-"}</TableCell>
+                <TableCell>{product.priceMin != null && product.priceMax != null ? `${product.priceMin.toLocaleString('vi-VN')} – ${product.priceMax.toLocaleString('vi-VN')} ₫` : product.sellingPrice?.toLocaleString('vi-VN') || 'Liên hệ'}</TableCell>
                 <TableCell>{product.stocks.reduce((total, stock) => total + stock.quantity, 0)}</TableCell>
                 <TableCell>{`${(product as any).minStock ?? 5}/${(product as any).maxStock ?? 100}`}</TableCell>
                 <TableCell>
@@ -419,7 +434,17 @@ export default function ProductsPage() {
               <TextField fullWidth label="Giá nhập" type="number" value={formData.importPrice} onChange={(e) => setFormData({ ...formData, importPrice: Number(e.target.value) })} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Giá bán (để trống nếu cần báo giá)" type="number" value={formData.sellingPrice ?? ""} onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value === "" ? null : Number(e.target.value) })} />
+              <TextField fullWidth disabled={formData.priceMin != null || formData.priceMax != null}
+                label="Giá bán cố định (chỉ dùng nếu được phép thanh toán trực tiếp)" type="number"
+                value={formData.priceMin != null || formData.priceMax != null ? "" : formData.sellingPrice ?? ""}
+                onChange={(e) => setFormData(current => ({ ...current, sellingPrice: e.target.value === "" ? null : Number(e.target.value) }))} />
+            </Grid>
+            <Grid item xs={12}><Typography fontWeight={700}>Giá bán linh hoạt theo tình trạng gai / chất lượng thực tế</Typography><Typography color="text.secondary" variant="body2">Nhập cả hai mức để khách xem khoảng giá và gửi yêu cầu báo giá. Không cho thanh toán trực tiếp khi có khoảng giá.</Typography></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth label="Giá thấp nhất (VNĐ)" type="number" value={formData.priceMin ?? ""}
+              onChange={e => setFormData(current => ({ ...current, priceMin: e.target.value === "" ? null : Number(e.target.value), sellingPrice: e.target.value === "" ? current.sellingPrice : null }))} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth label="Giá cao nhất (VNĐ)" type="number" value={formData.priceMax ?? ""}
+              onChange={e => setFormData(current => ({ ...current, priceMax: e.target.value === "" ? null : Number(e.target.value), sellingPrice: e.target.value === "" ? current.sellingPrice : null }))} />
+
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Min Stock" type="number" value={formData.minStock} onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })} />
@@ -456,7 +481,7 @@ export default function ProductsPage() {
             <Typography><b>Loại:</b> {viewingProduct?.type}</Typography>
             <Typography><b>Trạng thái:</b> {(viewingProduct?.status ?? "PUBLISHED") === "PUBLISHED" ? "Đã publish" : "Nháp"}</Typography>
             <Typography><b>Giá nhập:</b> {(viewingProduct?.importPrice ?? 0).toLocaleString()} ₫</Typography>
-            <Typography><b>Giá bán:</b> {viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString()} ₫` : "Liên hệ"}</Typography>
+            <Typography><b>Giá bán:</b> {viewingProduct?.priceMin != null && viewingProduct.priceMax != null ? `${viewingProduct.priceMin.toLocaleString('vi-VN')} – ${viewingProduct.priceMax.toLocaleString('vi-VN')} ₫` : viewingProduct?.sellingPrice ? `${viewingProduct.sellingPrice.toLocaleString('vi-VN')} ₫` : 'Liên hệ'}</Typography>
             <Box><Typography fontWeight={700}>Mô tả:</Typography><RichTextContent value={viewingProduct?.description || "Chưa có mô tả."} /></Box>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 3 }}>
