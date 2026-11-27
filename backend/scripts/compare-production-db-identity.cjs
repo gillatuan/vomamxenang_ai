@@ -1,98 +1,77 @@
 #!/usr/bin/env node
 'use strict';
-// Compares GitHub Production direct DB and actual Vercel backend Production DATABASE_URL.
-// Reads catalog metadata only. Never logs or exports connection strings or credentials.
-const { PrismaClient } = require('@prisma/client');
-const crypto = require('node:crypto');
+// Production comparison without decrypting any Vercel Secret.
+// Compares IDs, SKUs and slugs in the public backend catalog against published
+// products from the GitHub DIRECT_DATABASE_URL; all DB access is read-only.
+// No secret, hostname, product inventory, or customer record is printed.
+const fs=require('node:fs');
+const crypto=require('node:crypto');
+const {PrismaClient}=require('@prisma/client');
 
-const keys = ['QuoteLead','CaseStudy','ConversionEvent','SalesQuote','OrderPayment','Product','_prisma_migrations'];
-const sha = x => crypto.createHash('sha256').update(x).digest('hex');
-function endpoint(url) {
-  const u=new URL(url);
-  if(!['postgres:', 'postgresql:', 'prisma:', 'prisma+postgres:'].includes(u.protocol)) throw Error('Unsupported DB protocol');
-  return [u.protocol,u.hostname.toLowerCase(),u.port,decodeURIComponent(u.pathname),u.searchParams.get('schema')||'public'].join('|');
+function catalogEntries(products) {
+  if(!Array.isArray(products))throw Error('Backend product API did not return an array');
+  if(products.length<1 || products.length>10000)throw Error('Unexpected published product count');
+  const entries=products.map(p=>{
+    if(typeof p.id!=='string'||!p.id||typeof p.sku!=='string'||!p.sku)throw Error('Product missing id/sku');
+    return [p.id,p.sku,typeof p.slug==='string'?p.slug:''];
+  });
+  entries.sort((a,b)=>a[0].localeCompare(b[0]));
+  if(new Set(entries.map(x=>x[0])).size!==entries.length)throw Error('Duplicate product IDs in source');
+  return entries;
 }
-async function vercelDatabaseUrl() {
-  const token=process.env.VERCEL_TOKEN;
-  const team=process.env.VERCEL_ORG_ID;
-  const project=process.env.VERCEL_BACKEND_PROJECT_ID;
-  if(!token||!team||!project)throw Error('Vercel deploy credentials unavailable in Production environment');
-  // One explicit project selected by the same VERCEL_BACKEND_PROJECT_ID used to deploy production.
-  const url='https://api.vercel.com/v9/projects/'+encodeURIComponent(project)+
-    '/env?teamId='+encodeURIComponent(team)+'&decrypt=true';
-  const res=await fetch(url,{headers:{Authorization:'Bearer '+token},
-    signal:AbortSignal.timeout(20000)});
-  if(!res.ok)throw Error('Vercel production env read denied or unavailable (HTTP '+res.status+')');
-  const body=await res.json();
-  const values=(body.envs||[]).filter(e=>e.key==='DATABASE_URL' &&
-    (Array.isArray(e.target)?e.target.includes('production'):e.target==='production') &&
-    !e.gitBranch);
-  if(values.length!==1)throw Error('Expected one unambiguous Vercel production DATABASE_URL; found '+values.length);
-  const value=values[0].value;
-  if(typeof value!=='string'||!value||value==='*****'||value.includes('REDACTED')) {
-    throw Error('Vercel DATABASE_URL value is not decryptable with current token');
-  }
-  return value;
+function digest(records) {
+  return crypto.createHash('sha256').update(JSON.stringify(catalogEntries(records))).digest('hex');
 }
-async function snapshot(url) {
-  const prisma=new PrismaClient({datasources:{db:{url}}});
-  try {
+async function readGithubDb() {
+  const raw=process.env.GITHUB_DIRECT_DATABASE_URL;
+  if(!raw)throw Error('Missing GitHub direct PostgreSQL connection');
+  const prisma=new PrismaClient({datasources:{db:{url:raw}}});
+  try{
     return await prisma.$transaction(async tx=>{
       await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');
       await tx.$executeRawUnsafe("SET LOCAL statement_timeout='20000ms'");
-      const ident=await tx.$queryRawUnsafe(
-        "SELECT current_database() AS db, current_schema() AS schema, pg_is_in_recovery() AS is_replica");
-      const present=await tx.$queryRawUnsafe(
-        "SELECT relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p') AND relname IN ('QuoteLead','CaseStudy','ConversionEvent','SalesQuote','OrderPayment','Product','_prisma_migrations') ORDER BY relname");
-      const names=present.map(x=>x.relname);
-      if(!names.includes('Product')||!names.includes('_prisma_migrations'))throw Error('Expected Product and history tables absent');
-      const products=await tx.$queryRawUnsafe(
-        'SELECT count(*)::int AS total, md5(coalesce(string_agg("id"::text, \',\' ORDER BY "id"),\'\')) AS ids_digest FROM public."Product"');
-      const migrations=await tx.$queryRawUnsafe(
-        "SELECT md5(coalesce(string_agg(migration_name||':'||checksum||':'||(finished_at IS NOT NULL)::text||':'||(rolled_back_at IS NOT NULL)::text,',' ORDER BY migration_name),'')) AS ledger_digest,count(*)::int AS total FROM public.\"_prisma_migrations\"");
-      return {
-        database:ident[0].db,schema:ident[0].schema,isReplica:ident[0].is_replica,
-        objects:keys.map(name=>({name,present:names.includes(name)})),
-        productCount:products[0].total,
-        productIdsDigest:products[0].ids_digest,
-        migrationCount:migrations[0].total,
-        migrationLedgerDigest:migrations[0].ledger_digest,
-      };
+      const db=await tx.$queryRawUnsafe('SELECT current_database() AS name, current_schema() AS schema');
+      if(db[0]?.name!=='postgres'||db[0]?.schema!=='public')throw Error('Unexpected GitHub database identity');
+      const rows=await tx.$queryRawUnsafe('SELECT "id", "sku", "slug" FROM public."Product" WHERE "status" = \'PUBLISHED\'');
+      const tables=await tx.$queryRawUnsafe("SELECT relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p') AND relname IN ('QuoteLead','CaseStudy','ConversionEvent','SalesQuote','OrderPayment','Product','_prisma_migrations') ORDER BY relname");
+      return {products:rows,tableNames:tables.map(x=>x.relname)};
     },{timeout:45000,maxWait:20000});
-  } finally {await prisma.$disconnect();}
+  }finally{await prisma.$disconnect();}
 }
 async function main(){
-  if(process.env.APP_ENV!=='production')throw Error('Production environment required');
-  const github=process.env.GITHUB_DIRECT_DATABASE_URL;
-  if(!github)throw Error('Missing GitHub DIRECT_DATABASE_URL');
-  const vercel=await vercelDatabaseUrl();
-  let githubResult,vercelResult;
-  try {githubResult=await snapshot(github);}catch(e){throw Error('GitHub DB read-only probe failed');}
-  try {vercelResult=await snapshot(vercel);}catch(e){throw Error('Vercel DB read-only probe failed');}
-  const sameEndpoint=endpoint(github)===endpoint(vercel);
-  const sameSchemaSignature=
-    githubResult.database===vercelResult.database &&
-    githubResult.schema===vercelResult.schema &&
-    JSON.stringify(githubResult.objects)===JSON.stringify(vercelResult.objects) &&
-    githubResult.productCount===vercelResult.productCount &&
-    githubResult.productIdsDigest===vercelResult.productIdsDigest &&
-    githubResult.migrationCount===vercelResult.migrationCount &&
-    githubResult.migrationLedgerDigest===vercelResult.migrationLedgerDigest;
-  const verdict=sameEndpoint && sameSchemaSignature?'MATCHING_ENDPOINT_AND_SCHEMA_SNAPSHOT':
-    sameSchemaSignature?'MATCHING_SCHEMA_SNAPSHOT_ENDPOINTS_DIFFER':
-    'DIFFERENT_SCHEMA_STATE__STOP_MIGRATIONS';
-  const safe=(x)=>({
-    database:x.database,schema:x.schema,isReplica:x.isReplica,objects:x.objects,
-    productCount:x.productCount,migrationCount:x.migrationCount,
-  });
-  console.log(JSON.stringify({mode:'READ_ONLY',verdict,sameEndpoint,sameSchemaSignature,
-    github: safe(githubResult),vercelBackend:safe(vercelResult),
-    disclaimer:'Matching snapshots alone do not prove identical physical database instance. Never run migration based solely on this report.'},null,2));
-  if(!sameEndpoint || !sameSchemaSignature)process.exitCode=1;
+  if(process.env.APP_ENV!=='production')throw Error('Production mode required');
+  const filepath=process.env.PRODUCTION_PUBLIC_CATALOG_FILE;
+  if(!filepath)throw Error('Missing production backend public catalog file');
+  const stat=fs.statSync(filepath);
+  if(stat.size>8*1024*1024)throw Error('Public catalog unexpectedly large');
+  const api=JSON.parse(fs.readFileSync(filepath,'utf8'));
+  const direct=await readGithubDb();
+  const backendProducts=catalogEntries(api);
+  const githubProducts=catalogEntries(direct.products);
+  const sameProducts=backendProducts.length===githubProducts.length &&
+    digest(api)===digest(direct.products);
+  const result={
+    mode:'READ_ONLY',
+    comparison:'PUBLIC_BACKEND_VS_GITHUB_DIRECT_DB',
+    backendPublicProductCount:backendProducts.length,
+    githubPublishedProductCount:githubProducts.length,
+    samePublishedProductIdentifiers: sameProducts,
+    githubSchemaObjectsPresent:direct.tableNames,
+    verdict:sameProducts?'PUBLISHED_PRODUCTS_MATCH__DB_IDENTITY_NOT_YET_PROVEN':
+      'PUBLISHED_PRODUCTS_DIFFER__STOP_MIGRATIONS',
+    limits:'Identical product records can exist in a clone or replica. A Vercel runtime/provider database-identity proof is still required before any migration.',
+  };
+  console.log(JSON.stringify(result,null,2));
+  if(!sameProducts)process.exitCode=1;
 }
-main().catch(e=>{
-  // Never print raw errors: Prisma or Vercel APIs may echo connection URL.
-  const safe=/^Vercel production env read denied|^Vercel DATABASE_URL|^Expected one unambiguous|^Vercel deploy credentials|^Missing GitHub|^Production environment|^Expected Product|^GitHub DB read-only probe failed|^Vercel DB read-only probe failed/.test(e.message);
-  console.error('[DB COMPARISON] '+(safe?e.message:'Read-only comparison could not complete; inspect permissions and URL modes without exposing credentials'));
+if(require.main===module)main().catch(e=>{
+  // No raw Prisma errors or API body in logs (could contain connection secrets).
+  const safe=['Production mode required','Missing production backend public catalog file',
+   'Public catalog unexpectedly large','Backend product API did not return an array',
+   'Unexpected published product count','Product missing id/sku',
+   'Duplicate product IDs in source','Missing GitHub direct PostgreSQL connection',
+   'Unexpected GitHub database identity'].includes(e.message);
+  console.error('[DB COMPARISON] '+(safe?e.message:'Comparison could not complete; review connection and public backend response safely'));
   process.exitCode=1;
 });
+module.exports={catalogEntries,digest};
