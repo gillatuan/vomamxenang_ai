@@ -30,6 +30,8 @@ export interface Product {
   category?: { id: string; name: string };
   importPrice?: number;
   sellingPrice?: number | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
   minStock?: number;
   maxStock?: number;
   stocks?: { quantity: number }[];
