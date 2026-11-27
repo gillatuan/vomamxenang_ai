@@ -67,8 +67,8 @@ async function main(){
   if(!github)throw Error('Missing GitHub DIRECT_DATABASE_URL');
   const vercel=await vercelDatabaseUrl();
   let githubResult,vercelResult;
-  try {githubResult=await snapshot(github);}catch(e){throw Error('GitHub DB read-only probe failed: '+e.code||'Unknown');}
-  try {vercelResult=await snapshot(vercel);}catch(e){throw Error('Vercel DB read-only probe failed: '+(e.code||e.message||'unknown').slice(0,90));}
+  try {githubResult=await snapshot(github);}catch(e){throw Error('GitHub DB read-only probe failed');}
+  try {vercelResult=await snapshot(vercel);}catch(e){throw Error('Vercel DB read-only probe failed');}
   const sameEndpoint=endpoint(github)===endpoint(vercel);
   const sameSchemaSignature=
     githubResult.database===vercelResult.database &&
@@ -88,11 +88,11 @@ async function main(){
   console.log(JSON.stringify({mode:'READ_ONLY',verdict,sameEndpoint,sameSchemaSignature,
     github: safe(githubResult),vercelBackend:safe(vercelResult),
     disclaimer:'Matching snapshots alone do not prove identical physical database instance. Never run migration based solely on this report.'},null,2));
-  if(!sameSchemaSignature)process.exitCode=1;
+  if(!sameEndpoint || !sameSchemaSignature)process.exitCode=1;
 }
 main().catch(e=>{
   // Never print raw errors: Prisma or Vercel APIs may echo connection URL.
-  const safe=/^Vercel production env read denied|^Vercel DATABASE_URL|^Expected one unambiguous|^Vercel deploy credentials|^Missing GitHub|^Production environment|^Expected Product/.test(e.message);
+  const safe=/^Vercel production env read denied|^Vercel DATABASE_URL|^Expected one unambiguous|^Vercel deploy credentials|^Missing GitHub|^Production environment|^Expected Product|^GitHub DB read-only probe failed|^Vercel DB read-only probe failed/.test(e.message);
   console.error('[DB COMPARISON] '+(safe?e.message:'Read-only comparison could not complete; inspect permissions and URL modes without exposing credentials'));
   process.exitCode=1;
 });
