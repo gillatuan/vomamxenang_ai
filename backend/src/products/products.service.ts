@@ -15,19 +15,36 @@ export class ProductsService {
     const categoryFilter = fallbackType
       ? { AND: [{ OR: [{ categoryId }, { categoryId: null, type: fallbackType }] }] }
       : categoryId ? { categoryId } : {};
-    const where = { status: 'PUBLISHED' as const, ...(condition ? { condition } : {}), ...categoryFilter, ...(brand ? { brand } : {}), ...(size ? { size } : {}), ...(tireType ? { tireType } : {}), ...(rimType ? { rimType } : {}), ...((minPrice != null || maxPrice != null) ? { AND: [
-      { OR: [
-        { priceMin: { not: null }, priceMax: { not: null },
-          ...(minPrice != null ? { priceMax: { gte: minPrice } } : {}),
-          ...(maxPrice != null ? { priceMin: { lte: maxPrice } } : {}) },
-        { priceMin: null, priceMax: null, sellingPrice: { not: null,
+    const priceRangeFilter = minPrice != null || maxPrice != null ? {
+      OR: [
+        { priceMin: { ...(maxPrice != null ? { lte: maxPrice } : { not: null }) },
+          priceMax: { ...(minPrice != null ? { gte: minPrice } : { not: null }) } },
+        { priceMin: null, priceMax: null, sellingPrice: {
+          not: null,
           ...(minPrice != null ? { gte: minPrice } : {}),
-          ...(maxPrice != null ? { lte: maxPrice } : {}) } },
-      ] },
-    ] } : {}), ...(q ? { OR: [{ name: { contains: q, mode: 'insensitive' as const } }, { sku: { contains: q, mode: 'insensitive' as const } }, { brand: { contains: q, mode: 'insensitive' as const } }, { size: { contains: q, mode: 'insensitive' as const } }] } : {}) };
+          ...(maxPrice != null ? { lte: maxPrice } : {}),
+        } },
+      ],
+    } : null;
+    const where = {
+      status: 'PUBLISHED' as const,
+      ...(condition ? { condition } : {}),
+      ...categoryFilter,
+      ...(brand ? { brand } : {}),
+      ...(size ? { size } : {}),
+      ...(tireType ? { tireType } : {}),
+      ...(rimType ? { rimType } : {}),
+      ...(priceRangeFilter ? { AND: [priceRangeFilter] } : {}),
+      ...(q ? { OR: [
+        { name: { contains: q, mode: 'insensitive' as const } },
+        { sku: { contains: q, mode: 'insensitive' as const } },
+        { brand: { contains: q, mode: 'insensitive' as const } },
+        { size: { contains: q, mode: 'insensitive' as const } },
+      ] } : {}),
+    };
     return this.prisma.product.findMany({
       where,
-      orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? [{ priceMin: 'asc' }, { sellingPrice: 'asc' }] : sort === 'price-desc' ? [{ priceMax: 'desc' }, { sellingPrice: 'desc' }] : { createdAt: 'desc' },
+      orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
       select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, priceMin: true, priceMax: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true, stocks: { select: { quantity: true } } },
     });
