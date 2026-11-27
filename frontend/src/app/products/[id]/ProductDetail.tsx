@@ -2,6 +2,7 @@
 import { homeDesign } from "@/app/home-design";
 import RichTextContent from "@/components/RichTextContent";
 import { productFallbackImage, productSeoDescription } from "@/lib/product-content";
+import { hasQuoteRange, productPriceText, canCheckoutProduct } from "@/lib/product-pricing";
 
 import { Box, Button, Card, CardContent, Chip, Container, Grid, IconButton, Stack, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -58,14 +59,15 @@ export default function ProductDetailPage({ product, related, breadcrumbs }: { p
             {tireTypeLabel && <Typography>Loại vỏ: <b>{tireTypeLabel}</b></Typography>}
             <Stack direction="row" spacing={1} alignItems="center"><Chip size="small" color={stockState.color} label={stockState.label} /><Typography variant="body2" color="text.secondary">{stockState.detail}</Typography></Stack>
           </Stack>
-          <Typography component="p" variant="h5" sx={{ color: homeDesign.colors.ink, fontWeight: 800, fontSize: { xs: "1.55rem", md: "1.85rem" }, lineHeight: 1.3 }}>{product.sellingPrice ? `${product.sellingPrice.toLocaleString()} ₫` : "Liên hệ báo giá"}</Typography>
+          <Typography component="p" variant="h5" sx={{ color: homeDesign.colors.ink, fontWeight: 800, fontSize: { xs: "1.55rem", md: "1.85rem" }, lineHeight: 1.3 }}>{productPriceText(product)}</Typography>
+          {hasQuoteRange(product) && <Typography sx={{ mt: 1, color: "text.secondary" }}>Giá dự kiến thay đổi theo độ cao gai, tình trạng và số lượng thực tế; vui lòng yêu cầu báo giá chính xác trước khi mua.</Typography>}
           {product.tags?.includes("PRICE_REFERENCE_2026") && <Typography sx={{ mt: 1, color: "#92400e", fontWeight: 700 }}>Giá tham khảo từ thị trường. Vui lòng liên hệ xác nhận giá chính thức trước khi thanh toán.</Typography>}
           {product.tags?.includes("VAT_EXCLUDED_INVOICE_AVAILABLE") && <Typography sx={{ mt: 1, color: "text.secondary", fontWeight: 600 }}>Giá trên chưa bao gồm VAT. Hỗ trợ xuất hóa đơn VAT khi khách hàng yêu cầu; thuế áp dụng và tổng thanh toán sẽ được xác nhận trước khi chốt đơn.</Typography>}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3, flexWrap: "wrap", "& .MuiButton-root": { borderRadius: 2, minHeight: 44 } }}>
             <Button component="a" href={`tel:${phone}`} onClick={() => trackConversion("CLICK_PHONE", { productId: product.id, context: product.size })} variant="contained" startIcon={<PhoneIcon />} sx={{ bgcolor: homeDesign.colors.accent, color: homeDesign.colors.ink, "&:hover": { bgcolor: "#FBBF24" } }}>Gọi ngay</Button>
             <Button component="a" href={zaloUrl} onClick={() => trackConversion("CLICK_ZALO", { productId: product.id, context: product.size })} target="_blank" rel="noopener noreferrer" variant="outlined" startIcon={<ChatIcon />}>Chat Zalo</Button>
             <Button variant="outlined" startIcon={<RequestQuoteIcon />} onClick={() => { trackConversion("OPEN_QUOTE", { productId: product.id, context: product.size }); setQuoteOpen(true); }}>Yêu cầu báo giá</Button>
-            <Button variant="text" startIcon={<ShoppingCartIcon />} disabled={!product.sellingPrice} onClick={() => addItem(product, 1)}>Thêm vào giỏ</Button>
+            <Button variant="text" startIcon={<ShoppingCartIcon />} disabled={!canCheckoutProduct(product)} onClick={() => addItem(product, 1)}>Thêm vào giỏ</Button>
             <IconButton aria-label="Lưu yêu thích" color={favourite ? "error" : "default"} onClick={() => setFavourite(!favourite)}>{favourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}</IconButton>
           </Stack>
         </Box>
