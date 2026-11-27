@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { SeoBreadcrumbs } from "@/components/SeoBreadcrumbs";
 import { ordersAPI } from "@/lib/api-client";
 import { useCartStore } from "@/store/cart";
+import { canCheckoutProduct } from "@/lib/product-pricing";
 
 const steps = ["Xem lại giỏ hàng", "Giao hàng & giá khách hàng", "Thanh toán Stripe"];
 
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const next = async () => {
     setError(null);
     if (activeStep === 0 && !items.length) return setError("Giỏ hàng đang trống.");
+    if (items.some(item => !canCheckoutProduct(item))) return setError("Có sản phẩm cần xác nhận báo giá. Vui lòng yêu cầu báo giá trước khi thanh toán.");
     if (activeStep === 1 && (!delivery.name || !delivery.phone || !delivery.address)) return setError("Vui lòng nhập đầy đủ thông tin giao hàng.");
     if (activeStep < 2) return setActiveStep(activeStep + 1);
     setLoading(true);
