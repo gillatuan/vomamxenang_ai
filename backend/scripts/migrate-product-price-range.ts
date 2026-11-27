@@ -53,15 +53,38 @@ async function main() {
       .map(x => x.name);
     if (!local.includes(key)) throw Error('Price range migration missing from audited repository');
     const history = await prisma.$queryRaw<Array<{
-      migration_name: string; finished_at: Date | null; rolled_back_at: Date | null;
-    }>>`SELECT migration_name, finished_at, rolled_back_at FROM "_prisma_migrations"`;
+      migration_name: string; checksum: string; finished_at: Date | null; rolled_back_at: Date | null;
+    }>>`SELECT migration_name, checksum, finished_at, rolled_back_at FROM "_prisma_migrations"`;
     const completed = new Set(history.filter(x => x.finished_at && !x.rolled_back_at).map(x => x.migration_name));
     const unfinished = history.filter(x => !x.finished_at && !x.rolled_back_at);
     if (unfinished.length) throw Error('Failed or unfinished migration records exist; stop and review');
+
+    // Production already has one historical migration that is intentionally absent
+    // from current source. The old protected P2.1 workflow verifies its exact SHA-256.
+    // Allow ONLY this known, completed and checksum-matched historical record.
+    const legacyMigration = '20261004130000_product_category_relation';
+    const legacyChecksum = '43e5e770f5d30fa626c7a0447f12e88588e50b0593512fb474bc91e5c335e36a';
     const unknown = [...completed].filter(name => !local.includes(name));
-    if (unknown.length) throw Error('Unknown database migration(s): ' + unknown.join(', '));
+    const unapproved = unknown.filter(name => name !== legacyMigration);
+    if (unapproved.length) throw Error('Unknown database migration(s): ' + unapproved.join(', '));
+    if (unknown.includes(legacyMigration)) {
+      const matching = history.filter(row =>
+        row.migration_name === legacyMigration &&
+        row.finished_at !== null &&
+        row.rolled_back_at === null &&
+        row.checksum === legacyChecksum
+      );
+      if (matching.length !== 1 || history.some(row =>
+        row.migration_name === legacyMigration &&
+        (row.finished_at === null || row.rolled_back_at !== null || row.checksum !== legacyChecksum)
+      )) {
+        throw Error('Historical category relation migration checksum/state mismatch; manual audit required');
+      }
+    }
     const pending = local.filter(name => !completed.has(name));
-    console.log(JSON.stringify({mode,database:'postgres',target:key,pending,alreadyApplied:completed.has(key)},null,2));
+    console.log(JSON.stringify({mode,database:'postgres',target:key,pending,
+      verifiedLegacyMigration:unknown.includes(legacyMigration) ? legacyMigration : null,
+      alreadyApplied:completed.has(key)},null,2));
     if (mode === 'dry-run') return;
     requireBackupProof();
     if (pending.length !== 1 || pending[0] !== key) {
