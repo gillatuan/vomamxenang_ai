@@ -34,7 +34,7 @@ export class ProductsService {
       ...(size ? { size } : {}),
       ...(tireType ? { tireType } : {}),
       ...(rimType ? { rimType } : {}),
-      ...(priceRangeFilter ? { AND: [priceRangeFilter] } : {}),
+      ...(priceRangeFilter ? { AND: [...(fallbackType ? [{ OR: [{ categoryId }, { categoryId: null, type: fallbackType }] }] : []), priceRangeFilter] } : {}),
       ...(q ? { OR: [
         { name: { contains: q, mode: 'insensitive' as const } },
         { sku: { contains: q, mode: 'insensitive' as const } },
