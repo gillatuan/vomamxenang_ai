@@ -42,12 +42,23 @@ export class ProductsService {
         { size: { contains: q, mode: 'insensitive' as const } },
       ] } : {}),
     };
-    return this.prisma.product.findMany({
+    const products = await this.prisma.product.findMany({
       where,
-      orderBy: sort === 'name' ? { name: 'asc' } : sort === 'price-asc' ? { sellingPrice: 'asc' } : sort === 'price-desc' ? { sellingPrice: 'desc' } : { createdAt: 'desc' },
+      orderBy: sort === 'name' ? { name: 'asc' } : { createdAt: 'desc' },
       // Public catalog responses must never disclose purchase cost.
       select: { id: true, sku: true, type: true, name: true, categoryId: true, category: { select: { id: true, name: true } }, size: true, brand: true, tireType: true, rimType: true, condition: true, sellingPrice: true, priceMin: true, priceMax: true, minStock: true, maxStock: true, imageUrl: true, shortDescription: true, description: true, highlights: true, specifications: true, applications: true, slug: true, aliases: true, seo: true, tags: true, createdAt: true, stocks: { select: { quantity: true } } },
     });
+    if (sort === 'price-asc' || sort === 'price-desc') {
+      const value = (item: (typeof products)[number]) =>
+        sort === 'price-asc' ? (item.priceMin ?? item.sellingPrice) : (item.priceMax ?? item.sellingPrice);
+      return products.sort((left, right) => {
+        const a = value(left), b = value(right);
+        if (a == null) return b == null ? 0 : 1;
+        if (b == null) return -1;
+        return sort === 'price-asc' ? a - b : b - a;
+      });
+    }
+    return products;
   }
 
   async findOne(id: string) {
