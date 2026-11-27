@@ -22,7 +22,6 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       APP_ENV: production
-      MIGRATION_AUDIT_REPORT: ${{ runner.temp }}/production-migration-inventory.json
     steps:
       - uses: actions/checkout@v4
       - name: Restrict to reviewed main
@@ -38,6 +37,8 @@ jobs:
       - name: Check inventory parser before connecting to production
         run: node --test scripts/audit-historical-production-migrations.test.cjs
       - name: Inspect only production Prisma history and PostgreSQL catalogs
+        env:
+          MIGRATION_AUDIT_REPORT: ${{ runner.temp }}/production-migration-inventory.json
         run: node scripts/audit-historical-production-migrations.cjs
       - name: Save migration assessment for human review
         if: always()
