@@ -36,8 +36,10 @@ jobs:
           corepack enable
           yarn install --frozen-lockfile
           yarn prisma generate
-      - name: Syntax-check safe comparison script
-        run: node --check scripts/compare-production-db-identity.cjs
+      - name: Test comparison parser and syntax
+        run: |
+          node --check scripts/compare-production-db-identity.cjs
+          node --test scripts/compare-production-db-identity.test.cjs
       - name: Fetch actual production public product catalog (read-only)
         working-directory: ${{ github.workspace }}
         env:
