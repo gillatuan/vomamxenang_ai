@@ -23,8 +23,7 @@ jobs:
       APP_ENV: production
       GITHUB_DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_BACKEND_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Require reviewed main
@@ -37,9 +36,23 @@ jobs:
           corepack enable
           yarn install --frozen-lockfile
           yarn prisma generate
-      - name: Syntax-check safe comparison script
-        run: node --check scripts/compare-production-db-identity.cjs
-      - name: Compare production schema snapshots using two read-only connections
+      - name: Test comparison parser and syntax
+        run: |
+          node --check scripts/compare-production-db-identity.cjs
+          node --test scripts/compare-production-db-identity.test.cjs
+      - name: Fetch actual production public product catalog (read-only)
+        working-directory: ${{ github.workspace }}
+        env:
+          BACKEND_PUBLIC_URL: https://vomamxenang-backend.vercel.app
+        run: |
+          set -euo pipefail
+          npm install -g vercel@58.9.2 --silent
+          vercel curl "$BACKEND_PUBLIC_URL/api/v1/products" -- --fail --silent --show-error \
+            > "$RUNNER_TEMP/production-products.json"
+          test -s "$RUNNER_TEMP/production-products.json"
+      - name: Compare backend products to GitHub production DB
+        env:
+          PRODUCTION_PUBLIC_CATALOG_FILE: ${{ runner.temp }}/production-products.json
         run: node scripts/compare-production-db-identity.cjs
       - name: Explain safety and limits
         if: always()
@@ -47,9 +60,9 @@ jobs:
           {
             echo '### GitHub and Vercel production database identity'
             echo
-            echo 'Compares the Vercel backend Production DATABASE_URL with GitHub Production DIRECT_DATABASE_URL.'
+            echo 'Compares live Vercel backend public product identifiers against GitHub Production DIRECT_DATABASE_URL.'
             echo 'No connection strings, credentials, hosts, or customer rows are logged.'
-            echo 'Each PostgreSQL connection uses an explicitly READ ONLY transaction.'
-            echo 'Same schema snapshots do NOT prove physical database identity.'
+            echo 'PostgreSQL connection uses an explicitly READ ONLY transaction; backend uses a GET request.'
+            echo 'Same public product identifiers do NOT prove physical database identity; clones can match.'
             echo 'Do not run Prisma migrate deploy or resolve until verified and authorized.'
           } >> "$GITHUB_STEP_SUMMARY"
