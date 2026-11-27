@@ -6,7 +6,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { Client } = require('pg');
+const { PrismaClient } = require('@prisma/client');
 
 const migrationRoot = path.join(__dirname, '../prisma/migrations');
 const target = '20261127120000_product_price_range';
@@ -75,19 +75,23 @@ async function main() {
   if (!['postgres:', 'postgresql:'].includes(parsed.protocol) || parsed.hostname.includes('accelerate.prisma-data.net')) {
     throw new Error('Direct PostgreSQL required');
   }
-  const client = new Client({ connectionString:url });
-  await client.connect();
+  const prisma = new PrismaClient({datasources:{db:{url}}});
   try {
-    await client.query('BEGIN READ ONLY');
-    await client.query("SET LOCAL statement_timeout = '20000ms'");
-    const identity = await client.query('SELECT current_database() AS db_name');
+    const snapshot = await prisma.$transaction(async tx => {
+      // SET TRANSACTION READ ONLY runs before all catalog reads, in the same transaction.
+      await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');
+      await tx.$executeRawUnsafe("SET LOCAL statement_timeout = '20000ms'");
+      const identity = {rows:await tx.$queryRawUnsafe('SELECT current_database() AS db_name')};
+      const ledger = {rows:await tx.$queryRawUnsafe('SELECT migration_name, checksum, finished_at, rolled_back_at FROM public."_prisma_migrations"')};
+      const columnRows = {rows:await tx.$queryRawUnsafe("SELECT table_name, column_name, data_type, udt_name, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public'")};
+      const tableRows = {rows:await tx.$queryRawUnsafe("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'")};
+      const indexRows = {rows:await tx.$queryRawUnsafe("SELECT indexname, tablename, indexdef FROM pg_indexes WHERE schemaname='public'")};
+      const constraintRows = {rows:await tx.$queryRawUnsafe("SELECT c.conname, pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c JOIN pg_namespace ns ON ns.oid=c.connamespace WHERE ns.nspname='public'")};
+      const enumRows = {rows:await tx.$queryRawUnsafe("SELECT t.typname, e.enumlabel FROM pg_type t JOIN pg_enum e ON e.enumtypid=t.oid JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public' ORDER BY t.typname,e.enumsortorder")};
+      return {identity,ledger,columnRows,tableRows,indexRows,constraintRows,enumRows};
+    },{timeout:45000,maxWait:20000});
+    const {identity,ledger,columnRows,tableRows,indexRows,constraintRows,enumRows}=snapshot;
     if (identity.rows[0]?.db_name !== 'postgres') throw new Error('Unexpected database identity');
-    const ledger = await client.query('SELECT migration_name, checksum, finished_at, rolled_back_at FROM public."_prisma_migrations"');
-    const columnRows = await client.query("SELECT table_name, column_name, data_type, udt_name, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public'");
-    const tableRows = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'");
-    const indexRows = await client.query("SELECT indexname, tablename, indexdef FROM pg_indexes WHERE schemaname='public'");
-    const constraintRows = await client.query("SELECT c.conname, pg_get_constraintdef(c.oid) AS definition FROM pg_constraint c JOIN pg_namespace ns ON ns.oid=c.connamespace WHERE ns.nspname='public'");
-    const enumRows = await client.query("SELECT t.typname, e.enumlabel FROM pg_type t JOIN pg_enum e ON e.enumtypid=t.oid JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public' ORDER BY t.typname,e.enumsortorder");
     const tables = new Map(tableRows.rows.map(x => [x.table_name, x]));
     const columns = new Map(columnRows.rows.map(x => [x.table_name + '.' + x.column_name, x]));
     const indexes = new Map(indexRows.rows.map(x => [x.indexname, x]));
@@ -125,7 +129,6 @@ async function main() {
       }
       output.push(summarize({migration:name,history,objects}));
     }
-    await client.query('ROLLBACK');
     const report={
       mode:'READ_ONLY',database:'postgres',
       generatedAt:new Date().toISOString(),
@@ -144,10 +147,7 @@ async function main() {
         missing:x.objects.filter(y=>y.status==='MISSING').map(y=>y.kind+':'+y.name),
         assessment:x.assessment}))},null,2));
     if (output.some(x=>x.history.status==='FAILED_OR_MULTIPLE')) process.exitCode=1;
-  } catch(error) {
-    try { await client.query('ROLLBACK'); } catch {}
-    throw error;
-  } finally { await client.end(); }
+  } finally { await prisma.$disconnect(); }
 }
 if(require.main===module)main().catch(e=>{console.error('[MIGRATION INVENTORY] FAILED: '+e.message);process.exitCode=1;});
 module.exports={extractExpectations,summarize};
