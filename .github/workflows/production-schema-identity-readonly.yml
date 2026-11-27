@@ -1,0 +1,57 @@
+name: Production schema identity diagnostic (read-only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-schema-identity-readonly
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    name: Locate production schemas and tables safely
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    environment: Production
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require main
+        run: test "$GITHUB_REF" = refs/heads/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and generate Prisma
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile
+          yarn prisma generate
+      - name: Read-only schema identity and table-location report
+        env:
+          SCHEMA_IDENTITY_REPORT: ${{ runner.temp }}/production-schema-identity.json
+        run: node scripts/production-schema-identity-readonly.cjs
+      - name: Upload diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-schema-identity
+          path: ${{ runner.temp }}/production-schema-identity.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Explain limitations
+        if: always()
+        run: |
+          {
+            echo '### Read-only production schema identity'
+            echo 'Inspect JSON artifact for schema locations, anonymous connection fingerprint, current_schema and search_path.'
+            echo 'No credentials, no customer rows, no DDL, and no migration history changes.'
+            echo 'A successful job is diagnostic only; do NOT run migrate deploy/resolve yet.'
+          } >> "$GITHUB_STEP_SUMMARY"
