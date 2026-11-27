@@ -43,6 +43,9 @@ root="$(dirname "$archive")"
 }
 psql "$TEMP_RESTORE_ADMIN_URL" -v ON_ERROR_STOP=1 -qAtc "CREATE DATABASE \"$rehearsal_db\" TEMPLATE template0" >/dev/null
 created=1
+# Local throwaway PostgreSQL 18 container only. Never export production credentials
+# into pg_restore or prisma migrate deploy.
+export PGHOST=localhost PGPORT=5432 PGUSER=postgres PGPASSWORD=postgres
 restore_args=(--dbname="$rehearsal_db" --no-owner --no-acl --exit-on-error)
 if [[ -s "$root/isolated-restore-list.txt" ]]; then
   restore_args+=(--use-list="$root/isolated-restore-list.txt")
