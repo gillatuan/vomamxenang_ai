@@ -27,7 +27,7 @@ const names = [
 
 function extractExpectations(sql) {
   const tables = [...sql.matchAll(/CREATE\s+TABLE\s+"([^"]+)"/gi)].map(m => m[1]);
-  const types = [...sql.matchAll(/CREATE\s+TYPE\s+"([^"]+)"/gi)].map(m => m[1]);
+  const types = [...sql.matchAll(/CREATE\s+TYPE\s+"([^"]+)"\s+AS\s+ENUM\s*\(([^)]+)\)/gi)].map(m => ({ name:m[1], labels:[...m[2].matchAll(/'([^']+)'/g)].map(x=>x[1]) }));
   const indexes = [...sql.matchAll(/CREATE\s+(?:UNIQUE\s+)?INDEX\s+"([^"]+)"/gi)].map(m => m[1]);
   const constraints = [...sql.matchAll(/\bCONSTRAINT\s+"([^"]+)"|\bADD\s+CONSTRAINT\s+"([^"]+)"/gi)].map(m => m[1] || m[2]);
   const columns = [];
@@ -117,13 +117,25 @@ async function main() {
       checked(objects,indexes,null,expected.indexes,'index');
       checked(objects,constraints,null,expected.constraints,'constraint');
       for (const typ of expected.types) {
-        objects.push({ kind:'enum',name:typ,status:enums.has(typ) ? 'PRESENT':'MISSING',
-          ...(enums.has(typ) ? {labels:enums.get(typ)} : {}) });
+        const actual = enums.get(typ.name);
+        const matched = actual && JSON.stringify(actual) === JSON.stringify(typ.labels);
+        objects.push({kind:'enum',name:typ.name,status:!actual?'MISSING':matched?'PRESENT':'MISMATCH',
+          expectedLabels:typ.labels,...(actual?{actualLabels:actual}:{})});
       }
       for (const col of expected.columns) {
         const key = col.table + '.' + col.column;
         const actual = columns.get(key);
-        objects.push({kind:'column',name:key,status:actual?'PRESENT':'MISSING',
+        const declaration = col.declaration.trim();
+        const expectedType = declaration.match(/^(TEXT|INTEGER|BOOLEAN|DOUBLE PRECISION|TIMESTAMP\(\d+\)|"[^"]+")/i)?.[1];
+        const typeMap = {TEXT:'text',INTEGER:'integer',BOOLEAN:'boolean','DOUBLE PRECISION':'double precision'};
+        const expectedDbType = typeMap[expectedType?.toUpperCase()] ||
+          (expectedType?.startsWith('TIMESTAMP(') ? 'timestamp without time zone' : null);
+        const typeMatches = !actual || !expectedType ? false :
+          expectedDbType ? actual.data_type === expectedDbType :
+          expectedType.startsWith('"') ? actual.udt_name === expectedType.slice(1,-1) : false;
+        const nullableMatches = actual && actual.is_nullable === (/\bNOT NULL\b/i.test(declaration) ? 'NO' : 'YES');
+        const matched = actual && typeMatches && nullableMatches;
+        objects.push({kind:'column',name:key,status:!actual?'MISSING':matched?'PRESENT':'MISMATCH',
           expectedDeclaration:col.declaration,
           ...(actual?{actual:{dataType:actual.data_type,udt:actual.udt_name,nullable:actual.is_nullable,default:actual.column_default}}:{})});
       }
@@ -144,7 +156,7 @@ async function main() {
     console.log(JSON.stringify({mode:report.mode,summary:report.summary,
       migrationResults:output.map(x=>({migration:x.migration,history:x.history.status,
         present:x.objects.filter(y=>y.status==='PRESENT').length,
-        missing:x.objects.filter(y=>y.status==='MISSING').map(y=>y.kind+':'+y.name),
+        notMatching:x.objects.filter(y=>y.status!=='PRESENT').map(y=>y.kind+':'+y.name+' ['+y.status+']'),
         assessment:x.assessment}))},null,2));
     if (output.some(x=>x.history.status==='FAILED_OR_MULTIPLE')) process.exitCode=1;
   } finally { await prisma.$disconnect(); }
